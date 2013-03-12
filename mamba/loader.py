@@ -27,7 +27,6 @@ class describe(object):
         else:
             current = spec.Suite(self.subject)
             frame.f_locals['current_spec'].append(current)
-
             frame.f_locals['current_spec'] = current
 
         return _Context()
@@ -49,6 +48,8 @@ class describe(object):
             frame.f_locals['current_spec'].append(spec.Spec(value))
             value._registered = True
 
+
+        frame.f_locals['current_spec'].specs.sort(key=lambda x: x.source_line())
         frame.f_locals['current_spec'] = frame.f_locals['current_spec'].parent
 
 

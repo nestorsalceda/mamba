@@ -1,3 +1,4 @@
+import inspect
 from datetime import datetime, timedelta
 
 
@@ -33,6 +34,9 @@ class Spec(object):
 
         return self.parent.depth() + 1
 
+    def source_line(self):
+        return inspect.getsourcelines(self.test)[1]
+
 
 class Suite(object):
     def __init__(self, subject, parent=None):
@@ -56,3 +60,6 @@ class Suite(object):
             return 0
 
         return self.parent.depth() + 1
+
+    def source_line(self):
+        return self.specs[0].source_line()
