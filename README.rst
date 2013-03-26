@@ -6,51 +6,50 @@ mamba is the definitive BDD testing framework for Python. Born under the banner 
 Overview
 --------
 
-        from mamba import describe, context
+.. code:: python
 
-        with describe('mamba'):
-                def it_should_be_tested_with_mamba_itself():
-                        pass
+  from mamba import describe, context
 
-                with context('#features'):
-                        def it_supports_example_groups():
-                                pass
+  with describe('mamba'):
+          def it_should_be_tested_with_mamba_itself():
+                  pass
 
-                with context('#assertion_framework_agnostic'):
-                        def it_should_be_usable_with_plain_assertions():
-                                assert True
+          with context('#features'):
+                  def it_supports_example_groups():
+                          pass
 
-                        def it_should_be_usable_with_hamcrest_style_assertions():
-                                assert_that(True, is_(True))
+          with context('#assertion_framework_agnostic'):
+                  def it_should_be_usable_with_plain_assertions():
+                          assert True
 
-                        def it_should_be_usable_with_should_dsl_style_assertions():
-                                True |should| be(True)
+                  def it_should_be_usable_with_hamcrest_style_assertions():
+                          assert_that(True, is_(True))
 
-                        def it_should_be_usable_with_sure_style_assertions():
-                                True.should.be.true
+                  def it_should_be_usable_with_should_dsl_style_assertions():
 
-                                expect(True).to.be.true
+                  def it_should_be_usable_with_sure_style_assertions():
+                          True.should.be.true
 
-                with context('#test_doubles_framework_agnostic'):
-                        def it_should_be_usable_with_mockito():
-                                stub = mock()
-                                when(stub).is_usable_with_mockito().thenReturn(True)
+                          expect(True).to.be.true
 
-                                expect(stub.is_usable_with_mockito()).to.be.true
+          with context('#test_doubles_framework_agnostic'):
+                  def it_should_be_usable_with_mockito():
+                          stub = mock()
+                          when(stub).is_usable_with_mockito().thenReturn(True)
 
-                        def it_should_be_usable_with_doublex():
-                                with Spy() as sender:
-                                    sender.is_usable_with_doublex().returns(True)
+                          expect(stub.is_usable_with_mockito()).to.be.true
 
-                                assert_that(sender.is_usable_with_doublex(), is_(True))
-                                assert_that(sender.is_usable_with_doublex, called())
+                  def it_should_be_usable_with_doublex():
+                          with Spy() as sender:
+                              sender.is_usable_with_doublex().returns(True)
 
-                        def it_should_be_usable_with_mock():
-                                is_usable_with_mock = Mock(return_value=True)
+                          assert_that(sender.is_usable_with_doublex(), is_(True))
+                          assert_that(sender.is_usable_with_doublex, called())
 
-                                assert mock()
+                  def it_should_be_usable_with_mock():
+                          is_usable_with_mock = Mock(return_value=True)
 
-
+                          assert mock()
 
 
 Contribute
