@@ -2,7 +2,7 @@ import os
 import imp
 
 from mamba import describe, context
-from hamcrest import *
+from sure import expect
 
 with describe('Loader') as _:
 
@@ -10,9 +10,9 @@ with describe('Loader') as _:
         spec = os.path.join(os.path.dirname(__file__), 'fixtures', 'without_inner_contexts.py')
         module = imp.load_source(spec.replace('.py', ''), spec)
 
-        assert_that(module.specs, has_length(1))
-        assert_that(module.specs[0].specs, has_length(3))
+        expect(module.specs).to.have.length_of(1)
+        expect(module.specs[0].specs).to.have.length_of(3)
 
-        assert_that(module.specs[0].specs[0].name(), is_('first_spec'))
-        assert_that(module.specs[0].specs[1].name(), is_('second_spec'))
-        assert_that(module.specs[0].specs[2].name(), is_('third_spec'))
+        expect(module.specs[0].specs[0].name()).to.be.equal('first_spec')
+        expect(module.specs[0].specs[1].name()).to.be.equal('second_spec')
+        expect(module.specs[0].specs[2].name()).to.be.equal('third_spec')
