@@ -38,46 +38,46 @@
 <span class="kn">from</span> <span class="nn">mamba</span> <span class="kn">import</span> <span class="n">describe</span><span class="p">,</span> <span class="n">context</span>
 
 <span class="k">with</span> <span class="n">describe</span><span class="p">(</span><span class="s">'mamba'</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">it_should_be_tested_with_mamba_itself</span><span class="p">():</span>
-                <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">it_should_be_tested_with_mamba_itself</span><span class="p">():</span>
+        <span class="k">pass</span>
 
-        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#features'</span><span class="p">):</span>
-                <span class="k">def</span> <span class="nf">it_supports_example_groups</span><span class="p">():</span>
-                        <span class="k">pass</span>
+    <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#features'</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">it_supports_example_groups</span><span class="p">():</span>
+            <span class="k">pass</span>
 
-        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#assertion_framework_agnostic'</span><span class="p">):</span>
-                <span class="k">def</span> <span class="nf">it_should_be_usable_with_plain_assertions</span><span class="p">():</span>
-                        <span class="k">assert</span> <span class="bp">True</span>
+    <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#assertion_framework_agnostic'</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">it_should_be_usable_with_plain_assertions</span><span class="p">():</span>
+            <span class="k">assert</span> <span class="bp">True</span>
 
-                <span class="k">def</span> <span class="nf">it_should_be_usable_with_hamcrest_style_assertions</span><span class="p">():</span>
-                        <span class="n">assert_that</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">is_</span><span class="p">(</span><span class="bp">True</span><span class="p">))</span>
+        <span class="k">def</span> <span class="nf">it_should_be_usable_with_hamcrest_style_assertions</span><span class="p">():</span>
+            <span class="n">assert_that</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">is_</span><span class="p">(</span><span class="bp">True</span><span class="p">))</span>
 
-                <span class="k">def</span> <span class="nf">it_should_be_usable_with_should_dsl_style_assertions</span><span class="p">():</span>
-                        <span class="bp">True</span> <span class="o">|</span><span class="n">should</span><span class="o">|</span> <span class="n">be</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">it_should_be_usable_with_should_dsl_style_assertions</span><span class="p">():</span>
+            <span class="bp">True</span> <span class="o">|</span><span class="n">should</span><span class="o">|</span> <span class="n">be</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-                <span class="k">def</span> <span class="nf">it_should_be_usable_with_sure_style_assertions</span><span class="p">():</span>
-                        <span class="bp">True</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
+        <span class="k">def</span> <span class="nf">it_should_be_usable_with_sure_style_assertions</span><span class="p">():</span>
+            <span class="bp">True</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
 
-                        <span class="n">expect</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
+            <span class="n">expect</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
 
-        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#test_doubles_framework_agnostic'</span><span class="p">):</span>
-                <span class="k">def</span> <span class="nf">it_should_be_usable_with_mockito</span><span class="p">():</span>
-                        <span class="n">stub</span> <span class="o">=</span> <span class="n">mock</span><span class="p">()</span>
-                        <span class="n">when</span><span class="p">(</span><span class="n">stub</span><span class="p">)</span><span class="o">.</span><span class="n">is_usable_with_mockito</span><span class="p">()</span><span class="o">.</span><span class="n">thenReturn</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#test_doubles_framework_agnostic'</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">it_should_be_usable_with_mockito</span><span class="p">():</span>
+            <span class="n">stub</span> <span class="o">=</span> <span class="n">mock</span><span class="p">()</span>
+            <span class="n">when</span><span class="p">(</span><span class="n">stub</span><span class="p">)</span><span class="o">.</span><span class="n">is_usable_with_mockito</span><span class="p">()</span><span class="o">.</span><span class="n">thenReturn</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-                        <span class="n">expect</span><span class="p">(</span><span class="n">stub</span><span class="o">.</span><span class="n">is_usable_with_mockito</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
+            <span class="n">expect</span><span class="p">(</span><span class="n">stub</span><span class="o">.</span><span class="n">is_usable_with_mockito</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
 
-                <span class="k">def</span> <span class="nf">it_should_be_usable_with_doublex</span><span class="p">():</span>
-                        <span class="k">with</span> <span class="n">Spy</span><span class="p">()</span> <span class="k">as</span> <span class="n">sender</span><span class="p">:</span>
-                            <span class="n">sender</span><span class="o">.</span><span class="n">is_usable_with_doublex</span><span class="p">()</span><span class="o">.</span><span class="n">returns</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">it_should_be_usable_with_doublex</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">Spy</span><span class="p">()</span> <span class="k">as</span> <span class="n">sender</span><span class="p">:</span>
+                <span class="n">sender</span><span class="o">.</span><span class="n">is_usable_with_doublex</span><span class="p">()</span><span class="o">.</span><span class="n">returns</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-                        <span class="n">assert_that</span><span class="p">(</span><span class="n">sender</span><span class="o">.</span><span class="n">is_usable_with_doublex</span><span class="p">(),</span> <span class="n">is_</span><span class="p">(</span><span class="bp">True</span><span class="p">))</span>
-                        <span class="n">assert_that</span><span class="p">(</span><span class="n">sender</span><span class="o">.</span><span class="n">is_usable_with_doublex</span><span class="p">,</span> <span class="n">called</span><span class="p">())</span>
+            <span class="n">assert_that</span><span class="p">(</span><span class="n">sender</span><span class="o">.</span><span class="n">is_usable_with_doublex</span><span class="p">(),</span> <span class="n">is_</span><span class="p">(</span><span class="bp">True</span><span class="p">))</span>
+            <span class="n">assert_that</span><span class="p">(</span><span class="n">sender</span><span class="o">.</span><span class="n">is_usable_with_doublex</span><span class="p">,</span> <span class="n">called</span><span class="p">())</span>
 
-                <span class="k">def</span> <span class="nf">it_should_be_usable_with_mock</span><span class="p">():</span>
-                        <span class="n">is_usable_with_mock</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">(</span><span class="n">return_value</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">it_should_be_usable_with_mock</span><span class="p">():</span>
+            <span class="n">is_usable_with_mock</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">(</span><span class="n">return_value</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
-                        <span class="k">assert</span> <span class="n">mock</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="n">mock</span><span class="p">()</span>
 </pre></div>
 
 <h2>Contribute</h2>
