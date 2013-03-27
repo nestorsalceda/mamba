@@ -5,7 +5,7 @@ version = '0.1'
 setup(name='mamba',
       version=version,
       description="",
-      long_description=open('README.rst').read(),
+      long_description=open('README.md').read(),
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='',
       author='',
