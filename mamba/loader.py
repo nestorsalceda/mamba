@@ -49,7 +49,7 @@ class describe(object):
             value._registered = True
 
 
-        frame.f_locals['current_spec'].specs.sort(key=lambda x: x.source_line())
+        frame.f_locals['current_spec'].specs.sort(key=lambda x: x.source_line)
         frame.f_locals['current_spec'] = frame.f_locals['current_spec'].parent
 
 

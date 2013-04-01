@@ -2,7 +2,31 @@ import inspect
 from datetime import datetime, timedelta
 
 
-class Spec(object):
+class _Runnable(object):
+
+    def run(self):
+        raise NotImplementedError()
+
+    @property
+    def elapsed_time(self):
+        raise NotImplementedError()
+
+    @property
+    def name(self):
+        raise NotImplementedError()
+
+    @property
+    def depth(self):
+        if self.parent is None:
+            return 0
+
+        return self.parent.depth + 1
+
+    @property
+    def source_line(self):
+        raise NotImplementedError()
+
+class Spec(_Runnable):
 
     def __init__(self, test, parent=None):
         self.test = test
@@ -19,26 +43,24 @@ class Spec(object):
         finally:
             self._elapsed_time = datetime.utcnow() - begin
 
-    def exception_caught(self):
-        return self._exception_caught
-
+    @property
     def elapsed_time(self):
         return self._elapsed_time
 
+    def exception_caught(self):
+        return self._exception_caught
+
+    @property
     def name(self):
         return self.test.__name__
 
-    def depth(self):
-        if self.parent is None:
-            return 0
-
-        return self.parent.depth() + 1
-
+    @property
     def source_line(self):
         return inspect.getsourcelines(self.test)[1]
 
 
-class Suite(object):
+class Suite(_Runnable):
+
     def __init__(self, subject, parent=None):
         self.subject = subject
         self.specs = []
@@ -48,18 +70,18 @@ class Suite(object):
         for spec in self.specs:
             spec.run()
 
+    @property
+    def elapsed_time(self):
+        return sum([spec.elapsed_time for spec in self.specs], timedelta(0))
+
+    @property
     def name(self):
         return self.subject
+
+    @property
+    def source_line(self):
+        return self.specs[0].source_line
 
     def append(self, spec):
         self.specs.append(spec)
         spec.parent = self
-
-    def depth(self):
-        if self.parent is None:
-            return 0
-
-        return self.parent.depth() + 1
-
-    def source_line(self):
-        return self.specs[0].source_line()

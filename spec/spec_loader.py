@@ -11,4 +11,4 @@ with describe('Loader') as _:
         module = imp.load_source(spec.replace('.py', ''), spec)
 
         expect(module.specs).to.have.length_of(1)
-        expect([spec.name() for spec in module.specs[0].specs]).to.be.equal(['first_spec', 'second_spec', 'third_spec'])
+        expect([spec.name for spec in module.specs[0].specs]).to.be.equal(['first_spec', 'second_spec', 'third_spec'])
