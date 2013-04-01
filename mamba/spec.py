@@ -24,7 +24,7 @@ class _Runnable(object):
 
     @property
     def source_line(self):
-        raise NotImplementedError()
+        return 'inf'
 
 class Spec(_Runnable):
 
@@ -77,10 +77,6 @@ class Suite(_Runnable):
     @property
     def name(self):
         return self.subject
-
-    @property
-    def source_line(self):
-        return self.specs[0].source_line
 
     def append(self, spec):
         self.specs.append(spec)
