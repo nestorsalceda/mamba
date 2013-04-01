@@ -69,4 +69,5 @@ class describe(object):
     def _was_already_registered(self, code):
         return getattr(code, '_registered', False)
 
+
 context = describe

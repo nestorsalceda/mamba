@@ -64,7 +64,6 @@ class Spec(_Runnable):
 
         return reversed(parents)
 
-
     @property
     def elapsed_time(self):
         return self._elapsed_time

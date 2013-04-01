@@ -8,15 +8,15 @@ IRRELEVANT_SUBJECT = 'irrelevant_subject'
 
 with describe('Suite') as _:
 
-    def it_should_have_same_name_than_subject():
-        suite = Suite(IRRELEVANT_SUBJECT)
+    def before():
+        _.suite = Suite(IRRELEVANT_SUBJECT)
 
-        expect(suite.name).to.be.equals(IRRELEVANT_SUBJECT)
+    def it_should_have_same_name_than_subject():
+        expect(_.suite.name).to.be.equals(IRRELEVANT_SUBJECT)
 
     def it_should_have_depth_greater_than_parent():
         test = Spec(_test)
-        suite = Suite(IRRELEVANT_SUBJECT)
-        suite.append(test)
+        _.suite.append(test)
 
         expect(test.depth).to.be.equal(1)
 
@@ -24,22 +24,16 @@ with describe('Suite') as _:
         def _test():
             _.was_run = True
 
+        def before_run():
+            _.suite.append(Spec(_test))
+            _.suite.append(Spec(_test))
+
+            _.suite.run()
+
         def it_should_run_the_test():
-            suite = Suite(IRRELEVANT_SUBJECT)
-            suite.append(Spec(_test))
-            suite.append(Spec(_test))
-
-            suite.run()
-
             expect(_.was_run).to.be.true
 
         def it_should_calculate_elapsed_time():
-            suite = Suite(IRRELEVANT_SUBJECT)
-            suite.append(Spec(_test))
-            suite.append(Spec(_test))
-
-            suite.run()
-
-            expect(suite.elapsed_time.total_seconds()).to.be.greater_than(0)
+            expect(_.suite.elapsed_time.total_seconds()).to.be.greater_than(0)
 
 

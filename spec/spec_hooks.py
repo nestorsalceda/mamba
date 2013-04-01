@@ -25,7 +25,6 @@ with describe('Hooks') as _:
         _.calls.append('second')
 
     with context('#nested'):
-
         def before_nested():
             _.calls.append('before_nested')
 
