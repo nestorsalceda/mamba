@@ -16,6 +16,19 @@ with describe('mamba'):
         def it_supports_example_groups():
             pass
 
+        with context('#hooks'):
+            def before_all():
+                pass
+
+            def before():
+                pass
+
+            def after():
+                pass
+
+            def after_all():
+                pass
+
     with context('#assertion_framework_agnostic'):
         def it_should_be_usable_with_plain_assertions():
             assert True
