@@ -45,6 +45,19 @@
         <span class="k">def</span> <span class="nf">it_supports_example_groups</span><span class="p">():</span>
             <span class="k">pass</span>
 
+        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#hooks'</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">before_all</span><span class="p">():</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">before</span><span class="p">():</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">after</span><span class="p">():</span>
+                <span class="k">pass</span>
+
+            <span class="k">def</span> <span class="nf">after_all</span><span class="p">():</span>
+                <span class="k">pass</span>
+
     <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#assertion_framework_agnostic'</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">it_should_be_usable_with_plain_assertions</span><span class="p">():</span>
             <span class="k">assert</span> <span class="bp">True</span>
@@ -102,6 +115,16 @@
       </div>
     </div>
 
-  
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-39774055-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
   </body>
 </html>
