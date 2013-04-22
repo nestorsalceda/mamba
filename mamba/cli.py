@@ -17,6 +17,9 @@ def main():
 
     formatter.format_summary()
 
+    if runner.has_failed_tests:
+        sys.exit(1)
+
 
 if __name__ == '__main__':
     main()
