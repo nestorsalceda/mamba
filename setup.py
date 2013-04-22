@@ -1,16 +1,27 @@
+# -*- coding: utf-8 -*-
+
 from setuptools import setup, find_packages
 
 version = '0.1'
 
 setup(name='mamba',
       version=version,
-      description="",
+      description="The definitive testing tool for Python. Born under the banner of Behaviour Driven Development.",
       long_description=open('README.md').read(),
-      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      classifiers=[
+          'Development Status :: 4 - Beta',
+          'Environment :: Console',
+          'Intended Audience :: Developers',
+          'License :: OSI Approved :: MIT License',
+          'Operating System :: OS Independent',
+          'Topic :: Software Development :: Quality Assurance',
+          'Topic :: Software Development :: Testing'
+
+      ],
       keywords='',
-      author='',
-      author_email='',
-      url='',
+      author=u'Néstor Salceda',
+      author_email='nestor.salceda@gmail.com',
+      url='http://nestorsalceda.github.io/mamba',
       license='MIT/X11',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
