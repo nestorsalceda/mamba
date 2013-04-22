@@ -1,0 +1,3 @@
+language: python
+install: python setup.py develop
+script: mamba spec/*.py
