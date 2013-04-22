@@ -36,4 +36,15 @@ with describe('Suite') as _:
         def it_should_calculate_elapsed_time():
             expect(_.suite.elapsed_time.total_seconds()).to.be.greater_than(0)
 
+    with context('#run failed'):
 
+        def before_run_failed():
+            _.suite.append(Spec(_failing_test))
+
+            _.suite.run()
+
+        def it_should_be_marked_as_failed():
+            expect(_.suite.failed).to.be.true
+
+        def _failing_test():
+            raise ValueError()

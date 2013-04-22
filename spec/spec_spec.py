@@ -29,12 +29,16 @@ with describe('Spec') as _:
             expect(_.test.elapsed_time.total_seconds()).to.be.greater_than(0)
 
     with context('#run failed'):
+        def before_run_failed():
+            _.test = Spec(_failing_test)
+
+            _.test.run()
+
+        def it_should_be_marked_as_failed():
+            expect(_.test.failed).to.be.true
+
         def it_should_keep_the_error_if_test_failed():
-            test = Spec(_failing_test)
-
-            test.run()
-
-            expect(test.exception_caught()).to.not_be.none
+            expect(_.test.exception_caught()).to.not_be.none
 
         def _failing_test():
             raise ValueError()

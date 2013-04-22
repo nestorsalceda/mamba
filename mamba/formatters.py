@@ -30,13 +30,13 @@ class DocumentationFormatter(object):
     def format_spec(self, spec_):
         with indent(1 + spec_.depth):
             symbol = colored.green('✓')
-            if spec_.exception_caught() is not None:
+            if spec_.failed:
                 symbol = colored.red('✗')
                 self.has_failed_tests = True
 
             puts(symbol + ' ' + spec_.name.replace('_', ' '))
 
-            if spec_.exception_caught() is not None:
+            if spec_.failed:
                 with indent(spec_.depth + 2):
                     puts(colored.red(str(spec_.exception_caught())))
 

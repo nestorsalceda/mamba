@@ -29,6 +29,10 @@ class _Runnable(object):
     def run_hook(self, hook):
         raise NotImplementedError()
 
+    @property
+    def failed(self):
+        raise NotImplementedError()
+
 
 class Spec(_Runnable):
 
@@ -79,6 +83,10 @@ class Spec(_Runnable):
     def source_line(self):
         return inspect.getsourcelines(self.test)[1]
 
+    @property
+    def failed(self):
+        return self.exception_caught() is not None
+
 
 class Suite(_Runnable):
 
@@ -109,3 +117,7 @@ class Suite(_Runnable):
     def append(self, spec):
         self.specs.append(spec)
         spec.parent = self
+
+    @property
+    def failed(self):
+        return any(spec.failed for spec in self.specs)
