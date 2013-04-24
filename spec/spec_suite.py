@@ -1,4 +1,4 @@
-from mamba import describe, context
+from mamba import describe, context, before
 from sure import expect
 
 from mamba.spec import Spec, Suite
@@ -8,7 +8,8 @@ IRRELEVANT_SUBJECT = 'irrelevant_subject'
 
 with describe('Suite') as _:
 
-    def before():
+    @before.each
+    def create_suite():
         _.suite = Suite(IRRELEVANT_SUBJECT)
 
     def it_should_have_same_name_than_subject():
@@ -24,7 +25,8 @@ with describe('Suite') as _:
         def _test():
             _.was_run = True
 
-        def before_run():
+        @before.each
+        def append_tests_and_run_suite():
             _.suite.append(Spec(_test))
             _.suite.append(Spec(_test))
 
@@ -38,7 +40,8 @@ with describe('Suite') as _:
 
     with context('#run failed'):
 
-        def before_run_failed():
+        @before.each
+        def append_failing_tests_and_run():
             _.suite.append(Spec(_failing_test))
 
             _.suite.run()

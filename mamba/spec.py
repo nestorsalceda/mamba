@@ -45,9 +45,9 @@ class Spec(_Runnable):
     def run(self):
         try:
             begin = datetime.utcnow()
-            self.run_hook('before')
+            self.run_hook('before_each')
             self.test()
-            self.run_hook('after')
+            self.run_hook('after_each')
         except Exception as exception:
             self._exception_caught = exception
         finally:
@@ -94,7 +94,7 @@ class Suite(_Runnable):
         self.subject = subject
         self.specs = []
         self.parent = parent
-        self.hooks = {'before': None, 'after': None, 'before_all': None, 'after_all': None}
+        self.hooks = {'before_each': None, 'after_each': None, 'before_all': None, 'after_all': None}
 
     def run(self):
         self.run_hook('before_all')

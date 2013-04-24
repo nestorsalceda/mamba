@@ -1,4 +1,4 @@
-from mamba import describe, context
+from mamba import describe, context, before
 from sure import expect
 
 from mamba.spec import Spec
@@ -9,7 +9,8 @@ with describe('Spec') as _:
     def _test():
         _.was_run = True
 
-    def before():
+    @before.each
+    def create_new_test():
         _.test = Spec(_test)
 
     def it_should_have_same_name_than_test():
@@ -19,7 +20,8 @@ with describe('Spec') as _:
         expect(_.test.depth).to.be.equal(0)
 
     with context('#run'):
-        def before_run():
+        @before.each
+        def run_test():
             _.test.run()
 
         def it_should_run_the_test():
@@ -29,7 +31,8 @@ with describe('Spec') as _:
             expect(_.test.elapsed_time.total_seconds()).to.be.greater_than(0)
 
     with context('#run failed'):
-        def before_run_failed():
+        @before.each
+        def create_and_run_failing_test():
             _.test = Spec(_failing_test)
 
             _.test.run()

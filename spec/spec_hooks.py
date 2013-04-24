@@ -1,19 +1,23 @@
-from mamba import describe, context
+from mamba import describe, context, before, after
 from sure import expect
 
 with describe('Hooks') as _:
     _.calls = []
 
+    @before.all
     def before_all():
         _.calls.append('before_all')
 
+    @after.all
     def after_all():
         _.calls.append('after_all')
 
-    def before():
+    @before.each
+    def before_each():
         _.calls.append('before')
 
-    def after():
+    @after.each
+    def after_each():
         _.calls.append('after')
 
     def it_should_be_called_after_before():
@@ -25,12 +29,15 @@ with describe('Hooks') as _:
         _.calls.append('second')
 
     with context('#nested'):
+        @before.each
         def before_nested():
             _.calls.append('before_nested')
 
+        @before.all
         def before_all_nested():
             _.calls.append('before_all_nested')
 
+        @after.all
         def after_all_nested():
             _.calls.append('after_all_nested')
 
