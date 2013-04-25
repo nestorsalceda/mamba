@@ -28,7 +28,7 @@ with describe('Hooks') as _:
         expect(_.calls).to.be.equal(['before_all', 'before', 'first', 'after', 'before'])
         _.calls.append('second')
 
-    with context('#nested'):
+    with context('when nested context'):
         @before.each
         def before_nested():
             _.calls.append('before_nested')

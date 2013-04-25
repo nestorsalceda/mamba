@@ -21,9 +21,10 @@ with describe('Suite') as _:
 
         expect(test.depth).to.be.equal(1)
 
-    with context('#run'):
-        def _test():
-            _.was_run = True
+    def _test():
+        _.was_run = True
+
+    with context('when run'):
 
         @before.each
         def append_tests_and_run_suite():
@@ -38,16 +39,16 @@ with describe('Suite') as _:
         def it_should_calculate_elapsed_time():
             expect(_.suite.elapsed_time.total_seconds()).to.be.greater_than(0)
 
-    with context('#run failed'):
+    with context('when run failed'):
 
         @before.each
         def append_failing_tests_and_run():
+            def _failing_test():
+                raise ValueError()
+
             _.suite.append(Spec(_failing_test))
 
             _.suite.run()
 
         def it_should_be_marked_as_failed():
             expect(_.suite.failed).to.be.true
-
-        def _failing_test():
-            raise ValueError()
