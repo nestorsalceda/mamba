@@ -8,7 +8,7 @@ mamba is the definitive BDD testing framework for Python. Born under the banner 
 
 ```python
 
-from mamba import describe, context, before, after
+from mamba import describe, context, before, after, skip
 
 with describe('mamba'):
     def it_should_be_tested_with_mamba_itself():
@@ -33,6 +33,15 @@ with describe('mamba'):
 
             @after.all
             def run_after_all_specs():
+                pass
+
+        with context('#skippable specs'):
+            with skip(context('#skipped contexts')):
+                def it_should_not_run_specs_under_a_skipped_context():
+                    pass
+
+            @skip
+            def it_should_not_run_a_spec_marked_with_skip_decorator():
                 pass
 
     with context('#assertion_framework_agnostic'):
