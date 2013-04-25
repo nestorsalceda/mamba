@@ -22,14 +22,18 @@ class describe(object):
             frame.f_locals['current_spec'] = None
 
         if frame.f_locals['current_spec'] is None:
-            frame.f_locals['current_spec'] = spec.Suite(self.subject)
+            frame.f_locals['current_spec'] = spec.Suite(self.subject, skipped=self._skipped)
             frame.f_locals['specs'].append(frame.f_locals['current_spec'])
         else:
-            current = spec.Suite(self.subject)
+            current = spec.Suite(self.subject, skipped=self._skipped)
             frame.f_locals['current_spec'].append(current)
             frame.f_locals['current_spec'] = current
 
         return _Context()
+
+    @property
+    def _skipped(self):
+        return getattr(self, 'skipped', False)
 
     def __exit__(self, type, value, traceback):
         frame = inspect.currentframe(1)
@@ -44,7 +48,7 @@ class describe(object):
                 if self._is_hook(code):
                     self._load_hooks(function, code, frame.f_locals['current_spec'])
                 else:
-                    frame.f_locals['current_spec'].append(spec.Spec(code))
+                    frame.f_locals['current_spec'].append(spec.Spec(code, skipped=getattr(code, 'skipped', False)))
 
         frame.f_locals['current_spec'].specs.sort(key=lambda x: x.source_line)
         frame.f_locals['current_spec'] = frame.f_locals['current_spec'].parent
