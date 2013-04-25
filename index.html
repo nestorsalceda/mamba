@@ -37,7 +37,7 @@
 <h2>Overview</h2>
 
 <div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">mamba</span> <span class="kn">import</span> <span class="n">describe</span><span class="p">,</span> <span class="n">context</span>
+<span class="kn">from</span> <span class="nn">mamba</span> <span class="kn">import</span> <span class="n">describe</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">before</span><span class="p">,</span> <span class="n">after</span>
 
 <span class="k">with</span> <span class="n">describe</span><span class="p">(</span><span class="s">'mamba'</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">it_should_be_tested_with_mamba_itself</span><span class="p">():</span>
@@ -48,16 +48,20 @@
             <span class="k">pass</span>
 
         <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#hooks'</span><span class="p">):</span>
-            <span class="k">def</span> <span class="nf">before_all</span><span class="p">():</span>
+            <span class="nd">@before.all</span>
+            <span class="k">def</span> <span class="nf">run_once_before_specs</span><span class="p">():</span>
                 <span class="k">pass</span>
 
-            <span class="k">def</span> <span class="nf">before</span><span class="p">():</span>
+            <span class="nd">@before.each</span>
+            <span class="k">def</span> <span class="nf">run_before_every_spec</span><span class="p">():</span>
                 <span class="k">pass</span>
 
-            <span class="k">def</span> <span class="nf">after</span><span class="p">():</span>
+            <span class="nd">@after.each</span>
+            <span class="k">def</span> <span class="nf">run_after_every_spec</span><span class="p">():</span>
                 <span class="k">pass</span>
 
-            <span class="k">def</span> <span class="nf">after_all</span><span class="p">():</span>
+            <span class="nd">@after.all</span>
+            <span class="k">def</span> <span class="nf">run_after_all_specs</span><span class="p">():</span>
                 <span class="k">pass</span>
 
     <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#assertion_framework_agnostic'</span><span class="p">):</span>
