@@ -1,4 +1,4 @@
-from mamba import describe, context, before
+from mamba import describe, context, before, skip
 from sure import expect
 
 from mamba.spec import Spec
@@ -11,6 +11,7 @@ with describe('Spec') as _:
         def _test():
             _.was_run = True
 
+        _.was_run = False
         _.test = Spec(_test)
 
     def it_should_have_same_name_than_test():
@@ -18,6 +19,14 @@ with describe('Spec') as _:
 
     def it_should_have_depth_zero_without_parent():
         expect(_.test.depth).to.be.equal(0)
+
+    with context('when skipped'):
+        def it_should_not_run_the_test():
+            _.test.skipped = True
+
+            _.test.run()
+
+            expect(_.was_run).to.be.false
 
     with context('when run'):
         @before.each

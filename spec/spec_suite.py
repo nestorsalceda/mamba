@@ -10,6 +10,7 @@ with describe('Suite') as _:
 
     @before.each
     def create_suite():
+        _.was_run = False
         _.suite = Suite(IRRELEVANT_SUBJECT)
 
     def it_should_have_same_name_than_subject():
@@ -23,6 +24,17 @@ with describe('Suite') as _:
 
     def _test():
         _.was_run = True
+
+    with context('when skipped'):
+        def it_should_not_run_its_children():
+            test = Spec(_test)
+            _.suite.append(test)
+            _.suite.skipped = True
+
+            _.suite.run()
+
+            expect(_.was_run).to.be.false
+
 
     with context('when run'):
 

@@ -33,20 +33,22 @@ class _Runnable(object):
     def failed(self):
         raise NotImplementedError()
 
-
 class Spec(_Runnable):
 
-    def __init__(self, test, parent=None):
+    def __init__(self, test, parent=None, skipped=False):
         self.test = test
         self.parent = parent
+        self.skipped = skipped
         self._exception_caught = None
         self._elapsed_time = timedelta(0)
 
     def run(self):
+
         try:
             begin = datetime.utcnow()
             self.run_hook('before_each')
-            self.test()
+            if not self.skipped:
+                self.test()
             self.run_hook('after_each')
         except Exception as exception:
             self._exception_caught = exception
@@ -90,16 +92,18 @@ class Spec(_Runnable):
 
 class Suite(_Runnable):
 
-    def __init__(self, subject, parent=None):
+    def __init__(self, subject, parent=None, skipped=False):
         self.subject = subject
         self.specs = []
         self.parent = parent
+        self.skipped = skipped
         self.hooks = {'before_each': None, 'after_each': None, 'before_all': None, 'after_all': None}
 
     def run(self):
         self.run_hook('before_all')
-        for spec in self.specs:
-            spec.run()
+        if not self.skipped:
+            for spec in self.specs:
+                spec.run()
         self.run_hook('after_all')
 
     def run_hook(self, hook):
