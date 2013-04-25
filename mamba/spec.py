@@ -24,7 +24,7 @@ class _Runnable(object):
 
     @property
     def source_line(self):
-        return 'inf'
+        return float('inf')
 
     def run_hook(self, hook):
         raise NotImplementedError()

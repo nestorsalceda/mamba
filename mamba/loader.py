@@ -14,7 +14,7 @@ class describe(object):
         self.locals_before = None
 
     def __enter__(self):
-        frame = inspect.currentframe(1)
+        frame = inspect.currentframe().f_back
         self.locals_before = set(frame.f_locals.keys())
 
         if 'specs' not in frame.f_locals:
@@ -36,7 +36,7 @@ class describe(object):
         return getattr(self, 'skipped', False)
 
     def __exit__(self, type, value, traceback):
-        frame = inspect.currentframe(1)
+        frame = inspect.currentframe().f_back
 
         possible_specs = set(frame.f_locals.keys()) - self.locals_before
 
