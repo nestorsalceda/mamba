@@ -7,9 +7,22 @@ from mamba import spec
 class DocumentationFormatter(object):
 
     def __init__(self):
-        self.has_failed_tests = False
         self.total_specs = 0
+        self.failed_specs = 0
+        self.skipped_specs = 0
         self.total_seconds = .0
+
+    @property
+    def has_failed_specs(self):
+        return self.failed_specs != 0
+
+    @property
+    def has_skipped_specs(self):
+        return self.skipped_specs != 0
+
+    @property
+    def specs_ran(self):
+        return self.total_specs - self.skipped_specs
 
     def format(self, item):
         puts()
@@ -25,7 +38,10 @@ class DocumentationFormatter(object):
 
     def format_suite(self, suite):
         with indent(1 + suite.depth):
-            puts(colored.white(suite.name))
+            if suite.skipped:
+                puts(colored.yellow(suite.name))
+            else:
+                puts(colored.white(suite.name))
             self._format_children(suite)
 
     def format_spec(self, spec_):
@@ -33,7 +49,10 @@ class DocumentationFormatter(object):
             symbol = colored.green('✓')
             if spec_.failed:
                 symbol = colored.red('✗')
-                self.has_failed_tests = True
+                self.failed_specs += 1
+            elif spec_.skipped:
+                symbol = colored.yellow('✗')
+                self.skipped_specs += 1
 
             puts(symbol + ' ' + spec_.name.replace('_', ' '))
 
@@ -46,5 +65,9 @@ class DocumentationFormatter(object):
 
     def format_summary(self):
         puts()
-        color = colored.red if self.has_failed_tests else colored.green
-        puts(color("%d specs ran in %.4f seconds" % (self.total_specs, self.total_seconds)))
+        if self.has_failed_specs:
+            puts(colored.red("%d specs failed of %d ran in %.4f seconds" % (self.failed_specs, self.specs_ran, self.total_seconds)))
+        elif self.has_skipped_specs:
+            puts(colored.yellow("%d specs ran (%d skipped) in %.4f seconds" % (self.specs_ran, self.skipped_specs, self.total_seconds)))
+        else:
+            puts(colored.green("%d specs ran in %.4f seconds" % (self.specs_ran, self.total_seconds)))

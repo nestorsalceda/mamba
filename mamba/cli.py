@@ -17,7 +17,7 @@ def main():
 
     formatter.format_summary()
 
-    if runner.has_failed_tests:
+    if runner.has_failed_specs:
         sys.exit(1)
 
 
