@@ -26,15 +26,19 @@ with describe('Suite') as _:
         _.was_run = True
 
     with context('when skipped'):
-        def it_should_not_run_its_children():
+        @before.each
+        def append_spect_to_suite_and_set_skipped():
             test = Spec(_test)
             _.suite.append(test)
             _.suite.skipped = True
 
+        def it_should_not_run_its_children():
             _.suite.run()
 
             expect(_.was_run).to.be.false
 
+        def it_should_propagate_to_its_children():
+            expect(all(spec.skipped for spec in _.suite.specs)).to.be.true
 
     with context('when run'):
 

@@ -33,6 +33,15 @@ class _Runnable(object):
     def failed(self):
         raise NotImplementedError()
 
+    @property
+    def skipped(self):
+        raise NotImplementedError()
+
+    @skipped.setter
+    def skipped(self, value):
+        raise NotImplementedError()
+
+
 class Spec(_Runnable):
 
     def __init__(self, test, parent=None, skipped=False):
@@ -89,6 +98,16 @@ class Spec(_Runnable):
     def failed(self):
         return self.exception_caught() is not None
 
+    @property
+    def skipped(self):
+        if self.parent:
+            return self._skipped or self.parent.skipped
+        return self._skipped
+
+    @skipped.setter
+    def skipped(self, value):
+        self._skipped = value
+
 
 class Suite(_Runnable):
 
@@ -125,3 +144,13 @@ class Suite(_Runnable):
     @property
     def failed(self):
         return any(spec.failed for spec in self.specs)
+
+    @property
+    def skipped(self):
+        if self.parent:
+            return self._skipped or self.parent.skipped
+        return self._skipped
+
+    @skipped.setter
+    def skipped(self, value):
+        self._skipped = value

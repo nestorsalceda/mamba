@@ -1,4 +1,4 @@
-from mamba import describe, context, before, skip
+from mamba import describe, context, before
 from sure import expect
 
 from mamba.spec import Spec
@@ -54,5 +54,4 @@ with describe('Spec') as _:
 
         def it_should_keep_the_error_if_test_failed():
             expect(_.test.exception_caught()).to.not_be.none
-
 
