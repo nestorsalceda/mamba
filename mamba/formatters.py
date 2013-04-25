@@ -12,6 +12,7 @@ class DocumentationFormatter(object):
         self.total_seconds = .0
 
     def format(self, item):
+        puts()
         puts(colored.white(item.name))
         self._format_children(item)
 
