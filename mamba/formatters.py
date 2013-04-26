@@ -29,6 +29,8 @@ class DocumentationFormatter(object):
         puts(colored.white(item.name))
         self._format_children(item)
 
+        self.total_seconds += item.elapsed_time.total_seconds()
+
     def _format_children(self, item):
         for spec_ in item.specs:
             if isinstance(spec_, spec.Suite):
@@ -60,7 +62,6 @@ class DocumentationFormatter(object):
                 with indent(spec_.depth + 2):
                     puts(colored.red(str(spec_.exception_caught())))
 
-        self.total_seconds += spec_.elapsed_time.total_seconds()
         self.total_specs += 1
 
     def format_summary(self):

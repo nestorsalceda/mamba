@@ -117,13 +117,16 @@ class Suite(_Runnable):
         self.parent = parent
         self.skipped = skipped
         self.hooks = {'before_each': None, 'after_each': None, 'before_all': None, 'after_all': None}
+        self._elapsed_time = timedelta(0)
 
     def run(self):
+        begin = datetime.utcnow()
         self.run_hook('before_all')
         if not self.skipped:
             for spec in self.specs:
                 spec.run()
         self.run_hook('after_all')
+        self._elapsed_time = datetime.utcnow() - begin
 
     def run_hook(self, hook):
         if callable(self.hooks.get(hook, None)):
@@ -131,7 +134,7 @@ class Suite(_Runnable):
 
     @property
     def elapsed_time(self):
-        return sum([spec.elapsed_time for spec in self.specs], timedelta(0))
+        return self._elapsed_time
 
     @property
     def name(self):
