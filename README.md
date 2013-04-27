@@ -14,11 +14,11 @@ with describe('mamba'):
     def it_should_be_tested_with_mamba_itself():
         pass
 
-    with context('#features'):
+    with context('when listing features'):
         def it_supports_example_groups():
             pass
 
-        with context('#hooks'):
+        with context('hooks'):
             @before.all
             def run_once_before_specs():
                 pass
@@ -35,7 +35,7 @@ with describe('mamba'):
             def run_after_all_specs():
                 pass
 
-        with context('#skippable specs'):
+        with context('skip tests'):
             with skip(context('#skipped contexts')):
                 def it_should_not_run_specs_under_a_skipped_context():
                     pass
@@ -44,7 +44,7 @@ with describe('mamba'):
             def it_should_not_run_a_spec_marked_with_skip_decorator():
                 pass
 
-    with context('#assertion_framework_agnostic'):
+    with context('when writing assertions'):
         def it_should_be_usable_with_plain_assertions():
             assert True
 
@@ -59,7 +59,10 @@ with describe('mamba'):
 
             expect(True).to.be.true
 
-    with context('#test_doubles_framework_agnostic'):
+        def it_should_be_assertion_framework_agnostic():
+            pass
+
+    with context('when using a tests doubles'):
         def it_should_be_usable_with_mockito():
             stub = mock()
             when(stub).is_usable_with_mockito().thenReturn(True)
@@ -77,6 +80,9 @@ with describe('mamba'):
             is_usable_with_mock = Mock(return_value=True)
 
             assert mock()
+
+        def it_should_be_test_doubles_framework_agnostic():
+            pass
 ```
 
 
