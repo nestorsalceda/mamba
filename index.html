@@ -43,11 +43,11 @@
     <span class="k">def</span> <span class="nf">it_should_be_tested_with_mamba_itself</span><span class="p">():</span>
         <span class="k">pass</span>
 
-    <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#features'</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'when listing features'</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">it_supports_example_groups</span><span class="p">():</span>
             <span class="k">pass</span>
 
-        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#hooks'</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'hooks'</span><span class="p">):</span>
             <span class="nd">@before.all</span>
             <span class="k">def</span> <span class="nf">run_once_before_specs</span><span class="p">():</span>
                 <span class="k">pass</span>
@@ -64,7 +64,7 @@
             <span class="k">def</span> <span class="nf">run_after_all_specs</span><span class="p">():</span>
                 <span class="k">pass</span>
 
-        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#skippable specs'</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'skip tests'</span><span class="p">):</span>
             <span class="k">with</span> <span class="n">skip</span><span class="p">(</span><span class="n">context</span><span class="p">(</span><span class="s">'#skipped contexts'</span><span class="p">)):</span>
                 <span class="k">def</span> <span class="nf">it_should_not_run_specs_under_a_skipped_context</span><span class="p">():</span>
                     <span class="k">pass</span>
@@ -73,7 +73,7 @@
             <span class="k">def</span> <span class="nf">it_should_not_run_a_spec_marked_with_skip_decorator</span><span class="p">():</span>
                 <span class="k">pass</span>
 
-    <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#assertion_framework_agnostic'</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'when writing assertions'</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">it_should_be_usable_with_plain_assertions</span><span class="p">():</span>
             <span class="k">assert</span> <span class="bp">True</span>
 
@@ -88,7 +88,10 @@
 
             <span class="n">expect</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
 
-    <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'#test_doubles_framework_agnostic'</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">it_should_be_assertion_framework_agnostic</span><span class="p">():</span>
+            <span class="k">pass</span>
+
+    <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'when using tests doubles'</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">it_should_be_usable_with_mockito</span><span class="p">():</span>
             <span class="n">stub</span> <span class="o">=</span> <span class="n">mock</span><span class="p">()</span>
             <span class="n">when</span><span class="p">(</span><span class="n">stub</span><span class="p">)</span><span class="o">.</span><span class="n">is_usable_with_mockito</span><span class="p">()</span><span class="o">.</span><span class="n">thenReturn</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
@@ -106,6 +109,9 @@
             <span class="n">is_usable_with_mock</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">(</span><span class="n">return_value</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
             <span class="k">assert</span> <span class="n">mock</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">it_should_be_test_doubles_framework_agnostic</span><span class="p">():</span>
+            <span class="k">pass</span>
 </pre></div>
 
 <h2>Contribute</h2>
