@@ -62,7 +62,7 @@ with describe('mamba'):
         def it_should_be_assertion_framework_agnostic():
             pass
 
-    with context('when using a tests doubles'):
+    with context('when using tests doubles'):
         def it_should_be_usable_with_mockito():
             stub = mock()
             when(stub).is_usable_with_mockito().thenReturn(True)
