@@ -6,7 +6,7 @@ version = '0.3'
 
 setup(name='mamba',
       version=version,
-      description="The definitive testing tool for Python. Born under the banner of Behaviour Driven Development.",
+      description="The definitive testing tool for Python. Born under the banner of Behavior Driven Development.",
       long_description=open('README.md').read(),
       classifiers=[
           'Development Status :: 4 - Beta',
