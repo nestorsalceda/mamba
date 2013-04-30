@@ -12,7 +12,7 @@ def main():
     formatter = formatters.DocumentationFormatter()
     runner = Runner(formatter)
 
-    for file_ in _specs():
+    for file_ in _collect_specs_from_argv():
         module = imp.load_source(file_.replace('.py', ''), file_)
         runner.run(module)
 
@@ -22,16 +22,26 @@ def main():
         sys.exit(1)
 
 
-def _specs():
+def _collect_specs_from_argv():
     if len(sys.argv) == 1:
-        collected = []
-        for root, dirs, files in os.walk('spec'):
-            collected.extend([os.path.join(root, file_) for file_ in files if file_.endswith('_spec.py')])
-        collected.sort()
-        return collected
-    else:
-        return sys.argv[1:]
+        return _collect_specs_from_directory('spec')
 
+    collected = []
+    for arg in sys.argv[1:]:
+        if os.path.isdir(arg):
+            collected.extend(_collect_specs_from_directory(arg))
+        else:
+            collected.append(arg)
+    return collected
+
+
+def _collect_specs_from_directory(directory):
+    collected = []
+    for root, dirs, files in os.walk(directory):
+        collected.extend([os.path.join(root, file_) for file_ in files if file_.endswith('_spec.py')])
+
+    collected.sort()
+    return collected
 
 if __name__ == '__main__':
     main()
