@@ -41,6 +41,14 @@ class _Runnable(object):
     def skipped(self, value):
         raise NotImplementedError()
 
+    @property
+    def exception(self):
+        raise NotImplementedError()
+
+    @exception.setter
+    def exception(self, value):
+        raise NotImplementedError()
+
 
 class Spec(_Runnable):
 
@@ -48,11 +56,10 @@ class Spec(_Runnable):
         self.test = test
         self.parent = parent
         self.skipped = skipped
-        self._exception_caught = None
+        self._exception = None
         self._elapsed_time = timedelta(0)
 
     def run(self):
-
         try:
             begin = datetime.utcnow()
             self.run_hook('before_each')
@@ -60,7 +67,7 @@ class Spec(_Runnable):
                 self.test()
             self.run_hook('after_each')
         except Exception as exception:
-            self._exception_caught = exception
+            self.exception = exception
         finally:
             self._elapsed_time = datetime.utcnow() - begin
 
@@ -83,9 +90,6 @@ class Spec(_Runnable):
     def elapsed_time(self):
         return self._elapsed_time
 
-    def exception_caught(self):
-        return self._exception_caught
-
     @property
     def name(self):
         return self.test.__name__
@@ -96,7 +100,7 @@ class Spec(_Runnable):
 
     @property
     def failed(self):
-        return self.exception_caught() is not None
+        return self.exception is not None
 
     @property
     def skipped(self):
@@ -108,6 +112,13 @@ class Spec(_Runnable):
     def skipped(self, value):
         self._skipped = value
 
+    @property
+    def exception(self):
+        return self._exception
+
+    @exception.setter
+    def exception(self, value):
+        self._exception = value
 
 class Suite(_Runnable):
 
@@ -120,13 +131,18 @@ class Suite(_Runnable):
         self._elapsed_time = timedelta(0)
 
     def run(self):
-        begin = datetime.utcnow()
-        self.run_hook('before_all')
-        if not self.skipped:
+        try:
+            begin = datetime.utcnow()
+            self.run_hook('before_all')
+            if not self.skipped:
+                for spec in self.specs:
+                    spec.run()
+            self.run_hook('after_all')
+        except Exception as exception:
             for spec in self.specs:
-                spec.run()
-        self.run_hook('after_all')
-        self._elapsed_time = datetime.utcnow() - begin
+                spec.exception = exception
+        finally:
+            self._elapsed_time = datetime.utcnow() - begin
 
     def run_hook(self, hook):
         if callable(self.hooks.get(hook, None)):
@@ -157,3 +173,14 @@ class Suite(_Runnable):
     @skipped.setter
     def skipped(self, value):
         self._skipped = value
+
+    @property
+    def exception(self):
+        return self._exception
+
+    @exception.setter
+    def exception(self, value):
+        self._exception = value
+
+        for spec in self.specs:
+            spec.exception = value

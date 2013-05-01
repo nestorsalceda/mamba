@@ -53,5 +53,5 @@ with describe('Spec') as _:
             expect(_.test.failed).to.be.true
 
         def it_should_keep_the_error_if_test_failed():
-            expect(_.test.exception_caught()).to.not_be.none
+            expect(_.test.exception).to.not_be.none
 

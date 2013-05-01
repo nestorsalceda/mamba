@@ -60,7 +60,7 @@ class DocumentationFormatter(object):
 
             if spec_.failed:
                 with indent(spec_.depth + 2):
-                    puts(colored.red(str(spec_.exception_caught())))
+                    puts(colored.red(str(spec_.exception)))
 
         self.total_specs += 1
 
