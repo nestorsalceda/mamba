@@ -12,6 +12,7 @@ class describe(object):
     def __init__(self, subject):
         self.subject = subject
         self.locals_before = None
+        self.context = _Context()
 
     def __enter__(self):
         frame = inspect.currentframe().f_back
@@ -29,7 +30,7 @@ class describe(object):
             frame.f_locals['current_spec'].append(current)
             frame.f_locals['current_spec'] = current
 
-        return _Context()
+        return self.context
 
     @property
     def _skipped(self):
