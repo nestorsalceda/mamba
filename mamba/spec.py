@@ -139,8 +139,7 @@ class Suite(_Runnable):
                     spec.run()
             self.run_hook('after_all')
         except Exception as exception:
-            for spec in self.specs:
-                spec.exception = exception
+            self.exception = exception
         finally:
             self._elapsed_time = datetime.utcnow() - begin
 
