@@ -6,7 +6,8 @@ from mamba import spec
 
 class DocumentationFormatter(object):
 
-    def __init__(self):
+    def __init__(self, settings):
+        self.settings = settings
         self.total_specs = 0
         self.failed_specs = 0
         self.skipped_specs = 0
@@ -56,7 +57,7 @@ class DocumentationFormatter(object):
                 symbol = colored.yellow('✗')
                 self.skipped_specs += 1
 
-            puts(symbol + ' ' + spec_.name.replace('_', ' '))
+            puts(symbol + ' ' + spec_.name.replace('_', ' ') + self.format_slow_test(spec_))
 
             if spec_.failed:
                 with indent(spec_.depth + 2):
@@ -75,3 +76,19 @@ class DocumentationFormatter(object):
 
     def format_seconds(self, seconds):
         return '%.4f seconds' % seconds
+
+    def format_slow_test(self, spec_):
+        seconds = spec_.elapsed_time.total_seconds()
+        color = None
+
+        if seconds > self.settings.slow_test_threshold:
+            color = colored.yellow
+
+            if seconds > 5 * self.settings.slow_test_threshold:
+                color = colored.red
+
+        if color is not None:
+            return color(' (' + self.format_seconds(seconds) + ')')
+
+        return ''
+

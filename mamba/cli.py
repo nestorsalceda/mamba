@@ -6,10 +6,12 @@ import imp
 
 from mamba import formatters
 from mamba.runner import Runner
+from mamba.settings import Settings
 
 
 def main():
-    formatter = formatters.DocumentationFormatter()
+    settings = Settings()
+    formatter = formatters.DocumentationFormatter(settings)
     runner = Runner(formatter)
 
     for file_ in _collect_specs_from_argv():
