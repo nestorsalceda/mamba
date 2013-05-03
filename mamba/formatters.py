@@ -67,8 +67,11 @@ class DocumentationFormatter(object):
     def format_summary(self):
         puts()
         if self.has_failed_specs:
-            puts(colored.red("%d specs failed of %d ran in %.4f seconds" % (self.failed_specs, self.specs_ran, self.total_seconds)))
+            puts(colored.red("%d specs failed of %d ran in %s" % (self.failed_specs, self.specs_ran, self.format_seconds(self.total_seconds))))
         elif self.has_skipped_specs:
-            puts(colored.yellow("%d specs ran (%d skipped) in %.4f seconds" % (self.specs_ran, self.skipped_specs, self.total_seconds)))
+            puts(colored.yellow("%d specs ran (%d skipped) in %s" % (self.specs_ran, self.skipped_specs, self.format_seconds(self.total_seconds))))
         else:
-            puts(colored.green("%d specs ran in %.4f seconds" % (self.specs_ran, self.total_seconds)))
+            puts(colored.green("%d specs ran in %s" % (self.specs_ran, self.format_seconds(self.total_seconds))))
+
+    def format_seconds(self, seconds):
+        return '%.4f seconds' % seconds
