@@ -51,3 +51,19 @@ with describe(SubjectWithArguments) as third_context:
 
     def it_should_be_not_be_instantiated():
         expect(third_context).to.not_have.property('subject')
+
+
+class SubjectWithArgumentsAndBeforeEachHook(object):
+
+    def __init__(self, argument):
+        pass
+
+
+with describe(SubjectWithArgumentsAndBeforeEachHook) as __:
+
+    @before.each
+    def create_subject():
+        __.created = SubjectWithArgumentsAndBeforeEachHook(None)
+
+    def it_should_contain_created_attribute():
+        expect(__).to.have.property('created').to.be.a(SubjectWithArgumentsAndBeforeEachHook)

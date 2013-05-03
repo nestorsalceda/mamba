@@ -134,13 +134,21 @@ class Suite(_Runnable):
             self._register_before_each()
 
     def _register_before_each(self):
-        self.hooks['before_each'].insert(0, self._create_subject_and_unregister_if_fails)
+        if self._can_create_subject():
+            self.hooks['before_each'].append(self._create_subject)
 
-    def _create_subject_and_unregister_if_fails(self):
+    def _can_create_subject(self):
+        try:
+            self.subject()
+            return True
+        except:
+            return False
+
+    def _create_subject(self):
         try:
             self.context.subject = self.subject()
         except:
-            self.hooks['before_each'].remove(self._create_subject_and_unregister_if_fails)
+            pass
 
     def run(self):
         try:
