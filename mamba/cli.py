@@ -3,6 +3,7 @@
 import sys
 import os
 import imp
+import argparse
 
 from mamba import formatters
 from mamba.runner import Runner
@@ -10,11 +11,12 @@ from mamba.settings import Settings
 
 
 def main():
-    settings = Settings()
+    arguments = _parse_arguments()
+    settings = _settings_from_arguments(arguments)
     formatter = formatters.DocumentationFormatter(settings)
     runner = Runner(formatter)
 
-    for file_ in _collect_specs_from_argv():
+    for file_ in _collect_specs_from(arguments.specs):
         module = imp.load_source(file_.replace('.py', ''), file_)
         runner.run(module)
 
@@ -23,17 +25,30 @@ def main():
     if runner.has_failed_specs:
         sys.exit(1)
 
+def _parse_arguments():
+    parser = argparse.ArgumentParser()
 
-def _collect_specs_from_argv():
-    if len(sys.argv) == 1:
-        return _collect_specs_from_directory('spec')
+    parser.add_argument('--slow', '-s', default=0.075, type=float, help='slow test threshold in seconds (default: %(default)s)')
+    parser.add_argument('specs', default=['spec'], nargs='*', help='specs or directories with specs to run (default: %(default)s)')
 
+    args = parser.parse_args()
+    return args
+
+
+def _settings_from_arguments(arguments):
+    settings = Settings()
+    settings.slow_test_threshold = arguments.slow
+
+    return settings
+
+
+def _collect_specs_from(specs):
     collected = []
-    for arg in sys.argv[1:]:
-        if os.path.isdir(arg):
-            collected.extend(_collect_specs_from_directory(arg))
+    for path in specs:
+        if os.path.isdir(path):
+            collected.extend(_collect_specs_from_directory(path))
         else:
-            collected.append(arg)
+            collected.append(path)
     return collected
 
 
@@ -44,6 +59,7 @@ def _collect_specs_from_directory(directory):
 
     collected.sort()
     return collected
+
 
 if __name__ == '__main__':
     main()
