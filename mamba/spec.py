@@ -73,8 +73,7 @@ class Spec(_Runnable):
 
     def run_hook(self, hook):
         for parent in self._parents:
-            if callable(parent.hooks.get(hook, None)):
-                parent.hooks[hook]()
+            parent.run_hook(hook)
 
     @property
     def _parents(self):
@@ -122,13 +121,26 @@ class Spec(_Runnable):
 
 class Suite(_Runnable):
 
-    def __init__(self, subject, parent=None, skipped=False):
+    def __init__(self, subject, parent=None, skipped=False, context=None):
         self.subject = subject
         self.specs = []
         self.parent = parent
         self.skipped = skipped
-        self.hooks = {'before_each': None, 'after_each': None, 'before_all': None, 'after_all': None}
+        self.context = context
+        self.hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
         self._elapsed_time = timedelta(0)
+
+        if self.subject_is_class:
+            self._register_before_each()
+
+    def _register_before_each(self):
+        self.hooks['before_each'].insert(0, self._create_subject_and_unregister_if_fails)
+
+    def _create_subject_and_unregister_if_fails(self):
+        try:
+            self.context.subject = self.subject()
+        except:
+            self.hooks['before_each'].remove(self._create_subject_and_unregister_if_fails)
 
     def run(self):
         try:
@@ -144,8 +156,9 @@ class Suite(_Runnable):
             self._elapsed_time = datetime.utcnow() - begin
 
     def run_hook(self, hook):
-        if callable(self.hooks.get(hook, None)):
-            self.hooks[hook]()
+        for registered in self.hooks.get(hook, []):
+            if callable(registered):
+                registered()
 
     @property
     def elapsed_time(self):
@@ -153,6 +166,8 @@ class Suite(_Runnable):
 
     @property
     def name(self):
+        if self.subject_is_class:
+            return self.subject.__name__
         return self.subject
 
     def append(self, spec):
@@ -183,3 +198,7 @@ class Suite(_Runnable):
 
         for spec in self.specs:
             spec.exception = value
+
+    @property
+    def subject_is_class(self):
+        return inspect.isclass(self.subject)

@@ -75,7 +75,10 @@ with describe('Suite') as _:
         def append_failing_before_all_hook_and_run():
             def _raise_error():
                 raise ValueError()
-            _.suite.hooks['before_all'] = _raise_error
+            #TODO: Law of Demeter!
+            #_.suite.add_hook('before_all', _raise_error)
+            _.suite.hooks['before_all'] = []
+            _.suite.hooks['before_all'].append(_raise_error)
 
 
         with context('when has only specs as children'):

@@ -23,10 +23,10 @@ class describe(object):
             frame.f_locals['current_spec'] = None
 
         if frame.f_locals['current_spec'] is None:
-            frame.f_locals['current_spec'] = spec.Suite(self.subject, skipped=self._skipped)
+            frame.f_locals['current_spec'] = spec.Suite(self.subject, skipped=self._skipped, context=self.context)
             frame.f_locals['specs'].append(frame.f_locals['current_spec'])
         else:
-            current = spec.Suite(self.subject, skipped=self._skipped)
+            current = spec.Suite(self.subject, skipped=self._skipped, context=self.context)
             frame.f_locals['current_spec'].append(current)
             frame.f_locals['current_spec'] = current
 
@@ -67,6 +67,6 @@ class describe(object):
         return getattr(function, 'hook', [])
 
     def _load_hooks(self, function, code, current_spec):
-        current_spec.hooks['%s_%s' % (code.hook['where'], code.hook['when'])] = code
+        current_spec.hooks['%s_%s' % (code.hook['where'], code.hook['when'])].append(code)
 
 context = describe
