@@ -44,6 +44,9 @@ with describe('mamba'):
             def it_should_not_run_a_spec_marked_with_skip_decorator():
                 pass
 
+        def it_should_highlight_slow_tests():
+            sleep(10)
+
     with context('when writing assertions'):
         def it_should_be_usable_with_plain_assertions():
             assert True
