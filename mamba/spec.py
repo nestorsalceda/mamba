@@ -130,14 +130,18 @@ class Suite(_Runnable):
         self.hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
         self._elapsed_time = timedelta(0)
 
-        if self.subject_is_class:
-            self._register_before_each()
+    def run(self):
+        self._register_subject_creation_in_before_each_hook()
+        self._run_specs()
 
-    def _register_before_each(self):
+    def _register_subject_creation_in_before_each_hook(self):
         if self._can_create_subject():
-            self.hooks['before_each'].append(self._create_subject)
+            self.hooks['before_each'].insert(0, self._create_subject)
 
     def _can_create_subject(self):
+        if not self.subject_is_class:
+            return False
+
         try:
             self.subject()
             return True
@@ -150,7 +154,7 @@ class Suite(_Runnable):
         except:
             pass
 
-    def run(self):
+    def _run_specs(self):
         try:
             begin = datetime.utcnow()
             self.run_hook('before_all')
