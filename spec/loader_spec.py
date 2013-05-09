@@ -31,6 +31,6 @@ with describe('Loader') as _:
             expect(_.module.specs).to.have.length_of(1)
             expect(_.module.specs[0].specs[0].skipped).to.be.true
 
-        def it_should_mark_suite_as_skipped():
+        def it_should_mark_spec_group_as_skipped():
             expect(_.module.specs).to.have.length_of(1)
             expect(_.module.specs[0].specs[1].skipped).to.be.true

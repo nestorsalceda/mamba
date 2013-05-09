@@ -23,10 +23,10 @@ class describe(object):
             frame.f_locals['current_spec'] = None
 
         if frame.f_locals['current_spec'] is None:
-            frame.f_locals['current_spec'] = spec.Suite(self.subject, skipped=self._skipped, context=self.context)
+            frame.f_locals['current_spec'] = spec.SpecGroup(self.subject, skipped=self._skipped, context=self.context)
             frame.f_locals['specs'].append(frame.f_locals['current_spec'])
         else:
-            current = spec.Suite(self.subject, skipped=self._skipped, context=self.context)
+            current = spec.SpecGroup(self.subject, skipped=self._skipped, context=self.context)
             frame.f_locals['current_spec'].append(current)
             frame.f_locals['current_spec'] = current
 

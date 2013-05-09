@@ -34,18 +34,18 @@ class DocumentationFormatter(object):
 
     def _format_children(self, item):
         for spec_ in item.specs:
-            if isinstance(spec_, spec.Suite):
-                self.format_suite(spec_)
+            if isinstance(spec_, spec.SpecGroup):
+                self.format_spec_group(spec_)
             else:
                 self.format_spec(spec_)
 
-    def format_suite(self, suite):
-        with indent(1 + suite.depth):
-            if suite.skipped:
-                puts(colored.yellow(suite.name))
+    def format_spec_group(self, spec_group):
+        with indent(1 + spec_group.depth):
+            if spec_group.skipped:
+                puts(colored.yellow(spec_group.name))
             else:
-                puts(colored.white(suite.name))
-            self._format_children(suite)
+                puts(colored.white(spec_group.name))
+            self._format_children(spec_group)
 
     def format_spec(self, spec_):
         with indent(1 + spec_.depth):

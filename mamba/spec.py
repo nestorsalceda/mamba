@@ -119,7 +119,7 @@ class Spec(_Runnable):
     def exception(self, value):
         self._exception = value
 
-class Suite(_Runnable):
+class SpecGroup(_Runnable):
 
     def __init__(self, subject, parent=None, skipped=False, context=None):
         self.subject = subject
