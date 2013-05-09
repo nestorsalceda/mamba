@@ -2,7 +2,6 @@
 
 import sys
 import os
-import imp
 import argparse
 
 from mamba import formatters
