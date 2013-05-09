@@ -47,6 +47,10 @@ with describe('mamba'):
         def it_should_highlight_slow_tests():
             sleep(10)
 
+        with context(ASampleClass) as _:
+            def it_should_have_an_instance_in_subject_property():
+                expect(_.subject).to.be.a(ASampleClass)
+
     with context('when writing assertions'):
         def it_should_be_usable_with_plain_assertions():
             assert True
