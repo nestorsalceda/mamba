@@ -6,6 +6,7 @@ import imp
 import argparse
 
 from mamba import formatters
+from mamba.loader import Loader
 from mamba.runner import Runner
 from mamba.settings import Settings
 
@@ -13,12 +14,13 @@ from mamba.settings import Settings
 def main():
     arguments = _parse_arguments()
     settings = _settings_from_arguments(arguments)
+    loader = Loader()
     formatter = formatters.DocumentationFormatter(settings)
     runner = Runner(formatter)
 
     for file_ in _collect_specs_from(arguments.specs):
-        module = imp.load_source(file_.replace('.py', ''), file_)
-        runner.run(module)
+        with loader.load_from_file(file_) as module:
+            runner.run(module)
 
     formatter.format_summary()
 

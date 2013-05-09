@@ -1,4 +1,9 @@
+# -*- coding: utf-8 -*-
+
+import sys
+import imp
 import inspect
+import contextlib
 
 from mamba import spec
 
@@ -70,3 +75,15 @@ class describe(object):
         current_spec.hooks['%s_%s' % (code.hook['where'], code.hook['when'])].append(code)
 
 context = describe
+
+
+class Loader(object):
+
+    @contextlib.contextmanager
+    def load_from_file(self, path):
+        name = path.replace('.py', '')
+        try:
+            yield imp.load_source(name, path)
+        finally:
+            if name in sys.modules:
+                del sys.modules[name]
