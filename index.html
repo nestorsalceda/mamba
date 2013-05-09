@@ -76,6 +76,10 @@
         <span class="k">def</span> <span class="nf">it_should_highlight_slow_tests</span><span class="p">():</span>
             <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 
+        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="n">ASampleClass</span><span class="p">)</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">it_should_have_an_instance_in_subject_property</span><span class="p">():</span>
+                <span class="n">expect</span><span class="p">(</span><span class="n">_</span><span class="o">.</span><span class="n">subject</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">a</span><span class="p">(</span><span class="n">ASampleClass</span><span class="p">)</span>
+
     <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'when writing assertions'</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">it_should_be_usable_with_plain_assertions</span><span class="p">():</span>
             <span class="k">assert</span> <span class="bp">True</span>
