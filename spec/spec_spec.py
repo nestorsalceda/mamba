@@ -55,3 +55,5 @@ with describe('Spec') as _:
         def it_should_keep_the_error_if_test_failed():
             expect(_.test.exception).to.not_be.none
 
+        def it_should_keep_the_traceback():
+            expect(_.test.traceback).to.not_be.none

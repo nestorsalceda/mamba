@@ -1,3 +1,4 @@
+import sys
 import inspect
 from datetime import datetime, timedelta
 
@@ -49,6 +50,14 @@ class _Runnable(object):
     def exception(self, value):
         raise NotImplementedError()
 
+    @property
+    def traceback(self):
+        raise NotImplementedError()
+
+    @traceback.setter
+    def traceback(self, value):
+        raise NotImplementedError()
+
 
 class Spec(_Runnable):
 
@@ -57,6 +66,7 @@ class Spec(_Runnable):
         self.parent = parent
         self.skipped = skipped
         self._exception = None
+        self._traceback = None
         self._elapsed_time = timedelta(0)
 
     def run(self):
@@ -67,7 +77,9 @@ class Spec(_Runnable):
                 self.test()
             self.run_hook('after_each')
         except Exception as exception:
-            self.exception = exception
+            type_, value, traceback = sys.exc_info()
+            self.traceback = traceback
+            self.exception = value
         finally:
             self._elapsed_time = datetime.utcnow() - begin
 
@@ -118,6 +130,15 @@ class Spec(_Runnable):
     @exception.setter
     def exception(self, value):
         self._exception = value
+
+    @property
+    def traceback(self):
+        return self._traceback
+
+    @traceback.setter
+    def traceback(self, value):
+        self._traceback = value
+
 
 class SpecGroup(_Runnable):
 
