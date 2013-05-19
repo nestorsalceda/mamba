@@ -46,6 +46,9 @@ def _settings_from_arguments(arguments):
 def _collect_specs_from(specs):
     collected = []
     for path in specs:
+        if not os.path.exists(path):
+            continue
+
         if os.path.isdir(path):
             collected.extend(_collect_specs_from_directory(path))
         else:
