@@ -1,12 +1,11 @@
 class Runner(object):
 
-    def __init__(self, formatter):
-        self.formatter = formatter
+    def __init__(self):
         self.has_failed_specs = False
 
-    def run(self, module):
-        for spec in module.specs:
+    def run(self, specs):
+        for spec in specs:
             spec.run()
-            self.formatter.format(spec)
+
             if spec.failed:
                 self.has_failed_specs = True
