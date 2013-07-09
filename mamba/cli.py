@@ -15,16 +15,20 @@ def main():
     settings = _settings_from_arguments(arguments)
     loader = Loader()
     formatter = formatters.DocumentationFormatter(settings)
-    runner = Runner(formatter)
+    runner = Runner()
+
+    specs = []
 
     for file_ in _collect_specs_from(arguments.specs):
         with loader.load_from_file(file_) as module:
-            runner.run(module)
+            runner.run(module.specs)
+            specs.extend(module.specs)
 
-    formatter.format_summary()
+    formatter.format(specs)
 
     if runner.has_failed_specs:
         sys.exit(1)
+
 
 def _parse_arguments():
     parser = argparse.ArgumentParser()
