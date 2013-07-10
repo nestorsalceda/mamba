@@ -23,12 +23,18 @@ class DocumentationFormatter(object):
     def specs_ran(self):
         return self.total_specs - self.skipped_specs
 
-    def format(self, item):
+    def format(self, items):
+        for item in items:
+            self._format_item(item)
+
+            self.total_seconds += item.elapsed_time.total_seconds()
+
+        self.format_summary()
+
+    def _format_item(self, item):
         puts()
         puts(colored.white(item.name))
         self._format_children(item)
-
-        self.total_seconds += item.elapsed_time.total_seconds()
 
     def _format_children(self, item):
         for spec_ in item.specs:
