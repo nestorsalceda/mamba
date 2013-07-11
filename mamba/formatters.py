@@ -91,8 +91,6 @@ class DocumentationFormatter(object):
                 with indent(3):
                     puts(colored.red('Failure/Error: %s' % self.format_failing_expectation(failed)))
                     puts()
-                    puts(colored.red(str(failed.exception)))
-                    puts()
                     puts('Traceback:')
                     puts(colored.red(self.format_traceback(failed)))
                     puts()
@@ -110,11 +108,10 @@ class DocumentationFormatter(object):
         return ' '.join(result)
 
     def format_failing_expectation(self, spec_):
-        error = traceback.format_tb(spec_.traceback)[1:2][0]
-        return error.split('\n')[-2].strip()
+        return str(spec_.exception)
 
     def format_traceback(self, spec_):
-        return ''.join(traceback.format_tb(spec_.traceback)[1:])
+        return ''.join([message[2:] for message in traceback.format_tb(spec_.traceback)[1:]])
 
     def format_seconds(self, seconds):
         return '%.4f seconds' % seconds
