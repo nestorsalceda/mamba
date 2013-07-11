@@ -4,6 +4,14 @@
 
 mamba is the definitive BDD testing framework for Python. Born under the banner of Behavior Driven Development.
 
+##Installation
+
+To install mamba, just:
+
+``` sh
+pip install mamba
+```
+
 ##Overview
 
 ```python
