@@ -9,7 +9,7 @@ from mamba.loader import Loader
 from sure import expect
 
 IRRELEVANT_PATH = os.path.join(os.path.dirname(__file__), 'fixtures', 'without_inner_contexts.py')
-SKIP_DECORATOR_PATH = os.path.join(os.path.dirname(__file__), 'fixtures', 'with_skip_decorator.py')
+SKIP_DECORATOR_PATH = os.path.join(os.path.dirname(__file__), 'fixtures', 'with_pending_decorator.py')
 
 
 with describe(Loader) as _:
@@ -41,12 +41,12 @@ with describe(Loader) as _:
                 module.specs[0].specs]).to.be.equal(['first_spec', 'second_spec', 'third_spec', '#inner_context'])
 
     with context('when a skip decorator loaded'):
-        def it_should_mark_spec_as_skipped():
+        def it_should_mark_spec_as_pending():
             with _.subject.load_from_file(SKIP_DECORATOR_PATH) as module:
                 expect(module.specs).to.have.length_of(1)
-                expect(module.specs[0].specs[0].skipped).to.be.true
+                expect(module.specs[0].specs[0].pending).to.be.true
 
-        def it_should_mark_spec_group_as_skipped():
+        def it_should_mark_spec_group_as_pending():
             with _.subject.load_from_file(SKIP_DECORATOR_PATH) as module:
                 expect(module.specs).to.have.length_of(1)
-                expect(module.specs[0].specs[1].skipped).to.be.true
+                expect(module.specs[0].specs[1].pending).to.be.true

@@ -35,11 +35,11 @@ class _Runnable(object):
         raise NotImplementedError()
 
     @property
-    def skipped(self):
+    def pending(self):
         raise NotImplementedError()
 
-    @skipped.setter
-    def skipped(self, value):
+    @pending.setter
+    def pending(self, value):
         raise NotImplementedError()
 
     @property
@@ -61,10 +61,10 @@ class _Runnable(object):
 
 class Spec(_Runnable):
 
-    def __init__(self, test, parent=None, skipped=False):
+    def __init__(self, test, parent=None, pending=False):
         self.test = test
         self.parent = parent
-        self.skipped = skipped
+        self.pending = pending
         self._exception = None
         self._traceback = None
         self._elapsed_time = timedelta(0)
@@ -73,7 +73,7 @@ class Spec(_Runnable):
         try:
             begin = datetime.utcnow()
             self.run_hook('before_each')
-            if not self.skipped:
+            if not self.pending:
                 self.test()
             self.run_hook('after_each')
         except Exception as exception:
@@ -114,14 +114,14 @@ class Spec(_Runnable):
         return self.exception is not None
 
     @property
-    def skipped(self):
+    def pending(self):
         if self.parent:
-            return self._skipped or self.parent.skipped
-        return self._skipped
+            return self._pending or self.parent.pending
+        return self._pending
 
-    @skipped.setter
-    def skipped(self, value):
-        self._skipped = value
+    @pending.setter
+    def pending(self, value):
+        self._pending = value
 
     @property
     def exception(self):
@@ -142,11 +142,11 @@ class Spec(_Runnable):
 
 class SpecGroup(_Runnable):
 
-    def __init__(self, subject, parent=None, skipped=False, context=None):
+    def __init__(self, subject, parent=None, pending=False, context=None):
         self.subject = subject
         self.specs = []
         self.parent = parent
-        self.skipped = skipped
+        self.pending = pending
         self.context = context
         self.hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
         self._elapsed_time = timedelta(0)
@@ -179,7 +179,7 @@ class SpecGroup(_Runnable):
         try:
             begin = datetime.utcnow()
             self.run_hook('before_all')
-            if not self.skipped:
+            if not self.pending:
                 for spec in self.specs:
                     spec.run()
             self.run_hook('after_all')
@@ -212,14 +212,14 @@ class SpecGroup(_Runnable):
         return any(spec.failed for spec in self.specs)
 
     @property
-    def skipped(self):
+    def pending(self):
         if self.parent:
-            return self._skipped or self.parent.skipped
-        return self._skipped
+            return self._pending or self.parent.pending
+        return self._pending
 
-    @skipped.setter
-    def skipped(self, value):
-        self._skipped = value
+    @pending.setter
+    def pending(self, value):
+        self._pending = value
 
     @property
     def exception(self):

@@ -12,16 +12,16 @@ class DocumentationFormatter(object):
         self.settings = settings
         self.total_specs = 0
         self.failed_specs = []
-        self.skipped_specs = 0
+        self.pending_specs = 0
         self.total_seconds = .0
 
     @property
-    def has_skipped_specs(self):
-        return self.skipped_specs != 0
+    def has_pending_specs(self):
+        return self.pending_specs != 0
 
     @property
     def specs_ran(self):
-        return self.total_specs - self.skipped_specs
+        return self.total_specs - self.pending_specs
 
     def format(self, items):
         for item in items:
@@ -45,7 +45,7 @@ class DocumentationFormatter(object):
 
     def format_spec_group(self, spec_group):
         with indent(1 + spec_group.depth):
-            if spec_group.skipped:
+            if spec_group.pending:
                 puts(colored.yellow(spec_group.name))
             else:
                 puts(colored.white(spec_group.name))
@@ -57,9 +57,9 @@ class DocumentationFormatter(object):
             if spec_.failed:
                 symbol = colored.red('✗')
                 self.failed_specs.append(spec_)
-            elif spec_.skipped:
+            elif spec_.pending:
                 symbol = colored.yellow('✗')
-                self.skipped_specs += 1
+                self.pending_specs += 1
 
             puts(symbol + ' ' + self.format_spec_name(spec_) + self.format_slow_test(spec_))
 
@@ -77,8 +77,8 @@ class DocumentationFormatter(object):
         if self.failed_specs:
             self.format_failed_specs()
             puts(colored.red("%d specs failed of %d ran in %s" % (len(self.failed_specs), self.specs_ran, self.format_seconds(self.total_seconds))))
-        elif self.has_skipped_specs:
-            puts(colored.yellow("%d specs ran (%d skipped) in %s" % (self.specs_ran, self.skipped_specs, self.format_seconds(self.total_seconds))))
+        elif self.has_pending_specs:
+            puts(colored.yellow("%d specs ran (%d pending) in %s" % (self.specs_ran, self.pending_specs, self.format_seconds(self.total_seconds))))
         else:
             puts(colored.green("%d specs ran in %s" % (self.specs_ran, self.format_seconds(self.total_seconds))))
 

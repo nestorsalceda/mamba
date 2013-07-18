@@ -20,9 +20,9 @@ with describe('Spec') as _:
     def it_should_have_depth_zero_without_parent():
         expect(_.test.depth).to.be.equal(0)
 
-    with context('when skipped'):
+    with context('when pending'):
         def it_should_not_run_the_test():
-            _.test.skipped = True
+            _.test.pending = True
 
             _.test.run()
 

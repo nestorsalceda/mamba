@@ -28,18 +28,18 @@ class describe(object):
             frame.f_locals['current_spec'] = None
 
         if frame.f_locals['current_spec'] is None:
-            frame.f_locals['current_spec'] = spec.SpecGroup(self.subject, skipped=self._skipped, context=self.context)
+            frame.f_locals['current_spec'] = spec.SpecGroup(self.subject, pending=self._pending, context=self.context)
             frame.f_locals['specs'].append(frame.f_locals['current_spec'])
         else:
-            current = spec.SpecGroup(self.subject, skipped=self._skipped, context=self.context)
+            current = spec.SpecGroup(self.subject, pending=self._pending, context=self.context)
             frame.f_locals['current_spec'].append(current)
             frame.f_locals['current_spec'] = current
 
         return self.context
 
     @property
-    def _skipped(self):
-        return getattr(self, 'skipped', False)
+    def _pending(self):
+        return getattr(self, 'pending', False)
 
     def __exit__(self, type, value, traceback):
         frame = inspect.currentframe().f_back
@@ -54,7 +54,7 @@ class describe(object):
                 if self._is_hook(code):
                     self._load_hooks(function, code, frame.f_locals['current_spec'])
                 else:
-                    frame.f_locals['current_spec'].append(spec.Spec(code, skipped=getattr(code, 'skipped', False)))
+                    frame.f_locals['current_spec'].append(spec.Spec(code, pending=getattr(code, 'pending', False)))
 
         frame.f_locals['current_spec'].specs.sort(key=lambda x: x.source_line)
         frame.f_locals['current_spec'] = frame.f_locals['current_spec'].parent

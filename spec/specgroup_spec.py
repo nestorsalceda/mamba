@@ -25,12 +25,12 @@ with describe('SpecGroup') as _:
     def _test():
         _.was_run = True
 
-    with context('when skipped'):
+    with context('when pending'):
         @before.each
-        def append_spect_to_spec_group_and_set_skipped():
+        def append_spect_to_spec_group_and_set_pending():
             test = Spec(_test)
             _.spec_group.append(test)
-            _.spec_group.skipped = True
+            _.spec_group.pending = True
 
         def it_should_not_run_its_children():
             _.spec_group.run()
@@ -38,7 +38,7 @@ with describe('SpecGroup') as _:
             expect(_.was_run).to.be.false
 
         def it_should_propagate_to_its_children():
-            expect(all(spec.skipped for spec in _.spec_group.specs)).to.be.true
+            expect(all(spec.pending for spec in _.spec_group.specs)).to.be.true
 
     with context('when run'):
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
-def skip(fn):
-    fn.skipped = True
+def pending(fn):
+    fn.pending = True
     return fn
