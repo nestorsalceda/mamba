@@ -21,8 +21,9 @@ def main():
 
     for file_ in _collect_specs_from(arguments.specs):
         with loader.load_from_file(file_) as module:
-            runner.run(module.specs)
-            specs.extend(module.specs)
+            specs_in_module = getattr(module, 'specs', [])
+            runner.run(specs_in_module)
+            specs.extend(specs_in_module)
 
     formatter.format(specs)
 
