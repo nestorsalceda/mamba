@@ -20,6 +20,11 @@ with describe(reporters.Reporter) as _:
 
         assert_that(_.formatter.spec_started, called().with_args(ANY_SPEC))
 
+    def it_increases_spec_counter_when_spec_started():
+        _.reporter.spec_started(ANY_SPEC)
+
+        expect(_.reporter.spec_count).to.be.equal(1)
+
     def it_notifies_event_spec_passed_to_listeners():
         _.reporter.spec_passed(ANY_SPEC)
 
@@ -30,10 +35,20 @@ with describe(reporters.Reporter) as _:
 
         assert_that(_.formatter.spec_failed, called().with_args(ANY_SPEC))
 
+    def it_increases_failed_counter_when_spec_started():
+        _.reporter.spec_failed(ANY_SPEC)
+
+        expect(_.reporter.failed_count).to.be.equal(1)
+
     def it_notifies_event_spec_pending_to_listeners():
         _.reporter.spec_pending(ANY_SPEC)
 
         assert_that(_.formatter.spec_pending, called().with_args(ANY_SPEC))
+
+    def it_increases_pending_counter_when_spec_started():
+        _.reporter.spec_pending(ANY_SPEC)
+
+        expect(_.reporter.pending_count).to.be.equal(1)
 
     def it_notifies_event_spec_group_started_to_listeners():
         _.reporter.spec_group_started(ANY_SPEC_GROUP)
@@ -44,3 +59,9 @@ with describe(reporters.Reporter) as _:
         _.reporter.spec_group_finished(ANY_SPEC_GROUP)
 
         assert_that(_.formatter.spec_group_finished, called().with_args(ANY_SPEC_GROUP))
+
+    with context('when finishing'):
+        def it_notifies_summary_to_listeners():
+            _.reporter.finish()
+
+            assert_that(_.formatter.summary, called().with_args(_.reporter.spec_count, _.reporter.failed_count, _.reporter.pending_count))
