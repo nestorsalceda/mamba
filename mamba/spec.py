@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 class _Runnable(object):
 
-    def run(self):
+    def run(self, reporter):
         raise NotImplementedError()
 
     @property
@@ -69,17 +69,22 @@ class Spec(_Runnable):
         self._traceback = None
         self._elapsed_time = timedelta(0)
 
-    def run(self):
+    def run(self, reporter):
+        reporter.spec_started(self)
         try:
             begin = datetime.utcnow()
-            self.run_hook('before_each')
             if not self.pending:
+                self.run_hook('before_each')
                 self.test()
-            self.run_hook('after_each')
+                self.run_hook('after_each')
+                reporter.spec_passed(self)
+            else:
+                reporter.spec_pending(self)
         except Exception as exception:
             type_, value, traceback = sys.exc_info()
             self.traceback = traceback
             self.exception = value
+            reporter.spec_failed(self)
         finally:
             self._elapsed_time = datetime.utcnow() - begin
 
@@ -151,9 +156,9 @@ class SpecGroup(_Runnable):
         self.hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
         self._elapsed_time = timedelta(0)
 
-    def run(self):
+    def run(self, reporter):
         self._register_subject_creation_in_before_each_hook()
-        self._run_specs()
+        self._run_specs(reporter)
 
     def _register_subject_creation_in_before_each_hook(self):
         if self._can_create_subject():
@@ -175,13 +180,13 @@ class SpecGroup(_Runnable):
         except:
             pass
 
-    def _run_specs(self):
+    def _run_specs(self, reporter):
         try:
             begin = datetime.utcnow()
             self.run_hook('before_all')
             if not self.pending:
                 for spec in self.specs:
-                    spec.run()
+                    spec.run(reporter)
             self.run_hook('after_all')
         except Exception as exception:
             self.exception = exception

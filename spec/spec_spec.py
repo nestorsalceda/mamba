@@ -1,8 +1,11 @@
 from mamba import describe, context, before
 from sure import expect
+from doublex import *
 
+from mamba import reporters
 from mamba.spec import Spec
 
+ANY_REPORTER = Stub()
 
 with describe('Spec') as _:
 
@@ -24,14 +27,15 @@ with describe('Spec') as _:
         def it_should_not_run_the_test():
             _.test.pending = True
 
-            _.test.run()
+            _.test.run(ANY_REPORTER)
 
             expect(_.was_run).to.be.false
 
     with context('when run'):
         @before.each
         def run_test():
-            _.test.run()
+            _.reporter = Spy(reporters.Reporter)
+            _.test.run(_.reporter)
 
         def it_should_run_the_test():
             expect(_.was_run).to.be.true
@@ -47,7 +51,7 @@ with describe('Spec') as _:
 
             _.test = Spec(_failing_test)
 
-            _.test.run()
+            _.test.run(ANY_REPORTER)
 
         def it_should_be_marked_as_failed():
             expect(_.test.failed).to.be.true

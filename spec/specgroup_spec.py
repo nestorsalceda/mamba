@@ -1,9 +1,11 @@
 from mamba import describe, context, before
 from sure import expect
+from doublex import Stub
 
 from mamba.spec import Spec, SpecGroup
 
 IRRELEVANT_SUBJECT = 'irrelevant_subject'
+ANY_REPORTER = Stub()
 
 
 with describe('SpecGroup') as _:
@@ -33,7 +35,7 @@ with describe('SpecGroup') as _:
             _.spec_group.pending = True
 
         def it_should_not_run_its_children():
-            _.spec_group.run()
+            _.spec_group.run(ANY_REPORTER)
 
             expect(_.was_run).to.be.false
 
@@ -47,7 +49,7 @@ with describe('SpecGroup') as _:
             _.spec_group.append(Spec(_test))
             _.spec_group.append(Spec(_test))
 
-            _.spec_group.run()
+            _.spec_group.run(ANY_REPORTER)
 
         def it_should_run_the_test():
             expect(_.was_run).to.be.true
@@ -65,7 +67,7 @@ with describe('SpecGroup') as _:
 
             _.spec_group.append(Spec(_failing_test))
 
-            _.spec_group.run()
+            _.spec_group.run(ANY_REPORTER)
 
         def it_should_be_marked_as_failed():
             expect(_.spec_group.failed).to.be.true
@@ -86,7 +88,7 @@ with describe('SpecGroup') as _:
             def append_a_spec_and_run():
                 _.spec_group.append(Spec(_test))
 
-                _.spec_group.run()
+                _.spec_group.run(ANY_REPORTER)
 
             def it_should_mark_failed_all_children_specs():
                 expect(_.spec_group.specs[0].failed).to.be.true
@@ -103,7 +105,7 @@ with describe('SpecGroup') as _:
                 _.spec_group.append(SpecGroup(IRRELEVANT_SUBJECT))
                 _.spec_group.specs[0].append(Spec(_test))
 
-                _.spec_group.run()
+                _.spec_group.run(ANY_REPORTER)
 
             def it_should_mark_failed_all_children_contexts():
                 expect(_.spec_group.specs[0].failed).to.be.true
