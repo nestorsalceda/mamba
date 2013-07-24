@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+
 
 class Reporter(object):
 
@@ -8,6 +10,11 @@ class Reporter(object):
         self.spec_count = 0
         self.failed_count = 0
         self.pending_count = 0
+        self.begin = None
+        self.duration = datetime.timedelta(0)
+
+    def start(self):
+        self.begin = datetime.datetime.utcnow()
 
     def spec_started(self, spec):
         self.spec_count += 1
@@ -31,7 +38,11 @@ class Reporter(object):
         self.notify('spec_group_finished', spec_group)
 
     def finish(self):
-        self.notify('summary', self.spec_count, self.failed_count, self.pending_count)
+        self.stop()
+        self.notify('summary', self.duration, self.spec_count, self.failed_count, self.pending_count)
+
+    def stop(self):
+        self.duration = datetime.datetime.utcnow() - self.begin
 
     def notify(self, event, *args):
         for listener in self.listeners:

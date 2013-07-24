@@ -14,6 +14,7 @@ with describe(reporters.Reporter) as _:
     def create_reporter_and_attach_formatter():
         _.formatter = Spy(formatters.Formatter)
         _.reporter = reporters.Reporter(_.formatter)
+        _.reporter.start()
 
     def it_notifies_event_spec_started_to_listeners():
         _.reporter.spec_started(ANY_SPEC)
@@ -64,4 +65,9 @@ with describe(reporters.Reporter) as _:
         def it_notifies_summary_to_listeners():
             _.reporter.finish()
 
-            assert_that(_.formatter.summary, called().with_args(_.reporter.spec_count, _.reporter.failed_count, _.reporter.pending_count))
+            assert_that(_.formatter.summary, called().with_args(
+                _.reporter.duration,
+                _.reporter.spec_count,
+                _.reporter.failed_count,
+                _.reporter.pending_count
+            ))
