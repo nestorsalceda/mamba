@@ -3,7 +3,6 @@
 import traceback
 
 from clint.textui import indent, puts, colored
-from mamba import spec
 
 
 class Formatter(object):
@@ -26,118 +25,37 @@ class Formatter(object):
     def spec_group_finished(self, spec_group):
         pass
 
-class DocumentationFormatter(object):
+    def summary(self, duration, spec_count, failed_count, pending_count):
+        pass
+
+    def failures(self, failed_specs):
+        pass
+
+
+class DocumentationFormatter(Formatter):
 
     def __init__(self, settings):
         self.settings = settings
-        self.total_specs = 0
-        self.failed_specs = []
-        self.pending_specs = 0
-        self.total_seconds = .0
 
-    @property
-    def has_pending_specs(self):
-        return self.pending_specs != 0
+    def spec_passed(self, spec):
+        self._format_spec(colored.green('✓'), spec)
 
-    @property
-    def specs_ran(self):
-        return self.total_specs - self.pending_specs
+    def spec_failed(self, spec):
+        self._format_spec(colored.red('✗'), spec)
+        with indent((spec.depth + 1) * 2):
+            puts(colored.red(str(spec.exception)))
 
-    def format(self, items):
-        for item in items:
-            self._format_item(item)
+    def spec_pending(self, spec):
+        self._format_spec(colored.yellow('✗'), spec)
 
-            self.total_seconds += item.elapsed_time.total_seconds()
+    def _format_spec(self, symbol, spec):
+        puts('  ' * spec.depth + symbol + ' ' + self._format_spec_name(spec) + self._format_slow_test(spec))
 
-        self.format_summary()
+    def _format_spec_name(self, spec):
+        return spec.name.replace('_', ' ')
 
-    def _format_item(self, item):
-        puts()
-        puts(colored.white(item.name))
-        self._format_children(item)
-
-    def _format_children(self, item):
-        for spec_ in item.specs:
-            if isinstance(spec_, spec.SpecGroup):
-                self.format_spec_group(spec_)
-            else:
-                self.format_spec(spec_)
-
-    def format_spec_group(self, spec_group):
-        with indent(1 + spec_group.depth):
-            if spec_group.pending:
-                puts(colored.yellow(spec_group.name))
-            else:
-                puts(colored.white(spec_group.name))
-            self._format_children(spec_group)
-
-    def format_spec(self, spec_):
-        with indent(1 + spec_.depth):
-            symbol = colored.green('✓')
-            if spec_.failed:
-                symbol = colored.red('✗')
-                self.failed_specs.append(spec_)
-            elif spec_.pending:
-                symbol = colored.yellow('✗')
-                self.pending_specs += 1
-
-            puts(symbol + ' ' + self.format_spec_name(spec_) + self.format_slow_test(spec_))
-
-            if spec_.failed:
-                with indent(spec_.depth + 2):
-                    puts(colored.red(str(spec_.exception)))
-
-        self.total_specs += 1
-
-    def format_spec_name(self, spec_):
-        return spec_.name.replace('_', ' ')
-
-    def format_summary(self):
-        puts()
-        if self.failed_specs:
-            self.format_failed_specs()
-            puts(colored.red("%d specs failed of %d ran in %s" % (len(self.failed_specs), self.specs_ran, self.format_seconds(self.total_seconds))))
-        elif self.has_pending_specs:
-            puts(colored.yellow("%d specs ran (%d pending) in %s" % (self.specs_ran, self.pending_specs, self.format_seconds(self.total_seconds))))
-        else:
-            puts(colored.green("%d specs ran in %s" % (self.specs_ran, self.format_seconds(self.total_seconds))))
-
-    def format_failed_specs(self):
-        puts('Failures:')
-        puts()
-        with indent(2):
-            for index, failed in enumerate(self.failed_specs):
-                puts('%d) %s' % (index + 1, self.format_full_spec_name(failed)))
-                with indent(3):
-                    puts(colored.red('Failure/Error: %s' % self.format_failing_expectation(failed)))
-                    puts()
-                    puts('Traceback:')
-                    puts(colored.red(self.format_traceback(failed)))
-                    puts()
-
-
-    def format_full_spec_name(self, spec_):
-        result = [self.format_spec_name(spec_)]
-
-        current = spec_
-        while current.parent:
-            result.append(self.format_spec_name(current.parent))
-            current = current.parent
-
-        result.reverse()
-        return ' '.join(result)
-
-    def format_failing_expectation(self, spec_):
-        return str(spec_.exception)
-
-    def format_traceback(self, spec_):
-        return ''.join([message[2:] for message in traceback.format_tb(spec_.traceback)[1:]])
-
-    def format_seconds(self, seconds):
-        return '%.4f seconds' % seconds
-
-    def format_slow_test(self, spec_):
-        seconds = spec_.elapsed_time.total_seconds()
+    def _format_slow_test(self, spec):
+        seconds = spec.elapsed_time.total_seconds()
         color = None
 
         if seconds > self.settings.slow_test_threshold:
@@ -147,7 +65,64 @@ class DocumentationFormatter(object):
                 color = colored.red
 
         if color is not None:
-            return color(' (' + self.format_seconds(seconds) + ')')
+            return color(' (' + self._format_duration(spec.elapsed_time) + ')')
 
         return ''
+
+    def spec_group_started(self, spec_group):
+        if spec_group.pending:
+            puts('  ' * spec_group.depth + colored.yellow(spec_group.name))
+        else:
+            puts('  ' * spec_group.depth + colored.white(spec_group.name))
+
+    def spec_group_finished(self, spec_group):
+        if spec_group.depth == 0:
+            puts()
+
+    def summary(self, duration, spec_count, failed_count, pending_count):
+        duration = self._format_duration(duration)
+        if failed_count != 0:
+            puts(colored.red("%d specs failed of %d ran in %s" % (failed_count, spec_count, duration)))
+        elif pending_count != 0:
+            puts(colored.yellow("%d specs ran (%d pending) in %s" % (spec_count, pending_count, duration)))
+        else:
+            puts(colored.green("%d specs ran in %s" % (spec_count, duration)))
+
+    def _format_duration(self, duration):
+        return '%.4f seconds' % duration.total_seconds()
+
+    def failures(self, failed_specs):
+        if not failed_specs:
+            return
+
+        puts()
+        puts('Failures:')
+        puts()
+        with indent(2):
+            for index, failed in enumerate(failed_specs):
+                puts('%d) %s' % (index + 1, self._format_full_spec_name(failed)))
+                with indent(3):
+                    puts(colored.red('Failure/Error: %s' % self._format_failing_expectation(failed)))
+                    puts()
+                    puts('Traceback:')
+                    puts(colored.red(self._format_traceback(failed)))
+                    puts()
+
+
+    def _format_full_spec_name(self, spec):
+        result = [self._format_spec_name(spec)]
+
+        current = spec
+        while current.parent:
+            result.append(self._format_spec_name(current.parent))
+            current = current.parent
+
+        result.reverse()
+        return ' '.join(result)
+
+    def _format_failing_expectation(self, spec_):
+        return str(spec_.exception)
+
+    def _format_traceback(self, spec_):
+        return ''.join([message[2:] for message in traceback.format_tb(spec_.traceback)[1:]])
 

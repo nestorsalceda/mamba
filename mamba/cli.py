@@ -4,7 +4,7 @@ import sys
 import os
 import argparse
 
-from mamba import formatters, coverage_collector
+from mamba import formatters, reporters, runner, coverage_collector
 from mamba.loader import Loader
 from mamba.runner import Runner
 from mamba.settings import Settings
@@ -42,17 +42,18 @@ def _run(arguments):
     settings = _settings_from_arguments(arguments)
     loader = Loader()
     formatter = formatters.DocumentationFormatter(settings)
-    runner = Runner()
+    reporter = reporters.Reporter(formatter)
+    runner = Runner(reporter)
 
     specs = []
 
+    reporter.start()
     for file_ in _collect_specs_from(arguments.specs):
         with loader.load_from_file(file_) as module:
             specs_in_module = getattr(module, 'specs', [])
             runner.run(specs_in_module)
             specs.extend(specs_in_module)
-
-    formatter.format(specs)
+    reporter.finish()
 
     if runner.has_failed_specs:
         sys.exit(1)

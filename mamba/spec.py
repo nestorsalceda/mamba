@@ -72,21 +72,21 @@ class Spec(_Runnable):
     def run(self, reporter):
         reporter.spec_started(self)
         try:
-            begin = datetime.utcnow()
+            self._begin = datetime.utcnow()
             if self.pending:
                 reporter.spec_pending(self)
             else:
                 self._run_inner_test(reporter)
         except Exception as exception:
             self._set_exception_from_inner_test()
+            self._elapsed_time = datetime.utcnow() - self._begin
             reporter.spec_failed(self)
-        finally:
-            self._elapsed_time = datetime.utcnow() - begin
 
     def _run_inner_test(self, reporter):
         self.run_hook('before_each')
         self.test()
         self.run_hook('after_each')
+        self._elapsed_time = datetime.utcnow() - self._begin
         reporter.spec_passed(self)
 
     def _set_exception_from_inner_test(self):
