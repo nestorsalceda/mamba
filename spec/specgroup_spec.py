@@ -1,11 +1,11 @@
 from mamba import describe, context, before
 from sure import expect
-from doublex import Stub
+from doublex import *
 
+from mamba import reporters
 from mamba.spec import Spec, SpecGroup
 
 IRRELEVANT_SUBJECT = 'irrelevant_subject'
-ANY_REPORTER = Stub()
 
 
 with describe('SpecGroup') as _:
@@ -14,6 +14,7 @@ with describe('SpecGroup') as _:
     def create_spec_group():
         _.was_run = False
         _.spec_group = SpecGroup(IRRELEVANT_SUBJECT)
+        _.reporter = Spy(reporters.Reporter)
 
     def it_should_have_same_name_than_subject():
         expect(_.spec_group.name).to.be.equals(IRRELEVANT_SUBJECT)
@@ -35,7 +36,7 @@ with describe('SpecGroup') as _:
             _.spec_group.pending = True
 
         def it_should_not_run_its_children():
-            _.spec_group.run(ANY_REPORTER)
+            _.spec_group.run(_.reporter)
 
             expect(_.was_run).to.be.false
 
@@ -49,7 +50,7 @@ with describe('SpecGroup') as _:
             _.spec_group.append(Spec(_test))
             _.spec_group.append(Spec(_test))
 
-            _.spec_group.run(ANY_REPORTER)
+            _.spec_group.run(_.reporter)
 
         def it_should_run_the_test():
             expect(_.was_run).to.be.true
@@ -57,6 +58,11 @@ with describe('SpecGroup') as _:
         def it_should_calculate_elapsed_time():
             expect(_.spec_group.elapsed_time.total_seconds()).to.be.greater_than(0)
 
+        def it_notifies_that_a_spec_group_is_started():
+            assert_that(_.reporter.spec_group_started, called().with_args(_.spec_group))
+
+        def it_notifies_that_a_spec_group_is_finished():
+            assert_that(_.reporter.spec_group_finished, called().with_args(_.spec_group))
 
     with context('when run failed'):
 
@@ -67,7 +73,7 @@ with describe('SpecGroup') as _:
 
             _.spec_group.append(Spec(_failing_test))
 
-            _.spec_group.run(ANY_REPORTER)
+            _.spec_group.run(_.reporter)
 
         def it_should_be_marked_as_failed():
             expect(_.spec_group.failed).to.be.true
@@ -88,7 +94,7 @@ with describe('SpecGroup') as _:
             def append_a_spec_and_run():
                 _.spec_group.append(Spec(_test))
 
-                _.spec_group.run(ANY_REPORTER)
+                _.spec_group.run(_.reporter)
 
             def it_should_mark_failed_all_children_specs():
                 expect(_.spec_group.specs[0].failed).to.be.true
@@ -105,7 +111,7 @@ with describe('SpecGroup') as _:
                 _.spec_group.append(SpecGroup(IRRELEVANT_SUBJECT))
                 _.spec_group.specs[0].append(Spec(_test))
 
-                _.spec_group.run(ANY_REPORTER)
+                _.spec_group.run(_.reporter)
 
             def it_should_mark_failed_all_children_contexts():
                 expect(_.spec_group.specs[0].failed).to.be.true
