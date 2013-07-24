@@ -181,6 +181,7 @@ class SpecGroup(_Runnable):
             pass
 
     def _run_specs(self, reporter):
+        reporter.spec_group_started(self)
         try:
             begin = datetime.utcnow()
             self.run_hook('before_all')
@@ -192,6 +193,7 @@ class SpecGroup(_Runnable):
             self.exception = exception
         finally:
             self._elapsed_time = datetime.utcnow() - begin
+            reporter.spec_group_finished(self)
 
     def run_hook(self, hook):
         for registered in self.hooks.get(hook, []):
