@@ -190,8 +190,7 @@ class SpecGroup(_Runnable):
         reporter.spec_group_started(self)
         try:
             begin = datetime.utcnow()
-            if not self.pending:
-                self._run_inner_specs(reporter)
+            self._run_inner_specs(reporter)
         except Exception as exception:
             self.exception = exception
         finally:
