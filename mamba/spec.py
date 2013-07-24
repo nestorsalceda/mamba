@@ -73,20 +73,26 @@ class Spec(_Runnable):
         reporter.spec_started(self)
         try:
             begin = datetime.utcnow()
-            if not self.pending:
-                self.run_hook('before_each')
-                self.test()
-                self.run_hook('after_each')
-                reporter.spec_passed(self)
-            else:
+            if self.pending:
                 reporter.spec_pending(self)
+            else:
+                self._run_inner_test(reporter)
         except Exception as exception:
-            type_, value, traceback = sys.exc_info()
-            self.traceback = traceback
-            self.exception = value
+            self._set_exception_from_inner_test()
             reporter.spec_failed(self)
         finally:
             self._elapsed_time = datetime.utcnow() - begin
+
+    def _run_inner_test(self, reporter):
+        self.run_hook('before_each')
+        self.test()
+        self.run_hook('after_each')
+        reporter.spec_passed(self)
+
+    def _set_exception_from_inner_test(self):
+        type_, value, traceback = sys.exc_info()
+        self.exception = value
+        self.traceback = traceback
 
     def run_hook(self, hook):
         for parent in self._parents:
@@ -184,16 +190,19 @@ class SpecGroup(_Runnable):
         reporter.spec_group_started(self)
         try:
             begin = datetime.utcnow()
-            self.run_hook('before_all')
             if not self.pending:
-                for spec in self.specs:
-                    spec.run(reporter)
-            self.run_hook('after_all')
+                self._run_inner_specs(reporter)
         except Exception as exception:
             self.exception = exception
         finally:
             self._elapsed_time = datetime.utcnow() - begin
             reporter.spec_group_finished(self)
+
+    def _run_inner_specs(self, reporter):
+        self.run_hook('before_all')
+        for spec in self.specs:
+            spec.run(reporter)
+        self.run_hook('after_all')
 
     def run_hook(self, hook):
         for registered in self.hooks.get(hook, []):
