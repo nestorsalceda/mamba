@@ -7,11 +7,15 @@ class Reporter(object):
 
     def __init__(self, *formatters):
         self.listeners = formatters
-        self.spec_count = 0
-        self.failed_count = 0
-        self.pending_count = 0
         self.begin = None
         self.duration = datetime.timedelta(0)
+        self.spec_count = 0
+        self.pending_count = 0
+        self.failed_specs = []
+
+    @property
+    def failed_count(self):
+        return len(self.failed_specs)
 
     def start(self):
         self.begin = datetime.datetime.utcnow()
@@ -24,7 +28,7 @@ class Reporter(object):
         self.notify('spec_passed', spec)
 
     def spec_failed(self, spec):
-        self.failed_count += 1
+        self.failed_specs.append(spec)
         self.notify('spec_failed', spec)
 
     def spec_pending(self, spec):
@@ -40,6 +44,7 @@ class Reporter(object):
     def finish(self):
         self.stop()
         self.notify('summary', self.duration, self.spec_count, self.failed_count, self.pending_count)
+        self.notify('failures', self.failed_specs)
 
     def stop(self):
         self.duration = datetime.datetime.utcnow() - self.begin

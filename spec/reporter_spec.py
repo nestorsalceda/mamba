@@ -36,10 +36,15 @@ with describe(reporters.Reporter) as _:
 
         assert_that(_.formatter.spec_failed, called().with_args(ANY_SPEC))
 
-    def it_increases_failed_counter_when_spec_started():
+    def it_increases_failed_counter_when_spec_failed():
         _.reporter.spec_failed(ANY_SPEC)
 
         expect(_.reporter.failed_count).to.be.equal(1)
+
+    def it_adds_failed_spec_when_spec_failed():
+        _.reporter.spec_failed(ANY_SPEC)
+
+        expect(ANY_SPEC).to.be.within(_.reporter.failed_specs)
 
     def it_notifies_event_spec_pending_to_listeners():
         _.reporter.spec_pending(ANY_SPEC)
@@ -70,4 +75,11 @@ with describe(reporters.Reporter) as _:
                 _.reporter.spec_count,
                 _.reporter.failed_count,
                 _.reporter.pending_count
+            ))
+
+        def it_notifies_failed_specs_to_listeners():
+            _.reporter.finish()
+
+            assert_that(_.formatter.failures, called().with_args(
+                _.reporter.failed_specs
             ))
