@@ -2,11 +2,11 @@ from mamba import describe, context, before
 from sure import expect
 from doublex import *
 
+from spec.object_mother import *
+
 from mamba import reporter
 from mamba.example_group import ExampleGroup
 from mamba.example import Example
-
-IRRELEVANT_SUBJECT = 'irrelevant_subject'
 
 
 with describe(ExampleGroup) as _:
@@ -14,7 +14,7 @@ with describe(ExampleGroup) as _:
     @before.each
     def create_example_group():
         _.was_run = False
-        _.example_group = ExampleGroup(IRRELEVANT_SUBJECT)
+        _.example_group = an_example_group()
         _.reporter = Spy(reporter.Reporter)
 
     def it_should_have_same_name_than_subject():
@@ -109,7 +109,7 @@ with describe(ExampleGroup) as _:
         with context('when has contexts as children'):
             @before.each
             def append_a_context_with_an_example_and_run():
-                _.example_group.append(ExampleGroup(IRRELEVANT_SUBJECT))
+                _.example_group.append(an_example_group())
                 _.example_group.specs[0].append(Example(_test))
 
                 _.example_group.run(_.reporter)

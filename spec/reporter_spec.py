@@ -2,11 +2,11 @@ from mamba import describe, context, before
 from sure import expect
 from doublex import *
 
+from spec.object_mother import *
+
 from mamba import reporter, formatters, example, example_group
 
 ANY_SPEC = example.Example(None)
-ANY_SPEC_GROUP = example_group.ExampleGroup(None)
-
 
 with describe(reporter.Reporter) as _:
 
@@ -56,15 +56,20 @@ with describe(reporter.Reporter) as _:
 
         expect(_.reporter.pending_count).to.be.equal(1)
 
-    def it_notifies_event_example_group_started_to_listeners():
-        _.reporter.example_group_started(ANY_SPEC_GROUP)
+    with context('when reporting events for an example group'):
+        @before.each
+        def creates_example_group():
+            _.example_group = an_example_group()
 
-        assert_that(_.formatter.example_group_started, called().with_args(ANY_SPEC_GROUP))
+        def it_notifies_event_example_group_started_to_listeners():
+            _.reporter.example_group_started(_.example_group)
 
-    def it_notifies_event_example_group_finished_to_listeners():
-        _.reporter.example_group_finished(ANY_SPEC_GROUP)
+            assert_that(_.formatter.example_group_started, called().with_args(_.example_group))
 
-        assert_that(_.formatter.example_group_finished, called().with_args(ANY_SPEC_GROUP))
+        def it_notifies_event_example_group_finished_to_listeners():
+            _.reporter.example_group_finished(_.example_group)
+
+            assert_that(_.formatter.example_group_finished, called().with_args(_.example_group))
 
     with context('when finishing'):
         def it_notifies_summary_to_listeners():
