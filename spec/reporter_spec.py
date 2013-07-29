@@ -6,53 +6,53 @@ from spec.object_mother import *
 
 from mamba import reporter, formatters, example, example_group
 
-ANY_SPEC = example.Example(None)
 
 with describe(reporter.Reporter) as _:
 
     @before.each
     def create_reporter_and_attach_formatter():
+        _.example = an_example(_)
         _.formatter = Spy(formatters.Formatter)
         _.reporter = reporter.Reporter(_.formatter)
         _.reporter.start()
 
     def it_notifies_event_example_started_to_listeners():
-        _.reporter.example_started(ANY_SPEC)
+        _.reporter.example_started(_.example)
 
-        assert_that(_.formatter.example_started, called().with_args(ANY_SPEC))
+        assert_that(_.formatter.example_started, called().with_args(_.example))
 
     def it_increases_example_counter_when_example_started():
-        _.reporter.example_started(ANY_SPEC)
+        _.reporter.example_started(_.example)
 
         expect(_.reporter.example_count).to.be.equal(1)
 
     def it_notifies_event_example_passed_to_listeners():
-        _.reporter.example_passed(ANY_SPEC)
+        _.reporter.example_passed(_.example)
 
-        assert_that(_.formatter.example_passed, called().with_args(ANY_SPEC))
+        assert_that(_.formatter.example_passed, called().with_args(_.example))
 
     def it_notifies_event_example_failed_to_listeners():
-        _.reporter.example_failed(ANY_SPEC)
+        _.reporter.example_failed(_.example)
 
-        assert_that(_.formatter.example_failed, called().with_args(ANY_SPEC))
+        assert_that(_.formatter.example_failed, called().with_args(_.example))
 
     def it_increases_failed_counter_when_example_failed():
-        _.reporter.example_failed(ANY_SPEC)
+        _.reporter.example_failed(_.example)
 
         expect(_.reporter.failed_count).to.be.equal(1)
 
     def it_adds_failed_example_when_example_failed():
-        _.reporter.example_failed(ANY_SPEC)
+        _.reporter.example_failed(_.example)
 
-        expect(ANY_SPEC).to.be.within(_.reporter.failed_examples)
+        expect(_.example).to.be.within(_.reporter.failed_examples)
 
     def it_notifies_event_example_pending_to_listeners():
-        _.reporter.example_pending(ANY_SPEC)
+        _.reporter.example_pending(_.example)
 
-        assert_that(_.formatter.example_pending, called().with_args(ANY_SPEC))
+        assert_that(_.formatter.example_pending, called().with_args(_.example))
 
     def it_increases_pending_counter_when_example_started():
-        _.reporter.example_pending(ANY_SPEC)
+        _.reporter.example_pending(_.example)
 
         expect(_.reporter.pending_count).to.be.equal(1)
 

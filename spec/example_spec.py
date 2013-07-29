@@ -2,6 +2,8 @@ from mamba import describe, context, before
 from sure import expect
 from doublex import *
 
+from spec.object_mother import *
+
 from mamba import reporter
 from mamba.example import Example
 
@@ -10,15 +12,9 @@ with describe(Example) as _:
 
     @before.each
     def create_new_example_and_reporter():
-        def _test():
-            _.was_run = True
-
         _.was_run = False
-        _.example = Example(_test)
+        _.example = an_example(_)
         _.reporter = Spy(reporter.Reporter)
-
-    def it_should_have_same_name_than_inner_callable():
-        expect(_.example.name).to.be.equals(_.example.test.__name__)
 
     def it_should_have_depth_zero_without_parent():
         expect(_.example.depth).to.be.equal(0)
@@ -55,10 +51,7 @@ with describe(Example) as _:
     with context('when run failed'):
         @before.each
         def create_and_run_failing_example():
-            def _failing_test():
-                raise ValueError()
-
-            _.example = Example(_failing_test)
+            _.example = a_failing_example()
 
             _.example.run(_.reporter)
 

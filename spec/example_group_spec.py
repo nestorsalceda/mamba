@@ -21,18 +21,15 @@ with describe(ExampleGroup) as _:
         expect(_.example_group.name).to.be.equals(IRRELEVANT_SUBJECT)
 
     def it_should_have_depth_greater_than_parent():
-        example = Example(_test)
+        example = an_example(_)
         _.example_group.append(example)
 
         expect(example.depth).to.be.equal(1)
 
-    def _test():
-        _.was_run = True
-
     with context('when pending'):
         @before.each
         def append_example_to_group_and_set_pending():
-            example = Example(_test)
+            example = an_example(_)
             _.example_group.append(example)
             _.example_group.pending = True
 
@@ -48,8 +45,8 @@ with describe(ExampleGroup) as _:
 
         @before.each
         def append_examples_and_run_spec_group():
-            _.example_group.append(Example(_test))
-            _.example_group.append(Example(_test))
+            _.example_group.append(an_example(_))
+            _.example_group.append(an_example(_))
 
             _.example_group.run(_.reporter)
 
@@ -69,10 +66,7 @@ with describe(ExampleGroup) as _:
 
         @before.each
         def append_failing_examples_and_run():
-            def _failing_test():
-                raise ValueError()
-
-            _.example_group.append(Example(_failing_test))
+            _.example_group.append(a_failing_example())
 
             _.example_group.run(_.reporter)
 
@@ -93,7 +87,7 @@ with describe(ExampleGroup) as _:
         with context('when has only examples as children'):
             @before.each
             def append_an_example_and_run():
-                _.example_group.append(Example(_test))
+                _.example_group.append(an_example(_))
 
                 _.example_group.run(_.reporter)
 
@@ -110,7 +104,7 @@ with describe(ExampleGroup) as _:
             @before.each
             def append_a_context_with_an_example_and_run():
                 _.example_group.append(an_example_group())
-                _.example_group.specs[0].append(Example(_test))
+                _.example_group.specs[0].append(an_example(_))
 
                 _.example_group.run(_.reporter)
 
