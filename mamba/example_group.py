@@ -110,3 +110,7 @@ class ExampleGroup(object):
             return 0
 
         return self.parent.depth + 1
+
+    @property
+    def source_line(self):
+        return float('inf')

@@ -2,10 +2,10 @@ from mamba import describe, context, before
 from sure import expect
 from doublex import *
 
-from mamba import reporter, formatters, spec
+from mamba import reporter, formatters, example, example_group
 
-ANY_SPEC = spec.Spec(None)
-ANY_SPEC_GROUP = spec.SpecGroup(None)
+ANY_SPEC = example.Example(None)
+ANY_SPEC_GROUP = example_group.ExampleGroup(None)
 
 
 with describe(reporter.Reporter) as _:

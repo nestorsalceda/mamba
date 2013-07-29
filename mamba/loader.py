@@ -5,7 +5,7 @@ import imp
 import inspect
 import contextlib
 
-from mamba import spec
+from mamba import example, example_group
 
 
 class _Context(object):
@@ -28,10 +28,10 @@ class describe(object):
             frame.f_locals['current_spec'] = None
 
         if frame.f_locals['current_spec'] is None:
-            frame.f_locals['current_spec'] = spec.SpecGroup(self.subject, pending=self._pending, context=self.context)
+            frame.f_locals['current_spec'] = example_group.ExampleGroup(self.subject, pending=self._pending, context=self.context)
             frame.f_locals['specs'].append(frame.f_locals['current_spec'])
         else:
-            current = spec.SpecGroup(self.subject, pending=self._pending, context=self.context)
+            current = example_group.ExampleGroup(self.subject, pending=self._pending, context=self.context)
             frame.f_locals['current_spec'].append(current)
             frame.f_locals['current_spec'] = current
 
@@ -54,7 +54,7 @@ class describe(object):
                 if self._is_hook(code):
                     self._load_hooks(function, code, frame.f_locals['current_spec'])
                 else:
-                    frame.f_locals['current_spec'].append(spec.Spec(code, pending=getattr(code, 'pending', False)))
+                    frame.f_locals['current_spec'].append(example.Example(code, pending=getattr(code, 'pending', False)))
 
         frame.f_locals['current_spec'].specs.sort(key=lambda x: x.source_line)
         frame.f_locals['current_spec'] = frame.f_locals['current_spec'].parent
