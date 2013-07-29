@@ -33,7 +33,7 @@ with describe(Example) as _:
             expect(_.was_run).to.be.false
 
         def it_notifies_is_pending():
-            assert_that(_.reporter.spec_pending, called().with_args(_.example))
+            assert_that(_.reporter.example_pending, called().with_args(_.example))
 
     with context('when run'):
         @before.each
@@ -47,10 +47,10 @@ with describe(Example) as _:
             expect(_.example.elapsed_time.total_seconds()).to.be.greater_than(0)
 
         def it_notifies_is_started():
-            assert_that(_.reporter.spec_started, called().with_args(_.example))
+            assert_that(_.reporter.example_started, called().with_args(_.example))
 
         def it_notifies_is_passed():
-            assert_that(_.reporter.spec_passed, called().with_args(_.example))
+            assert_that(_.reporter.example_passed, called().with_args(_.example))
 
     with context('when run failed'):
         @before.each
@@ -72,5 +72,5 @@ with describe(Example) as _:
             expect(_.example.traceback).to.not_be.none
 
         def it_notifies_is_failed():
-            assert_that(_.reporter.spec_failed, called().with_args(_.example))
+            assert_that(_.reporter.example_failed, called().with_args(_.example))
 

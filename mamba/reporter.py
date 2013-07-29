@@ -9,42 +9,42 @@ class Reporter(object):
         self.listeners = formatters
         self.begin = None
         self.duration = datetime.timedelta(0)
-        self.spec_count = 0
+        self.example_count = 0
         self.pending_count = 0
-        self.failed_specs = []
+        self.failed_examples = []
 
     @property
     def failed_count(self):
-        return len(self.failed_specs)
+        return len(self.failed_examples)
 
     def start(self):
         self.begin = datetime.datetime.utcnow()
 
-    def spec_started(self, spec):
-        self.spec_count += 1
-        self.notify('spec_started', spec)
+    def example_started(self, example):
+        self.example_count += 1
+        self.notify('example_started', example)
 
-    def spec_passed(self, spec):
-        self.notify('spec_passed', spec)
+    def example_passed(self, example):
+        self.notify('example_passed', example)
 
-    def spec_failed(self, spec):
-        self.failed_specs.append(spec)
-        self.notify('spec_failed', spec)
+    def example_failed(self, example):
+        self.failed_examples.append(example)
+        self.notify('example_failed', example)
 
-    def spec_pending(self, spec):
+    def example_pending(self, example):
         self.pending_count += 1
-        self.notify('spec_pending', spec)
+        self.notify('example_pending', example)
 
-    def spec_group_started(self, spec_group):
-        self.notify('spec_group_started', spec_group)
+    def example_group_started(self, example_group):
+        self.notify('example_group_started', example_group)
 
-    def spec_group_finished(self, spec_group):
-        self.notify('spec_group_finished', spec_group)
+    def example_group_finished(self, example_group):
+        self.notify('example_group_finished', example_group)
 
     def finish(self):
         self.stop()
-        self.notify('summary', self.duration, self.spec_count, self.failed_count, self.pending_count)
-        self.notify('failures', self.failed_specs)
+        self.notify('summary', self.duration, self.example_count, self.failed_count, self.pending_count)
+        self.notify('failures', self.failed_examples)
 
     def stop(self):
         self.duration = datetime.datetime.utcnow() - self.begin

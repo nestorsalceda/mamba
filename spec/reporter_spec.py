@@ -16,55 +16,55 @@ with describe(reporter.Reporter) as _:
         _.reporter = reporter.Reporter(_.formatter)
         _.reporter.start()
 
-    def it_notifies_event_spec_started_to_listeners():
-        _.reporter.spec_started(ANY_SPEC)
+    def it_notifies_event_example_started_to_listeners():
+        _.reporter.example_started(ANY_SPEC)
 
-        assert_that(_.formatter.spec_started, called().with_args(ANY_SPEC))
+        assert_that(_.formatter.example_started, called().with_args(ANY_SPEC))
 
-    def it_increases_spec_counter_when_spec_started():
-        _.reporter.spec_started(ANY_SPEC)
+    def it_increases_example_counter_when_example_started():
+        _.reporter.example_started(ANY_SPEC)
 
-        expect(_.reporter.spec_count).to.be.equal(1)
+        expect(_.reporter.example_count).to.be.equal(1)
 
-    def it_notifies_event_spec_passed_to_listeners():
-        _.reporter.spec_passed(ANY_SPEC)
+    def it_notifies_event_example_passed_to_listeners():
+        _.reporter.example_passed(ANY_SPEC)
 
-        assert_that(_.formatter.spec_passed, called().with_args(ANY_SPEC))
+        assert_that(_.formatter.example_passed, called().with_args(ANY_SPEC))
 
-    def it_notifies_event_spec_failed_to_listeners():
-        _.reporter.spec_failed(ANY_SPEC)
+    def it_notifies_event_example_failed_to_listeners():
+        _.reporter.example_failed(ANY_SPEC)
 
-        assert_that(_.formatter.spec_failed, called().with_args(ANY_SPEC))
+        assert_that(_.formatter.example_failed, called().with_args(ANY_SPEC))
 
-    def it_increases_failed_counter_when_spec_failed():
-        _.reporter.spec_failed(ANY_SPEC)
+    def it_increases_failed_counter_when_example_failed():
+        _.reporter.example_failed(ANY_SPEC)
 
         expect(_.reporter.failed_count).to.be.equal(1)
 
-    def it_adds_failed_spec_when_spec_failed():
-        _.reporter.spec_failed(ANY_SPEC)
+    def it_adds_failed_example_when_example_failed():
+        _.reporter.example_failed(ANY_SPEC)
 
-        expect(ANY_SPEC).to.be.within(_.reporter.failed_specs)
+        expect(ANY_SPEC).to.be.within(_.reporter.failed_examples)
 
-    def it_notifies_event_spec_pending_to_listeners():
-        _.reporter.spec_pending(ANY_SPEC)
+    def it_notifies_event_example_pending_to_listeners():
+        _.reporter.example_pending(ANY_SPEC)
 
-        assert_that(_.formatter.spec_pending, called().with_args(ANY_SPEC))
+        assert_that(_.formatter.example_pending, called().with_args(ANY_SPEC))
 
-    def it_increases_pending_counter_when_spec_started():
-        _.reporter.spec_pending(ANY_SPEC)
+    def it_increases_pending_counter_when_example_started():
+        _.reporter.example_pending(ANY_SPEC)
 
         expect(_.reporter.pending_count).to.be.equal(1)
 
-    def it_notifies_event_spec_group_started_to_listeners():
-        _.reporter.spec_group_started(ANY_SPEC_GROUP)
+    def it_notifies_event_example_group_started_to_listeners():
+        _.reporter.example_group_started(ANY_SPEC_GROUP)
 
-        assert_that(_.formatter.spec_group_started, called().with_args(ANY_SPEC_GROUP))
+        assert_that(_.formatter.example_group_started, called().with_args(ANY_SPEC_GROUP))
 
-    def it_notifies_event_spec_group_finished_to_listeners():
-        _.reporter.spec_group_finished(ANY_SPEC_GROUP)
+    def it_notifies_event_example_group_finished_to_listeners():
+        _.reporter.example_group_finished(ANY_SPEC_GROUP)
 
-        assert_that(_.formatter.spec_group_finished, called().with_args(ANY_SPEC_GROUP))
+        assert_that(_.formatter.example_group_finished, called().with_args(ANY_SPEC_GROUP))
 
     with context('when finishing'):
         def it_notifies_summary_to_listeners():
@@ -72,14 +72,14 @@ with describe(reporter.Reporter) as _:
 
             assert_that(_.formatter.summary, called().with_args(
                 _.reporter.duration,
-                _.reporter.spec_count,
+                _.reporter.example_count,
                 _.reporter.failed_count,
                 _.reporter.pending_count
             ))
 
-        def it_notifies_failed_specs_to_listeners():
+        def it_notifies_failed_examples_to_listeners():
             _.reporter.finish()
 
             assert_that(_.formatter.failures, called().with_args(
-                _.reporter.failed_specs
+                _.reporter.failed_examples
             ))

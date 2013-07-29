@@ -60,10 +60,10 @@ with describe(ExampleGroup) as _:
             expect(_.example_group.elapsed_time.total_seconds()).to.be.greater_than(0)
 
         def it_notifies_that_a_example_group_is_started():
-            assert_that(_.reporter.spec_group_started, called().with_args(_.example_group))
+            assert_that(_.reporter.example_group_started, called().with_args(_.example_group))
 
         def it_notifies_that_a_example_group_is_finished():
-            assert_that(_.reporter.spec_group_finished, called().with_args(_.example_group))
+            assert_that(_.reporter.example_group_finished, called().with_args(_.example_group))
 
     with context('when run failed'):
 

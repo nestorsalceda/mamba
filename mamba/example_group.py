@@ -40,7 +40,7 @@ class ExampleGroup(object):
             pass
 
     def _run_specs(self, reporter):
-        reporter.spec_group_started(self)
+        reporter.example_group_started(self)
         try:
             begin = datetime.utcnow()
             self._run_inner_specs(reporter)
@@ -48,7 +48,7 @@ class ExampleGroup(object):
             self.exception = exception
         finally:
             self._elapsed_time = datetime.utcnow() - begin
-            reporter.spec_group_finished(self)
+            reporter.example_group_finished(self)
 
     def _run_inner_specs(self, reporter):
         self.run_hook('before_all')
