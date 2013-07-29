@@ -1,4 +1,4 @@
-from mamba import reporters
+# -*- coding: utf-8 -*-
 
 class Runner(object):
 

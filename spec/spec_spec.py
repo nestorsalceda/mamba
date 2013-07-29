@@ -2,7 +2,7 @@ from mamba import describe, context, before
 from sure import expect
 from doublex import *
 
-from mamba import reporters
+from mamba import reporter
 from mamba.spec import Spec
 
 ANY_REPORTER = Stub()
@@ -16,7 +16,7 @@ with describe('Spec') as _:
 
         _.was_run = False
         _.test = Spec(_test)
-        _.reporter = Spy(reporters.Reporter)
+        _.reporter = Spy(reporter.Reporter)
 
     def it_should_have_same_name_than_test():
         expect(_.test.name).to.be.equals('_test')

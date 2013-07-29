@@ -2,18 +2,18 @@ from mamba import describe, context, before
 from sure import expect
 from doublex import *
 
-from mamba import reporters, formatters, spec
+from mamba import reporter, formatters, spec
 
 ANY_SPEC = spec.Spec(None)
 ANY_SPEC_GROUP = spec.SpecGroup(None)
 
 
-with describe(reporters.Reporter) as _:
+with describe(reporter.Reporter) as _:
 
     @before.each
     def create_reporter_and_attach_formatter():
         _.formatter = Spy(formatters.Formatter)
-        _.reporter = reporters.Reporter(_.formatter)
+        _.reporter = reporter.Reporter(_.formatter)
         _.reporter.start()
 
     def it_notifies_event_spec_started_to_listeners():

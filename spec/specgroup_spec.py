@@ -2,7 +2,7 @@ from mamba import describe, context, before
 from sure import expect
 from doublex import *
 
-from mamba import reporters
+from mamba import reporter
 from mamba.spec import Spec, SpecGroup
 
 IRRELEVANT_SUBJECT = 'irrelevant_subject'
@@ -14,7 +14,7 @@ with describe('SpecGroup') as _:
     def create_spec_group():
         _.was_run = False
         _.spec_group = SpecGroup(IRRELEVANT_SUBJECT)
-        _.reporter = Spy(reporters.Reporter)
+        _.reporter = Spy(reporter.Reporter)
 
     def it_should_have_same_name_than_subject():
         expect(_.spec_group.name).to.be.equals(IRRELEVANT_SUBJECT)
