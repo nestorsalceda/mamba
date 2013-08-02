@@ -39,12 +39,12 @@ with describe(ExampleGroup) as _:
             expect(_.was_run).to.be.false
 
         def it_should_propagate_to_its_children():
-            expect(all(spec.pending for spec in _.example_group.specs)).to.be.true
+            expect(all(example.pending for example in _.example_group.examples)).to.be.true
 
     with context('when run'):
 
         @before.each
-        def append_examples_and_run_spec_group():
+        def append_examples_and_run_example_group():
             _.example_group.append(an_example(_))
             _.example_group.append(an_example(_))
 
@@ -92,10 +92,10 @@ with describe(ExampleGroup) as _:
                 _.example_group.run(_.reporter)
 
             def it_should_mark_failed_all_children():
-                expect(_.example_group.specs[0].failed).to.be.true
+                expect(_.example_group.examples[0].failed).to.be.true
 
             def it_should_propagate_error_to_all_children():
-                expect(_.example_group.specs[0].exception).to.be.a(ValueError)
+                expect(_.example_group.examples[0].exception).to.be.a(ValueError)
 
             def it_should_not_execute_any_example():
                 expect(_.was_run).to.be.false
@@ -104,12 +104,12 @@ with describe(ExampleGroup) as _:
             @before.each
             def append_a_context_with_an_example_and_run():
                 _.example_group.append(an_example_group())
-                _.example_group.specs[0].append(an_example(_))
+                _.example_group.examples[0].append(an_example(_))
 
                 _.example_group.run(_.reporter)
 
             def it_should_mark_failed_all_children_contexts():
-                expect(_.example_group.specs[0].failed).to.be.true
+                expect(_.example_group.examples[0].failed).to.be.true
 
             def it_should_propagate_error_to_all_children_contexts():
-                expect(_.example_group.specs[0].exception).to.be.a(ValueError)
+                expect(_.example_group.examples[0].exception).to.be.a(ValueError)

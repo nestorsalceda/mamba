@@ -23,17 +23,17 @@ class describe(object):
         frame = inspect.currentframe().f_back
         self.locals_before = set(frame.f_locals.keys())
 
-        if 'specs' not in frame.f_locals:
-            frame.f_locals['specs'] = []
-            frame.f_locals['current_spec'] = None
+        if 'examples' not in frame.f_locals:
+            frame.f_locals['examples'] = []
+            frame.f_locals['current_example'] = None
 
-        if frame.f_locals['current_spec'] is None:
-            frame.f_locals['current_spec'] = example_group.ExampleGroup(self.subject, pending=self._pending, context=self.context)
-            frame.f_locals['specs'].append(frame.f_locals['current_spec'])
+        if frame.f_locals['current_example'] is None:
+            frame.f_locals['current_example'] = example_group.ExampleGroup(self.subject, pending=self._pending, context=self.context)
+            frame.f_locals['examples'].append(frame.f_locals['current_example'])
         else:
             current = example_group.ExampleGroup(self.subject, pending=self._pending, context=self.context)
-            frame.f_locals['current_spec'].append(current)
-            frame.f_locals['current_spec'] = current
+            frame.f_locals['current_example'].append(current)
+            frame.f_locals['current_example'] = current
 
         return self.context
 
@@ -44,20 +44,20 @@ class describe(object):
     def __exit__(self, type, value, traceback):
         frame = inspect.currentframe().f_back
 
-        possible_specs = set(frame.f_locals.keys()) - self.locals_before
+        possible_examples = set(frame.f_locals.keys()) - self.locals_before
 
-        for function in possible_specs:
+        for function in possible_examples:
             code = frame.f_locals[function]
 
             if self._is_non_private_function(function, code) and not self._is_registered(code):
                 self._register(code)
                 if self._is_hook(code):
-                    self._load_hooks(function, code, frame.f_locals['current_spec'])
+                    self._load_hooks(function, code, frame.f_locals['current_example'])
                 else:
-                    frame.f_locals['current_spec'].append(example.Example(code, pending=getattr(code, 'pending', False)))
+                    frame.f_locals['current_example'].append(example.Example(code, pending=getattr(code, 'pending', False)))
 
-        frame.f_locals['current_spec'].specs.sort(key=lambda x: x.source_line)
-        frame.f_locals['current_spec'] = frame.f_locals['current_spec'].parent
+        frame.f_locals['current_example'].examples.sort(key=lambda x: x.source_line)
+        frame.f_locals['current_example'] = frame.f_locals['current_example'].parent
 
     def _is_non_private_function(self, function, code):
         return callable(code) and not function.startswith('_')
@@ -71,8 +71,8 @@ class describe(object):
     def _is_hook(self, function):
         return getattr(function, 'hook', [])
 
-    def _load_hooks(self, function, code, current_spec):
-        current_spec.hooks['%s_%s' % (code.hook['where'], code.hook['when'])].append(code)
+    def _load_hooks(self, function, code, current_example):
+        current_example.hooks['%s_%s' % (code.hook['where'], code.hook['when'])].append(code)
 
 context = describe
 

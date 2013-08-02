@@ -29,24 +29,23 @@ with describe(Loader) as _:
         spec = os.path.join(os.path.dirname(__file__), 'fixtures', 'without_inner_contexts.py')
 
         with _.subject.load_from_file(spec) as module:
-            expect(module.specs).to.have.length_of(1)
-            expect([spec.name for spec in module.specs[0].specs]).to.be.equal(['first_spec', 'second_spec', 'third_spec'])
+            expect(module.examples).to.have.length_of(1)
+            expect([example.name for example in module.examples[0].examples]).to.be.equal(['first_example', 'second_example', 'third_example'])
 
-    def it_should_put_specs_together_and_groups_at_last():
+    def it_should_put_examples_together_and_groups_at_last():
         spec = os.path.join(os.path.dirname(__file__), 'fixtures', 'with_inner_contexts.py')
 
         with _.subject.load_from_file(spec) as module:
-            expect(module.specs).to.have.length_of(1)
-            expect([spec.name for spec in
-                module.specs[0].specs]).to.be.equal(['first_spec', 'second_spec', 'third_spec', '#inner_context'])
+            expect(module.examples).to.have.length_of(1)
+            expect([example.name for example in module.examples[0].examples]).to.be.equal(['first_example', 'second_example', 'third_example', '#inner_context'])
 
     with context('when a skip decorator loaded'):
-        def it_should_mark_spec_as_pending():
+        def it_should_mark_example_as_pending():
             with _.subject.load_from_file(SKIP_DECORATOR_PATH) as module:
-                expect(module.specs).to.have.length_of(1)
-                expect(module.specs[0].specs[0].pending).to.be.true
+                expect(module.examples).to.have.length_of(1)
+                expect(module.examples[0].examples[0].pending).to.be.true
 
-        def it_should_mark_spec_group_as_pending():
+        def it_should_mark_example_group_as_pending():
             with _.subject.load_from_file(SKIP_DECORATOR_PATH) as module:
-                expect(module.specs).to.have.length_of(1)
-                expect(module.specs[0].specs[1].pending).to.be.true
+                expect(module.examples).to.have.length_of(1)
+                expect(module.examples[0].examples[1].pending).to.be.true

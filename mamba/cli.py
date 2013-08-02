@@ -45,17 +45,13 @@ def _run(arguments):
     reporter_ = reporter.Reporter(formatter)
     runner = Runner(reporter_)
 
-    specs = []
-
     reporter_.start()
     for file_ in _collect_specs_from(arguments.specs):
         with loader.load_from_file(file_) as module:
-            specs_in_module = getattr(module, 'specs', [])
-            runner.run(specs_in_module)
-            specs.extend(specs_in_module)
+            runner.run(getattr(module, 'examples', []))
     reporter_.finish()
 
-    if runner.has_failed_specs:
+    if runner.has_failed_examples:
         sys.exit(1)
 
 

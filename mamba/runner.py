@@ -4,11 +4,11 @@ class Runner(object):
 
     def __init__(self, reporter):
         self.reporter = reporter
-        self.has_failed_specs = False
+        self.has_failed_examples = False
 
-    def run(self, specs):
-        for spec in specs:
-            spec.run(self.reporter)
+    def run(self, examples):
+        for example in examples:
+            example.run(self.reporter)
 
-            if spec.failed:
-                self.has_failed_specs = True
+            if example.failed:
+                self.has_failed_examples = True
