@@ -16,7 +16,7 @@ pip install mamba
 
 ```python
 
-from mamba import describe, context, before, after, skip
+from mamba import describe, context, before, after, pending
 
 with describe('mamba'):
     def it_should_be_tested_with_mamba_itself():
@@ -43,13 +43,13 @@ with describe('mamba'):
             def run_after_all_specs():
                 pass
 
-        with context('skip tests'):
-            with skip(context('#skipped contexts')):
-                def it_should_not_run_specs_under_a_skipped_context():
+        with context('pending tests'):
+            with pending(context('when running pending contexts')):
+                def it_should_not_run_specs_under_a_pending_context():
                     pass
 
-            @skip
-            def it_should_not_run_a_spec_marked_with_skip_decorator():
+            @pending
+            def it_should_not_run_a_spec_marked_with_pending_decorator():
                 pass
 
         def it_should_highlight_slow_tests():
