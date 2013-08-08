@@ -47,7 +47,7 @@
 <a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h2>
 
 <div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">mamba</span> <span class="kn">import</span> <span class="n">describe</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">before</span><span class="p">,</span> <span class="n">after</span><span class="p">,</span> <span class="n">skip</span>
+<span class="kn">from</span> <span class="nn">mamba</span> <span class="kn">import</span> <span class="n">describe</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">before</span><span class="p">,</span> <span class="n">after</span><span class="p">,</span> <span class="n">pending</span>
 
 <span class="k">with</span> <span class="n">describe</span><span class="p">(</span><span class="s">'mamba'</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">it_should_be_tested_with_mamba_itself</span><span class="p">():</span>
@@ -74,13 +74,13 @@
             <span class="k">def</span> <span class="nf">run_after_all_specs</span><span class="p">():</span>
                 <span class="k">pass</span>
 
-        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'skip tests'</span><span class="p">):</span>
-            <span class="k">with</span> <span class="n">skip</span><span class="p">(</span><span class="n">context</span><span class="p">(</span><span class="s">'#skipped contexts'</span><span class="p">)):</span>
-                <span class="k">def</span> <span class="nf">it_should_not_run_specs_under_a_skipped_context</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'pending tests'</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">pending</span><span class="p">(</span><span class="n">context</span><span class="p">(</span><span class="s">'when running pending contexts'</span><span class="p">)):</span>
+                <span class="k">def</span> <span class="nf">it_should_not_run_specs_under_a_pending_context</span><span class="p">():</span>
                     <span class="k">pass</span>
 
-            <span class="nd">@skip</span>
-            <span class="k">def</span> <span class="nf">it_should_not_run_a_spec_marked_with_skip_decorator</span><span class="p">():</span>
+            <span class="nd">@pending</span>
+            <span class="k">def</span> <span class="nf">it_should_not_run_a_spec_marked_with_pending_decorator</span><span class="p">():</span>
                 <span class="k">pass</span>
 
         <span class="k">def</span> <span class="nf">it_should_highlight_slow_tests</span><span class="p">():</span>
