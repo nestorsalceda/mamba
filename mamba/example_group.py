@@ -43,9 +43,9 @@ class ExampleGroup(object):
             pass
 
     def _run_examples(self, reporter):
+        begin = datetime.utcnow()
         reporter.example_group_started(self)
         try:
-            begin = datetime.utcnow()
             self._run_inner_examples(reporter)
         except Exception as exception:
             self._set_failed()

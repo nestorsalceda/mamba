@@ -17,9 +17,9 @@ class Example(object):
         self._elapsed_time = timedelta(0)
 
     def run(self, reporter):
+        self._begin = datetime.utcnow()
         reporter.example_started(self)
         try:
-            self._begin = datetime.utcnow()
             if self.pending:
                 reporter.example_pending(self)
             else:
