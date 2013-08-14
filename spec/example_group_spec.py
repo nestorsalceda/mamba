@@ -95,7 +95,7 @@ with describe(ExampleGroup) as _:
                 expect(_.example_group.examples[0].failed).to.be.true
 
             def it_should_propagate_error_to_all_children():
-                expect(_.example_group.examples[0].exception).to.be.a(ValueError)
+                expect(_.example_group.examples[0].error).to.not_be.none
 
             def it_should_not_execute_any_example():
                 expect(_.was_run).to.be.false
@@ -112,4 +112,4 @@ with describe(ExampleGroup) as _:
                 expect(_.example_group.examples[0].failed).to.be.true
 
             def it_should_propagate_error_to_all_children_contexts():
-                expect(_.example_group.examples[0].exception).to.be.a(ValueError)
+                expect(_.example_group.examples[0].error).to.not_be.none

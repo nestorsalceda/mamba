@@ -4,6 +4,8 @@ import sys
 from datetime import datetime, timedelta
 import inspect
 
+from mamba import error
+
 
 class Example(object):
 
@@ -11,8 +13,7 @@ class Example(object):
         self.test = test
         self.parent = parent
         self.pending = pending
-        self._exception = None
-        self._traceback = None
+        self._error = None
         self._elapsed_time = timedelta(0)
 
     def run(self, reporter):
@@ -24,8 +25,8 @@ class Example(object):
             else:
                 self._run_inner_test(reporter)
         except Exception as exception:
-            self._set_exception_from_inner_test()
             self._elapsed_time = datetime.utcnow() - self._begin
+            self._set_failed()
             reporter.example_failed(self)
 
     def _run_inner_test(self, reporter):
@@ -35,10 +36,9 @@ class Example(object):
         self._elapsed_time = datetime.utcnow() - self._begin
         reporter.example_passed(self)
 
-    def _set_exception_from_inner_test(self):
+    def _set_failed(self):
         type_, value, traceback = sys.exc_info()
-        self.exception = value
-        self.traceback = traceback
+        self.error = error.Error(value, traceback)
 
     def run_hook(self, hook):
         for parent in self._parents:
@@ -68,7 +68,7 @@ class Example(object):
 
     @property
     def failed(self):
-        return self.exception is not None
+        return self.error is not None
 
     @property
     def pending(self):
@@ -81,20 +81,12 @@ class Example(object):
         self._pending = value
 
     @property
-    def exception(self):
-        return self._exception
+    def error(self):
+        return self._error
 
-    @exception.setter
-    def exception(self, value):
-        self._exception = value
-
-    @property
-    def traceback(self):
-        return self._traceback
-
-    @traceback.setter
-    def traceback(self, value):
-        self._traceback = value
+    @error.setter
+    def error(self, value):
+        self._error = value
 
     @property
     def depth(self):

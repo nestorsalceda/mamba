@@ -59,10 +59,7 @@ with describe(Example) as _:
             expect(_.example.failed).to.be.true
 
         def it_should_keep_the_error_if_example_failed():
-            expect(_.example.exception).to.not_be.none
-
-        def it_should_keep_the_traceback():
-            expect(_.example.traceback).to.not_be.none
+            expect(_.example.error).to.not_be.none
 
         def it_notifies_is_failed():
             assert_that(_.reporter.example_failed, called().with_args(_.example))

@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import sys
 from datetime import datetime, timedelta
 import inspect
+
+from mamba import error
 
 
 class ExampleGroup(object):
@@ -45,7 +48,7 @@ class ExampleGroup(object):
             begin = datetime.utcnow()
             self._run_inner_examples(reporter)
         except Exception as exception:
-            self.exception = exception
+            self._set_failed()
         finally:
             self._elapsed_time = datetime.utcnow() - begin
             reporter.example_group_finished(self)
@@ -60,6 +63,10 @@ class ExampleGroup(object):
         for registered in self.hooks.get(hook, []):
             if callable(registered):
                 registered()
+
+    def _set_failed(self):
+        type_, value, traceback = sys.exc_info()
+        self.error = error.Error(value, traceback)
 
     @property
     def elapsed_time(self):
@@ -90,15 +97,15 @@ class ExampleGroup(object):
         self._pending = value
 
     @property
-    def exception(self):
-        return self._exception
+    def error(self):
+        return self._error
 
-    @exception.setter
-    def exception(self, value):
-        self._exception = value
+    @error.setter
+    def error(self, value):
+        self._error = value
 
         for example in self.examples:
-            example.exception = value
+            example.error = value
 
     @property
     def subject_is_class(self):

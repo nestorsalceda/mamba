@@ -43,7 +43,7 @@ class DocumentationFormatter(Formatter):
     def example_failed(self, example):
         self._format_example(colored.red('✗'), example)
         with indent((example.depth + 1) * 2):
-            puts(colored.red(str(example.exception)))
+            puts(colored.red(str(example.error.exception)))
 
     def example_pending(self, example):
         self._format_example(colored.yellow('✗'), example)
@@ -121,8 +121,8 @@ class DocumentationFormatter(Formatter):
         return ' '.join(result)
 
     def _format_failing_expectation(self, example_):
-        return str(example_.exception)
+        return str(example_.error.exception)
 
     def _format_traceback(self, example_):
-        return ''.join([message[2:] for message in traceback.format_tb(example_.traceback)[1:]])
+        return ''.join([message[2:] for message in traceback.format_tb(example_.error.traceback)[1:]])
 
