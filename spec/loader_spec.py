@@ -53,7 +53,6 @@ with describe(Loader) as _:
 
     with context('when a pending decorator loaded_as_root'):
         def it_should_mark_inner_examples_as_pending():
-            print 'running test!'
             with _.subject.load_from_file(PENDING_DECORATOR_AS_ROOT_PATH) as module:
                 expect(module.examples).to.have.length_of(1)
                 examples_in_root = module.examples[0].examples
