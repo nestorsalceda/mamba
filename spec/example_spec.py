@@ -16,9 +16,6 @@ with describe(Example) as _:
         _.example = an_example(_)
         _.reporter = Spy(reporter.Reporter)
 
-    def it_should_have_depth_zero_without_parent():
-        expect(_.example.depth).to.be.equal(0)
-
     with context('when run'):
         @before.each
         def run_example():

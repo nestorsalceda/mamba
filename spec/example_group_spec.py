@@ -20,12 +20,6 @@ with describe(ExampleGroup) as _:
     def it_should_have_same_name_than_subject():
         expect(_.example_group.name).to.be.equals(IRRELEVANT_SUBJECT)
 
-    def it_should_have_depth_greater_than_parent():
-        example = an_example(_)
-        _.example_group.append(example)
-
-        expect(example.depth).to.be.equal(1)
-
     with context('when run'):
 
         @before.each

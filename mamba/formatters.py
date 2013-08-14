@@ -47,14 +47,23 @@ class DocumentationFormatter(Formatter):
 
     def example_failed(self, example):
         self._format_example(colored.red('✗'), example)
-        with indent((example.depth + 1) * 2):
+        with indent((self._depth(example) + 1) * 2):
             puts(colored.red(str(example.error.exception)))
+
+    def _depth(self, example):
+        depth = 0
+        current = example.parent
+        while current is not None:
+            depth += 1
+            current = current.parent
+
+        return depth
 
     def example_pending(self, example):
         self._format_example(colored.yellow('✗'), example)
 
     def _format_example(self, symbol, example):
-        puts('  ' * example.depth + symbol + ' ' + self._format_example_name(example) + self._format_slow_test(example))
+        puts('  ' * self._depth(example) + symbol + ' ' + self._format_example_name(example) + self._format_slow_test(example))
 
     def _format_example_name(self, example):
         return example.name.replace('_', ' ')
@@ -78,14 +87,14 @@ class DocumentationFormatter(Formatter):
         self._format_example_group(example_group, colored.white)
 
     def example_group_finished(self, example_group):
-        if example_group.depth == 0:
+        if example_group.parent is None:
             puts()
 
     def example_group_pending(self, example_group):
         self._format_example_group(example_group, colored.yellow)
 
     def _format_example_group(self, example_group, color):
-        puts('  ' * example_group.depth + color(example_group.name))
+        puts('  ' * self._depth(example_group) + color(example_group.name))
 
     def summary(self, duration, example_count, failed_count, pending_count):
         duration = self._format_duration(duration)

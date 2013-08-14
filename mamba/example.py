@@ -82,13 +82,6 @@ class Example(object):
     def error(self, value):
         self._error = value
 
-    @property
-    def depth(self):
-        if self.parent is None:
-            return 0
-
-        return self.parent.depth + 1
-
 
 class PendingExample(Example):
 
