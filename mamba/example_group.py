@@ -115,9 +115,8 @@ class ExampleGroup(object):
 class PendingExampleGroup(ExampleGroup):
 
     def run(self, reporter):
-        reporter.example_group_started(self)
+        reporter.example_group_pending(self)
         self._run_inner_examples(reporter)
-        reporter.example_group_finished(self)
 
     def _run_inner_examples(self, reporter):
         for example in self.examples:

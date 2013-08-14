@@ -41,6 +41,9 @@ class Reporter(object):
     def example_group_finished(self, example_group):
         self.notify('example_group_finished', example_group)
 
+    def example_group_pending(self, example_group):
+        pass
+
     def finish(self):
         self.stop()
         self.notify('summary', self.duration, self.example_count, self.failed_count, self.pending_count)
