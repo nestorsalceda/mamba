@@ -27,7 +27,7 @@ class ExampleGroup(object):
             self.hooks['before_each'].insert(0, self._create_subject)
 
     def _can_create_subject(self):
-        if not self.subject_is_class:
+        if not self._subject_is_class:
             return False
 
         try:
@@ -74,7 +74,7 @@ class ExampleGroup(object):
 
     @property
     def name(self):
-        if self.subject_is_class:
+        if self._subject_is_class:
             return self.subject.__name__
         return self.subject
 
@@ -98,7 +98,7 @@ class ExampleGroup(object):
             example.error = value
 
     @property
-    def subject_is_class(self):
+    def _subject_is_class(self):
         return inspect.isclass(self.subject)
 
     @property
