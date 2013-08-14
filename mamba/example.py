@@ -43,7 +43,7 @@ class Example(object):
 
     def _finish(self, reporter):
         self._elapsed_time = datetime.utcnow() - self._begin
-        if not self.error:
+        if not self.failed:
             reporter.example_passed(self)
         else:
             reporter.example_failed(self)
