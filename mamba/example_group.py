@@ -19,8 +19,18 @@ class ExampleGroup(object):
         self._elapsed_time = timedelta(0)
 
     def run(self, reporter):
+        self._start(reporter)
+        try:
+            self._run_inner_examples(reporter)
+        except Exception as exception:
+            self._set_failed()
+        finally:
+            self._finish(reporter)
+
+    def _start(self, reporter):
         self._register_subject_creation_in_before_each_hook()
-        self._run_examples(reporter)
+        self._begin = datetime.utcnow()
+        reporter.example_group_started(self)
 
     def _register_subject_creation_in_before_each_hook(self):
         if self._can_create_subject():
@@ -36,22 +46,15 @@ class ExampleGroup(object):
         except:
             return False
 
+    @property
+    def _subject_is_class(self):
+        return inspect.isclass(self.subject)
+
     def _create_subject(self):
         try:
             self.context.subject = self.subject()
         except:
             pass
-
-    def _run_examples(self, reporter):
-        begin = datetime.utcnow()
-        reporter.example_group_started(self)
-        try:
-            self._run_inner_examples(reporter)
-        except Exception as exception:
-            self._set_failed()
-        finally:
-            self._elapsed_time = datetime.utcnow() - begin
-            reporter.example_group_finished(self)
 
     def _run_inner_examples(self, reporter):
         self.run_hook('before_all')
@@ -67,6 +70,10 @@ class ExampleGroup(object):
     def _set_failed(self):
         type_, value, traceback = sys.exc_info()
         self.error = error.Error(value, traceback)
+
+    def _finish(self, reporter):
+        self._elapsed_time = datetime.utcnow() - self._begin
+        reporter.example_group_finished(self)
 
     @property
     def elapsed_time(self):
@@ -96,10 +103,6 @@ class ExampleGroup(object):
 
         for example in self.examples:
             example.error = value
-
-    @property
-    def _subject_is_class(self):
-        return inspect.isclass(self.subject)
 
     @property
     def depth(self):
