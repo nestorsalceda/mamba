@@ -27,6 +27,9 @@ class Formatter(object):
     def example_group_finished(self, example_group):
         pass
 
+    def example_group_pending(self, example_group):
+        pass
+
     def summary(self, duration, example_count, failed_count, pending_count):
         pass
 

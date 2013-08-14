@@ -71,6 +71,13 @@ with describe(reporter.Reporter) as _:
 
             assert_that(_.formatter.example_group_finished, called().with_args(_.example_group))
 
+        def it_notifies_event_example_group_pending_to_listeners():
+            _.example_group = a_pending_example_group()
+
+            _.reporter.example_group_pending(_.example_group)
+
+            assert_that(_.formatter.example_group_pending, called().with_args(_.example_group))
+
     with context('when finishing'):
         def it_notifies_summary_to_listeners():
             _.reporter.finish()
