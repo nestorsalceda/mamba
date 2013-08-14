@@ -4,6 +4,8 @@ import traceback
 
 from clint.textui import indent, puts, colored
 
+from mamba.example_group import PendingExampleGroup
+
 
 class Formatter(object):
 
@@ -70,7 +72,7 @@ class DocumentationFormatter(Formatter):
         return ''
 
     def example_group_started(self, example_group):
-        if example_group.pending:
+        if isinstance(example_group, PendingExampleGroup):
             puts('  ' * example_group.depth + colored.yellow(example_group.name))
         else:
             puts('  ' * example_group.depth + colored.white(example_group.name))

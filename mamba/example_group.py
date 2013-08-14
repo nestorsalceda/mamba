@@ -5,15 +5,15 @@ from datetime import datetime, timedelta
 import inspect
 
 from mamba import error
+from mamba.example import Example, PendingExample
 
 
 class ExampleGroup(object):
 
-    def __init__(self, subject, parent=None, pending=False, context=None):
+    def __init__(self, subject, parent=None, context=None):
         self.subject = subject
         self.examples = []
         self.parent = parent
-        self.pending = pending
         self.context = context
         self.hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
         self._elapsed_time = timedelta(0)
@@ -87,16 +87,6 @@ class ExampleGroup(object):
         return any(example.failed for example in self.examples)
 
     @property
-    def pending(self):
-        if self.parent:
-            return self._pending or self.parent.pending
-        return self._pending
-
-    @pending.setter
-    def pending(self, value):
-        self._pending = value
-
-    @property
     def error(self):
         return self._error
 
@@ -121,3 +111,20 @@ class ExampleGroup(object):
     @property
     def source_line(self):
         return float('inf')
+
+class PendingExampleGroup(ExampleGroup):
+
+    def run(self, reporter):
+        reporter.example_group_started(self)
+        self._run_inner_examples(reporter)
+        reporter.example_group_finished(self)
+
+    def _run_inner_examples(self, reporter):
+        for example in self.examples:
+            example.run(reporter)
+
+    def append(self, example):
+        if not type(example) in [PendingExample, PendingExampleGroup]:
+            raise TypeError('A pending example or example group expected')
+
+        super(PendingExampleGroup, self).append(example)

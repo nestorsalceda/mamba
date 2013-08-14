@@ -8,6 +8,37 @@ import contextlib
 from mamba import example, example_group
 
 
+class Factory(object):
+
+    def create_root_example_group(self, subject, context, marked_as_pending):
+        if marked_as_pending is False:
+            return example_group.ExampleGroup(subject, context=context)
+
+        return example_group.PendingExampleGroup(subject, context=context)
+
+    def create_example_group(self, subject, context, parent, marked_as_pending):
+        if self._is_a_pending_example_group(parent, marked_as_pending):
+            return example_group.PendingExampleGroup(subject, context=context)
+
+        return example_group.ExampleGroup(subject, context=context)
+
+    def _is_a_pending_example_group(self, parent, marked_as_pending):
+        parent_marked_as_pending = isinstance(parent, example_group.PendingExampleGroup)
+
+        return marked_as_pending or parent_marked_as_pending
+
+    def create_example(self, code, parent):
+        if self._is_a_pending_example(code, parent):
+            return example.PendingExample(code)
+
+        return example.Example(code)
+
+    def _is_a_pending_example(self, code, parent):
+        marked_as_pending = getattr(code, 'pending', False)
+        parent_marked_as_pending = isinstance(parent, example_group.PendingExampleGroup)
+
+        return marked_as_pending or parent_marked_as_pending
+
 class _Context(object):
     pass
 
@@ -18,6 +49,7 @@ class describe(object):
         self.subject = subject
         self.locals_before = None
         self.context = _Context()
+        self.factory = Factory()
 
     def __enter__(self):
         frame = inspect.currentframe().f_back
@@ -28,17 +60,17 @@ class describe(object):
             frame.f_locals['current_example'] = None
 
         if frame.f_locals['current_example'] is None:
-            frame.f_locals['current_example'] = example_group.ExampleGroup(self.subject, pending=self._pending, context=self.context)
+            frame.f_locals['current_example'] = self.factory.create_root_example_group(self.subject, self.context, self._marked_as_pending)
             frame.f_locals['examples'].append(frame.f_locals['current_example'])
         else:
-            current = example_group.ExampleGroup(self.subject, pending=self._pending, context=self.context)
+            current = self.factory.create_example_group(self.subject, self.context, frame.f_locals['current_example'], self._marked_as_pending)
             frame.f_locals['current_example'].append(current)
             frame.f_locals['current_example'] = current
 
         return self.context
 
     @property
-    def _pending(self):
+    def _marked_as_pending(self):
         return getattr(self, 'pending', False)
 
     def __exit__(self, type, value, traceback):
@@ -54,7 +86,8 @@ class describe(object):
                 if self._is_hook(code):
                     self._load_hooks(function, code, frame.f_locals['current_example'])
                 else:
-                    frame.f_locals['current_example'].append(example.Example(code, pending=getattr(code, 'pending', False)))
+                    example = self.factory.create_example(code, frame.f_locals['current_example'])
+                    frame.f_locals['current_example'].append(example)
 
         frame.f_locals['current_example'].examples.sort(key=lambda x: x.source_line)
         frame.f_locals['current_example'] = frame.f_locals['current_example'].parent

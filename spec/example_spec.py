@@ -19,18 +19,6 @@ with describe(Example) as _:
     def it_should_have_depth_zero_without_parent():
         expect(_.example.depth).to.be.equal(0)
 
-    with context('when pending'):
-        @before.each
-        def run_pending_example():
-            _.example.pending = True
-            _.example.run(_.reporter)
-
-        def it_should_not_run_the_example():
-            expect(_.was_run).to.be.false
-
-        def it_notifies_is_pending():
-            assert_that(_.reporter.example_pending, called().with_args(_.example))
-
     with context('when run'):
         @before.each
         def run_example():

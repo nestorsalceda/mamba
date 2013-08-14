@@ -26,21 +26,6 @@ with describe(ExampleGroup) as _:
 
         expect(example.depth).to.be.equal(1)
 
-    with context('when pending'):
-        @before.each
-        def append_example_to_group_and_set_pending():
-            example = an_example(_)
-            _.example_group.append(example)
-            _.example_group.pending = True
-
-        def it_should_not_run_its_children():
-            _.example_group.run(_.reporter)
-
-            expect(_.was_run).to.be.false
-
-        def it_should_propagate_to_its_children():
-            expect(all(example.pending for example in _.example_group.examples)).to.be.true
-
     with context('when run'):
 
         @before.each

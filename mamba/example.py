@@ -9,10 +9,9 @@ from mamba import error
 
 class Example(object):
 
-    def __init__(self, test, parent=None, pending=False):
+    def __init__(self, test, parent=None):
         self.test = test
         self.parent = parent
-        self.pending = pending
         self._error = None
         self._elapsed_time = timedelta(0)
 
@@ -20,10 +19,7 @@ class Example(object):
         self._begin = datetime.utcnow()
         reporter.example_started(self)
         try:
-            if self.pending:
-                reporter.example_pending(self)
-            else:
-                self._run_inner_test(reporter)
+            self._run_inner_test(reporter)
         except Exception as exception:
             self._elapsed_time = datetime.utcnow() - self._begin
             self._set_failed()
@@ -71,16 +67,6 @@ class Example(object):
         return self.error is not None
 
     @property
-    def pending(self):
-        if self.parent:
-            return self._pending or self.parent.pending
-        return self._pending
-
-    @pending.setter
-    def pending(self, value):
-        self._pending = value
-
-    @property
     def error(self):
         return self._error
 
@@ -94,3 +80,9 @@ class Example(object):
             return 0
 
         return self.parent.depth + 1
+
+
+class PendingExample(Example):
+
+    def run(self, reporter):
+        reporter.example_pending(self)
