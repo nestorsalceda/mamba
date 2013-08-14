@@ -16,29 +16,37 @@ class Example(object):
         self._elapsed_time = timedelta(0)
 
     def run(self, reporter):
-        self._begin = datetime.utcnow()
-        reporter.example_started(self)
+        self._start(reporter)
         try:
             self._run_inner_test(reporter)
         except Exception as exception:
-            self._elapsed_time = datetime.utcnow() - self._begin
             self._set_failed()
-            reporter.example_failed(self)
+        finally:
+            self._finish(reporter)
+
+    def _start(self, reporter):
+        self._begin = datetime.utcnow()
+        reporter.example_started(self)
 
     def _run_inner_test(self, reporter):
         self.run_hook('before_each')
         self.test()
         self.run_hook('after_each')
-        self._elapsed_time = datetime.utcnow() - self._begin
-        reporter.example_passed(self)
+
+    def run_hook(self, hook):
+        for parent in self._parents:
+            parent.run_hook(hook)
 
     def _set_failed(self):
         type_, value, traceback = sys.exc_info()
         self.error = error.Error(value, traceback)
 
-    def run_hook(self, hook):
-        for parent in self._parents:
-            parent.run_hook(hook)
+    def _finish(self, reporter):
+        self._elapsed_time = datetime.utcnow() - self._begin
+        if not self.error:
+            reporter.example_passed(self)
+        else:
+            reporter.example_failed(self)
 
     @property
     def _parents(self):
