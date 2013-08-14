@@ -75,14 +75,17 @@ class DocumentationFormatter(Formatter):
         return ''
 
     def example_group_started(self, example_group):
-        if isinstance(example_group, PendingExampleGroup):
-            puts('  ' * example_group.depth + colored.yellow(example_group.name))
-        else:
-            puts('  ' * example_group.depth + colored.white(example_group.name))
+        self._format_example_group(example_group, colored.white)
 
     def example_group_finished(self, example_group):
         if example_group.depth == 0:
             puts()
+
+    def example_group_pending(self, example_group):
+        self._format_example_group(example_group, colored.yellow)
+
+    def _format_example_group(self, example_group, color):
+        puts('  ' * example_group.depth + color(example_group.name))
 
     def summary(self, duration, example_count, failed_count, pending_count):
         duration = self._format_duration(duration)
