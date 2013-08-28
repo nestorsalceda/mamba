@@ -143,14 +143,3 @@ class describe(object):
 
 context = describe
 
-
-class Loader(object):
-
-    @contextlib.contextmanager
-    def load_from_file(self, path):
-        name = path.replace('.py', '')
-        try:
-            yield imp.load_source(name, path)
-        finally:
-            if name in sys.modules:
-                del sys.modules[name]

@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import os
-
-from mamba import loader
+import sys
+import imp
+import contextlib
 
 class ExampleCollector(object):
 
     def __init__(self, paths):
         self.paths = paths
-        self._loader = loader.Loader()
 
     def modules(self):
-        for file_ in self._collect_files_containing_examples():
-            with self._loader.load_from_file(file_) as module:
+        for path in self._collect_files_containing_examples():
+            with self._load_module_from(path) as module:
                 if self._has_examples(module):
                     yield module
 
@@ -36,6 +36,15 @@ class ExampleCollector(object):
 
         collected.sort()
         return collected
+
+    @contextlib.contextmanager
+    def _load_module_from(self, path):
+        name = path.replace('.py', '')
+        try:
+            yield imp.load_source(name, path)
+        finally:
+            if name in sys.modules:
+                del sys.modules[name]
 
     def _has_examples(self, module):
         return hasattr(module, 'examples')
