@@ -8,7 +8,7 @@ import contextlib
 from mamba import example, example_group
 
 
-class Factory(object):
+class _Factory(object):
 
     def create_root_example_group(self, subject, context, marked_as_pending):
         if marked_as_pending is False:
@@ -49,7 +49,7 @@ class describe(object):
         self.subject = subject
         self.locals_before = None
         self.context = _Context()
-        self.factory = Factory()
+        self.factory = _Factory()
 
     def __enter__(self):
         frame = inspect.currentframe().f_back
