@@ -39,32 +39,10 @@ def _run(arguments):
     factory = application_factory.ApplicationFactory(arguments)
     runner = factory.create_runner()
 
-    runner.run(_collect_specs_from(arguments.specs))
+    runner.run()
 
     if runner.has_failed_examples:
         sys.exit(1)
-
-
-def _collect_specs_from(specs):
-    collected = []
-    for path in specs:
-        if not os.path.exists(path):
-            continue
-
-        if os.path.isdir(path):
-            collected.extend(_collect_specs_from_directory(path))
-        else:
-            collected.append(path)
-    return collected
-
-
-def _collect_specs_from_directory(directory):
-    collected = []
-    for root, dirs, files in os.walk(directory):
-        collected.extend([os.path.join(root, file_) for file_ in files if file_.endswith('_spec.py')])
-
-    collected.sort()
-    return collected
 
 
 if __name__ == '__main__':

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import functools
-
-from mamba import settings, formatters, reporter, runner
+from mamba import settings, formatters, reporter, runner, example_collector
 
 
 class ApplicationFactory(object):
@@ -20,9 +18,12 @@ class ApplicationFactory(object):
     def create_formatter(self):
         return formatters.DocumentationFormatter(self.create_settings())
 
+    def create_example_collector(self):
+        return example_collector.ExampleCollector(self.arguments.specs)
+
     def create_reporter(self):
         return reporter.Reporter(self.create_formatter())
 
     def create_runner(self):
-        return runner.Runner(self.create_reporter())
+        return runner.Runner(self.create_example_collector(), self.create_reporter())
 
