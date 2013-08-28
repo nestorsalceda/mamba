@@ -5,8 +5,6 @@ import os
 import argparse
 
 from mamba import coverage_collector, application_factory
-from mamba.loader import Loader
-from mamba.runner import Runner
 
 
 def main():
@@ -39,16 +37,9 @@ def _run_with_coverage(arguments):
 
 def _run(arguments):
     factory = application_factory.ApplicationFactory(arguments)
-    reporter_ = factory.create_reporter()
     runner = factory.create_runner()
 
-    loader = Loader()
-
-    reporter_.start()
-    for file_ in _collect_specs_from(arguments.specs):
-        with loader.load_from_file(file_) as module:
-            runner.run(getattr(module, 'examples', []))
-    reporter_.finish()
+    runner.run(_collect_specs_from(arguments.specs))
 
     if runner.has_failed_examples:
         sys.exit(1)
