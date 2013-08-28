@@ -4,10 +4,9 @@ import sys
 import os
 import argparse
 
-from mamba import formatters, reporter, runner, coverage_collector
+from mamba import coverage_collector, application_factory
 from mamba.loader import Loader
 from mamba.runner import Runner
-from mamba.settings import Settings
 
 
 def main():
@@ -39,11 +38,11 @@ def _run_with_coverage(arguments):
 
 
 def _run(arguments):
-    settings = _settings_from_arguments(arguments)
+    factory = application_factory.ApplicationFactory(arguments)
+    reporter_ = factory.create_reporter()
+    runner = factory.create_runner()
+
     loader = Loader()
-    formatter = formatters.DocumentationFormatter(settings)
-    reporter_ = reporter.Reporter(formatter)
-    runner = Runner(reporter_)
 
     reporter_.start()
     for file_ in _collect_specs_from(arguments.specs):
@@ -53,13 +52,6 @@ def _run(arguments):
 
     if runner.has_failed_examples:
         sys.exit(1)
-
-
-def _settings_from_arguments(arguments):
-    settings = Settings()
-    settings.slow_test_threshold = arguments.slow
-
-    return settings
 
 
 def _collect_specs_from(specs):
