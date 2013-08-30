@@ -5,7 +5,7 @@ class Settings(object):
 
     def __init__(self):
         self._slow_test_threshold = .075
-        self._enable_coverage = False
+        self._enable_code_coverage = False
 
     @property
     def slow_test_threshold(self):
