@@ -3,7 +3,7 @@
 import coverage
 
 
-class CoverageCollector(object):
+class CodeCoverage(object):
 
     def __init__(self):
         self.coverage = coverage.coverage()

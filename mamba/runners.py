@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from mamba.infrastructure import code_coverage
+
 
 class Runner(object):
 
@@ -22,3 +24,9 @@ class Runner(object):
 
             if example.failed:
                 self.has_failed_examples = True
+
+
+class CodeCoverageRunner(Runner):
+    def run(self):
+        with code_coverage.CodeCoverage():
+            super(CodeCoverageRunner, self).run()
