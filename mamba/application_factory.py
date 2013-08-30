@@ -12,7 +12,7 @@ class ApplicationFactory(object):
     def create_settings(self):
         settings_ = settings.Settings()
         settings_.slow_test_threshold = self.arguments.slow
-        settings_.enable_coverage = self.arguments.enable_coverage
+        settings_.enable_code_coverage = self.arguments.enable_coverage
 
         return settings_
 
@@ -27,7 +27,7 @@ class ApplicationFactory(object):
 
     def create_runner(self):
         settings = self.create_settings()
-        if settings.enable_coverage:
+        if settings.enable_code_coverage:
             return runners.CodeCoverageRunner(self.create_example_collector(), self.create_reporter())
 
         return runners.Runner(self.create_example_collector(), self.create_reporter())
