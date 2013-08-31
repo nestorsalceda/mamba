@@ -32,3 +32,4 @@ def a_failing_example():
 
 def _failing_test():
     raise ValueError()
+
