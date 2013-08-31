@@ -7,11 +7,6 @@ class Reporter(object):
 
     def __init__(self, *formatters):
         self.listeners = formatters
-        self.begin = None
-        self.duration = datetime.timedelta(0)
-        self.example_count = 0
-        self.pending_count = 0
-        self.failed_examples = []
 
     @property
     def failed_count(self):
@@ -19,6 +14,10 @@ class Reporter(object):
 
     def start(self):
         self.begin = datetime.datetime.utcnow()
+        self.duration = datetime.timedelta(0)
+        self.example_count = 0
+        self.pending_count = 0
+        self.failed_examples = []
 
     def example_started(self, example):
         self.example_count += 1

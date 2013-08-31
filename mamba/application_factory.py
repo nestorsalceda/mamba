@@ -13,6 +13,7 @@ class ApplicationFactory(object):
         settings_ = settings.Settings()
         settings_.slow_test_threshold = self.arguments.slow
         settings_.enable_code_coverage = self.arguments.enable_coverage
+        settings_.enable_file_watcher = self.arguments.watch
 
         return settings_
 
@@ -27,8 +28,13 @@ class ApplicationFactory(object):
 
     def create_runner(self):
         settings = self.create_settings()
-        if settings.enable_code_coverage:
-            return runners.CodeCoverageRunner(self.create_example_collector(), self.create_reporter())
+        runner = runners.BaseRunner(self.create_example_collector(), self.create_reporter())
 
-        return runners.Runner(self.create_example_collector(), self.create_reporter())
+        if settings.enable_code_coverage:
+            runner = runners.CodeCoverageRunner(runner)
+
+        if settings.enable_file_watcher:
+            runner = runners.FileWatcherRunner(runner)
+
+        return runner
 
