@@ -7,6 +7,7 @@ from mamba.settings import Settings
 
 IRRELEVANT_SLOW_TEST_THRESHOLD = 'irrelevant slow test threeshold'
 IRRELEVANT_ENABLE_CODE_COVERAGE = 'irrelevant enable code coverage'
+IRRELEVANT_ENABLE_FILE_WATCHER = 'irrelevant enable file watcher'
 
 
 with describe(Settings) as _:
@@ -16,6 +17,9 @@ with describe(Settings) as _:
 
         def it_has_code_coverage_disabled_by_default():
             expect(_.subject).to.have.property('enable_code_coverage').to.be.false
+
+        def it_has_file_watcher_disabled_by_default():
+            expect(_.subject).to.have.property('enable_file_watcher').to.be.false
 
     with context('when setting custom values'):
         def it_sets_slow_test_threshold():
@@ -27,3 +31,8 @@ with describe(Settings) as _:
             _.subject.enable_code_coverage = IRRELEVANT_ENABLE_CODE_COVERAGE
 
             expect(_.subject).to.have.property('enable_code_coverage').to.be.equal(IRRELEVANT_ENABLE_CODE_COVERAGE)
+
+        def it_sets_file_watcher():
+            _.subject.enable_file_watcher = IRRELEVANT_ENABLE_FILE_WATCHER
+
+            expect(_.subject).to.have.property('enable_file_watcher').to.be.equal(IRRELEVANT_ENABLE_FILE_WATCHER)
