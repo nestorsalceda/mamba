@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from mamba import settings, formatters, reporter, runners, example_collector
+from mamba.infrastructure import is_python3
 
 
 class ApplicationFactory(object):
@@ -13,7 +14,9 @@ class ApplicationFactory(object):
         settings_ = settings.Settings()
         settings_.slow_test_threshold = self.arguments.slow
         settings_.enable_code_coverage = self.arguments.enable_coverage
-        settings_.enable_file_watcher = self.arguments.watch
+
+        if not is_python3():
+            settings_.enable_file_watcher = self.arguments.watch
 
         return settings_
 
