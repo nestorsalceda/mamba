@@ -68,7 +68,10 @@ class Example(object):
 
     @property
     def source_line(self):
-        return inspect.getsourcelines(self.test)[1]
+        try:
+            return inspect.getsourcelines(self.test)[1]
+        except IndexError:
+            return 'inf'
 
     @property
     def failed(self):
