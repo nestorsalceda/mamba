@@ -24,6 +24,9 @@ class Formatter(object):
     def example_group_started(self, example_group):
         pass
 
+    def example_group_failed(self, example_group):
+        pass
+
     def example_group_finished(self, example_group):
         pass
 
@@ -85,6 +88,10 @@ class DocumentationFormatter(Formatter):
 
     def example_group_started(self, example_group):
         self._format_example_group(example_group, colored.white)
+
+    def example_group_failed(self, example_group):
+        for example in example_group.examples:
+            self.example_failed(example)
 
     def example_group_finished(self, example_group):
         if example_group.parent is None:

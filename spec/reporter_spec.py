@@ -12,6 +12,7 @@ with describe(reporter.Reporter) as _:
     @before.each
     def create_reporter_and_attach_formatter():
         _.example = an_example(_)
+        _.example_group = an_example_group()
         _.formatter = Spy(formatters.Formatter)
         _.reporter = reporter.Reporter(_.formatter)
         _.reporter.start()
@@ -41,6 +42,11 @@ with describe(reporter.Reporter) as _:
 
         expect(_.reporter.failed_count).to.be.equal(1)
 
+    def it_increases_example_counter_when_example_group_failed():
+        _.reporter.example_group_failed(_.example_group)
+
+        expect(_.reporter.example_count).to.be.equal(len(_.example_group.examples))
+
     def it_adds_failed_example_when_example_failed():
         _.reporter.example_failed(_.example)
 
@@ -65,6 +71,11 @@ with describe(reporter.Reporter) as _:
             _.reporter.example_group_started(_.example_group)
 
             assert_that(_.formatter.example_group_started, called().with_args(_.example_group))
+
+        def it_notifies_event_example_group_failed_to_listeners():
+            _.reporter.example_group_failed(_.example_group)
+
+            assert_that(_.formatter.example_group_failed, called().with_args(_.example_group))
 
         def it_notifies_event_example_group_finished_to_listeners():
             _.reporter.example_group_finished(_.example_group)
