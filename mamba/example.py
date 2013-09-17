@@ -18,7 +18,8 @@ class Example(object):
     def run(self, reporter):
         self._start(reporter)
         try:
-            self._run_inner_test(reporter)
+            if not self.failed:
+                self._run_inner_test(reporter)
         except Exception as exception:
             self._set_failed()
         finally:

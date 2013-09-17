@@ -79,6 +79,9 @@ with describe(ExampleGroup) as _:
             def it_should_not_execute_any_example():
                 expect(_.was_run).to.be.false
 
+            def it_should_report_as_failed_example():
+                assert_that(_.reporter.example_failed, called().with_args(_.example_group.examples[0]))
+
         with context('when has contexts as children'):
             @before.each
             def append_a_context_with_an_example_and_run():

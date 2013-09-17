@@ -65,7 +65,10 @@ class ExampleGroup(object):
     def run_hook(self, hook):
         for registered in self.hooks.get(hook, []):
             if callable(registered):
-                registered()
+                try:
+                    registered()
+                except Exception as exception:
+                    self._set_failed()
 
     def _set_failed(self):
         type_, value, traceback = sys.exc_info()
