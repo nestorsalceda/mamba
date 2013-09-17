@@ -37,6 +37,11 @@ class Reporter(object):
     def example_group_started(self, example_group):
         self.notify('example_group_started', example_group)
 
+    def example_group_failed(self, example_group):
+        self.example_count += len(example_group.examples)
+        self.failed_examples.extend(example_group.examples)
+        self.notify('example_group_failed', example_group)
+
     def example_group_finished(self, example_group):
         self.notify('example_group_finished', example_group)
 

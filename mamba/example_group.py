@@ -17,6 +17,7 @@ class ExampleGroup(object):
         self.context = context
         self.hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
         self._elapsed_time = timedelta(0)
+        self._error = None
 
     def run(self, reporter):
         self._start(reporter)
@@ -76,7 +77,10 @@ class ExampleGroup(object):
 
     def _finish(self, reporter):
         self._elapsed_time = datetime.utcnow() - self._begin
-        reporter.example_group_finished(self)
+        if self.error:
+            reporter.example_group_failed(self)
+        else:
+            reporter.example_group_finished(self)
 
     @property
     def elapsed_time(self):
