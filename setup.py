@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
-
-version = '0.5'
+from mamba import version
 
 setup(name='mamba',
-      version=version,
+      version=version.STRING,
       description="The definitive testing tool for Python. Born under the banner of Behavior Driven Development.",
       long_description=open('README.md').read(),
       classifiers=[

@@ -4,8 +4,6 @@ import traceback
 
 from clint.textui import indent, puts, colored
 
-from mamba.example_group import PendingExampleGroup
-
 
 class Formatter(object):
 
