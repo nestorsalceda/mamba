@@ -3,14 +3,14 @@
 import sys
 import argparse
 
-from mamba import application_factory, version
+from mamba import application_factory, __version__
 from mamba.infrastructure import is_python3
 
 
 def main():
     arguments = _parse_arguments()
     if arguments.version:
-        print(version.STRING)
+        print(__version__)
         return
 
     factory = application_factory.ApplicationFactory(arguments)
