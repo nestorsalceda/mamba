@@ -40,4 +40,3 @@ class ApplicationFactory(object):
             runner = runners.FileWatcherRunner(runner)
 
         return runner
-
