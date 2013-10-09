@@ -7,6 +7,15 @@ class Settings(object):
         self._slow_test_threshold = .075
         self._enable_code_coverage = False
         self._enable_file_watcher = False
+        self._format = 'documentation'
+
+    @property
+    def format(self):
+        return self._format
+
+    @format.setter
+    def format(self, value):
+        self._format = value
 
     @property
     def slow_test_threshold(self):
