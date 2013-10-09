@@ -24,10 +24,8 @@ class ApplicationFactory(object):
     def create_formatter(self):
         settings = self.create_settings()
         if settings.format == 'progress':
-            formatter = formatters.ProgressFormatter(settings)
-        else:
-            formatter = formatters.DocumentationFormatter(settings)
-        return formatter
+            return formatters.ProgressFormatter(settings)
+        return formatters.DocumentationFormatter(settings)
 
     def create_example_collector(self):
         return example_collector.ExampleCollector(self.arguments.specs)

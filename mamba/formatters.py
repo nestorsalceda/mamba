@@ -144,9 +144,6 @@ class DocumentationFormatter(Formatter):
 
 class ProgressFormatter(DocumentationFormatter):
 
-    def __init__(self, settings):
-        self.settings = settings
-
     def example_passed(self, example):
         puts('.', newline=False)
 
@@ -166,6 +163,7 @@ class ProgressFormatter(DocumentationFormatter):
         pass
 
     def summary(self, duration, example_count, failed_count, pending_count):
+        puts()
         puts()
         super(ProgressFormatter, self).summary(duration, example_count, failed_count, pending_count)
 
