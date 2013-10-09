@@ -14,6 +14,7 @@ class ApplicationFactory(object):
         settings_ = settings.Settings()
         settings_.slow_test_threshold = self.arguments.slow
         settings_.enable_code_coverage = self.arguments.enable_coverage
+        settings_.format = self.arguments.format
 
         if not is_python3():
             settings_.enable_file_watcher = self.arguments.watch
@@ -21,7 +22,12 @@ class ApplicationFactory(object):
         return settings_
 
     def create_formatter(self):
-        return formatters.DocumentationFormatter(self.create_settings())
+        settings = self.create_settings()
+        if settings.format == 'progress':
+            formatter = formatters.ProgressFormatter(settings)
+        else:
+            formatter = formatters.DocumentationFormatter(settings)
+        return formatter
 
     def create_example_collector(self):
         return example_collector.ExampleCollector(self.arguments.specs)

@@ -141,3 +141,31 @@ class DocumentationFormatter(Formatter):
     def _format_traceback(self, example_):
         return ''.join([message[2:] for message in traceback.format_tb(example_.error.traceback)[1:]])
 
+
+class ProgressFormatter(DocumentationFormatter):
+
+    def __init__(self, settings):
+        self.settings = settings
+
+    def example_passed(self, example):
+        puts('.', newline=False)
+
+    def example_failed(self, example):
+        puts(colored.red('F'), newline=False)
+
+    def example_pending(self, example):
+        puts(colored.yellow('*'), newline=False)
+
+    def example_group_started(self, example_group):
+        pass
+
+    def example_group_finished(self, example_group):
+        pass
+
+    def example_group_pending(self, example_group):
+        pass
+
+    def summary(self, duration, example_count, failed_count, pending_count):
+        puts()
+        super(ProgressFormatter, self).summary(duration, example_count, failed_count, pending_count)
+

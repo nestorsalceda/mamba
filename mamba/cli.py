@@ -28,6 +28,7 @@ def _parse_arguments():
     parser.add_argument('--version', '-v', default=False, action='store_true', help='Display the version.')
     parser.add_argument('--slow', '-s', default=0.075, type=float, help='Slow test threshold in seconds (default: %(default)s)')
     parser.add_argument('--enable-coverage', default=False, action='store_true', help='Enable code coverage measurement (default: %(default)s)')
+    parser.add_argument('--format', default='documentation', action='store', help='Output format (default: %(default)s)')
     parser.add_argument('specs', default=['spec'], nargs='*', help='Specs or directories with specs to run (default: %(default)s)')
 
     if not is_python3():
