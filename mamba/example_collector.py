@@ -32,10 +32,13 @@ class ExampleCollector(object):
     def _collect_files_in_directory(self, directory):
         collected = []
         for root, dirs, files in os.walk(directory):
-            collected.extend([os.path.join(root, file_) for file_ in files if file_.endswith('_spec.py')])
-
+            collected.extend([os.path.join(self._normalize_path(root), file_)
+                    for file_ in files if file_.endswith('_spec.py')])
         collected.sort()
         return collected
+
+    def _normalize_path(self, path):
+        return os.path.normpath(path)
 
     @contextlib.contextmanager
     def _load_module_from(self, path):
