@@ -145,7 +145,7 @@ class DocumentationFormatter(Formatter):
 class ProgressFormatter(DocumentationFormatter):
 
     def example_passed(self, example):
-        puts('.', newline=False)
+        puts(colored.green('.'), newline=False)
 
     def example_failed(self, example):
         puts(colored.red('F'), newline=False)
