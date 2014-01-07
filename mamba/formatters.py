@@ -3,6 +3,7 @@
 import traceback
 
 from clint.textui import indent, puts, colored
+import notify2
 
 
 class Formatter(object):
@@ -141,6 +142,32 @@ class DocumentationFormatter(Formatter):
     def _format_traceback(self, example_):
         return ''.join([message[2:] for message in traceback.format_tb(example_.error.traceback)[1:]])
 
+
+class GritterFormatter(DocumentationFormatter):
+    def __init__(self, settings):
+        notify2.init('Basic')
+        super(GritterFormatter, self).__init__(settings)
+
+    def __popup_gritter(self, failed_count, pending_count):
+        message = ""
+        dialog_type = ""
+        if failed_count != 0:
+            message = 'Failed tests:' + str(failed_count)
+            dialog_type = "dialog-error"
+        elif pending_count != 0:
+            message = 'Pending:' + str(pending_count)
+        else:
+            message = 'Success!'
+            dialog_type = "dialog-info"
+
+        note = notify2.Notification('Tests execution:', message, dialog_type)
+        note.set_timeout(2000)
+        note.show()
+
+    def summary(self, duration, example_count, failed_count, pending_count):
+        super(GritterFormatter, self).summary(duration, example_count, failed_count, pending_count)
+        self.__popup_gritter(failed_count, pending_count)
+             
 
 class ProgressFormatter(DocumentationFormatter):
 

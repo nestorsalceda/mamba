@@ -1,3 +1,4 @@
 clint==0.3.1
 coverage==3.7
 watchdog==0.6.0
+notify2==0.3
