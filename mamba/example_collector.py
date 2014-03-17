@@ -2,7 +2,7 @@
 
 import os
 import sys
-import imp
+import importlib
 import contextlib
 
 class ExampleCollector(object):
@@ -42,12 +42,43 @@ class ExampleCollector(object):
 
     @contextlib.contextmanager
     def _load_module_from(self, path):
-        name = path.replace('.py', '')
+        path, name = self._split_into_module_path_and_name(path)
+
         try:
-            yield imp.load_source(name, path)
+            with self._path(path):
+                yield importlib.import_module(name)
         finally:
             if name in sys.modules:
                 del sys.modules[name]
+
+    @contextlib.contextmanager
+    def _path(self, path):
+        old_path = list(sys.path)
+
+        sys.path.append(path)
+
+        try:
+            yield
+        finally:
+            sys.path = old_path
+
+    def _split_into_module_path_and_name(self, path):
+        dirname, basename = os.path.split(path)
+
+        module_path = basename
+        package_path = None
+
+        while dirname:
+            if os.path.exists(os.path.join(dirname, '__init__.py')):
+                package_path = dirname
+            elif package_path is not None:
+                break
+
+            dirname, basename = os.path.split(dirname)
+
+            module_path = os.path.join(basename, module_path)
+
+        return dirname, module_path.replace('.py', '').replace(os.sep, '.')
 
     def _has_examples(self, module):
         return hasattr(module, 'examples')

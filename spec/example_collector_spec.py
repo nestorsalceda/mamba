@@ -8,23 +8,37 @@ from mamba import describe, context, example, example_group, before
 from mamba.example_collector import ExampleCollector
 from sure import expect
 
-IRRELEVANT_PATH = os.path.join(os.path.dirname(__file__), 'fixtures', 'without_inner_contexts.py')
-PENDING_DECORATOR_PATH = os.path.join(os.path.dirname(__file__), 'fixtures', 'with_pending_decorator.py')
-PENDING_DECORATOR_AS_ROOT_PATH = os.path.join(os.path.dirname(__file__), 'fixtures', 'with_pending_decorator_as_root.py')
+
+def spec_relpath(name):
+    return os.path.join('spec', 'fixtures', name)
+
+
+def spec_abspath(name):
+    return os.path.join(os.path.dirname(__file__), 'fixtures', name)
+
+
+IRRELEVANT_PATH = spec_abspath('without_inner_contexts.py')
+PENDING_DECORATOR_PATH = spec_abspath('with_pending_decorator.py')
+PENDING_DECORATOR_AS_ROOT_PATH = spec_abspath('with_pending_decorator_as_root.py')
+WITH_RELATIVE_IMPORT_PATH = spec_abspath('with_relative_import.py')
+
+
+def _load_module(path):
+    example_collector = ExampleCollector([path])
+    return list(example_collector.modules())[0]
 
 
 with describe(ExampleCollector) as _:
-
     with context('when loading from file'):
-
-        def it_should_loads_the_module():
+        def it_should_load_the_module_from_absolute_path():
             module = _load_module(IRRELEVANT_PATH)
 
             expect(inspect.ismodule(module)).to.be.true
 
-        def _load_module(path):
-            example_collector = ExampleCollector([path])
-            return list(example_collector.modules())[0]
+        def it_should_load_the_module_from_relative_path():
+            module = _load_module(spec_relpath('without_inner_contexts.py'))
+
+            expect(inspect.ismodule(module)).to.be.true
 
         def it_should_unload_module_when_finished():
             module = _load_module(IRRELEVANT_PATH)
@@ -32,18 +46,28 @@ with describe(ExampleCollector) as _:
 
             expect(sys.modules).to_not.contain(name)
 
-    def it_should_order_by_line_number_without_inner_context():
-        path = os.path.join(os.path.dirname(__file__), 'fixtures', 'without_inner_contexts.py')
+        def it_should_restore_pythonpath_when_finished_from_absolute_path():
+            old_path = list(sys.path)
 
-        module = _load_module(path)
+            module = _load_module(IRRELEVANT_PATH)
+
+            expect(sys.path).to.equal(old_path)
+
+        def it_should_restore_pythonpath_when_finished_from_relative_path():
+            old_path = list(sys.path)
+
+            module = _load_module(spec_relpath('without_inner_contexts.py'))
+
+            expect(sys.path).to.equal(old_path)
+
+    def it_should_order_by_line_number_without_inner_context():
+        module = _load_module(spec_abspath('without_inner_contexts.py'))
 
         expect(module.examples).to.have.length_of(1)
         expect([example.name for example in module.examples[0].examples]).to.be.equal(['first_example', 'second_example', 'third_example'])
 
     def it_should_put_examples_together_and_groups_at_last():
-        path = os.path.join(os.path.dirname(__file__), 'fixtures', 'with_inner_contexts.py')
-
-        module = _load_module(path)
+        module = _load_module(spec_abspath('with_inner_contexts.py'))
 
         expect(module.examples).to.have.length_of(1)
         expect([example.name for example in module.examples[0].examples]).to.be.equal(['first_example', 'second_example', 'third_example', '#inner_context'])
@@ -73,3 +97,8 @@ with describe(ExampleCollector) as _:
             expect(examples_in_root[1]).to.be.a(example_group.PendingExampleGroup)
             expect(examples_in_root[1].examples[0]).to.be.a(example.PendingExample)
 
+    with context('when loading with relative import'):
+        def it_should_load_the_module_and_perform_relative_import():
+            module = _load_module(WITH_RELATIVE_IMPORT_PATH)
+
+            expect(module).to.have.property('HelperClass')
