@@ -41,12 +41,12 @@ class DocumentationFormatter(Formatter):
         self.settings = settings
 
     def example_passed(self, example):
-        self._format_example(colored.green('✓'), example)
+        self._format_example(self._color('green', '✓'), example)
 
     def example_failed(self, example):
-        self._format_example(colored.red('✗'), example)
+        self._format_example(self._color('red', '✗'), example)
         with indent((self._depth(example) + 1) * 2):
-            puts(colored.red(str(example.error.exception)))
+            puts(self._color('red', str(example.error.exception)))
 
     def _depth(self, example):
         depth = 0
@@ -58,7 +58,7 @@ class DocumentationFormatter(Formatter):
         return depth
 
     def example_pending(self, example):
-        self._format_example(colored.yellow('✗'), example)
+        self._format_example(self._color('yellow', '✗'), example)
 
     def _format_example(self, symbol, example):
         puts('  ' * self._depth(example) + symbol + ' ' + self._format_example_name(example) + self._format_slow_test(example))
@@ -68,40 +68,40 @@ class DocumentationFormatter(Formatter):
 
     def _format_slow_test(self, example):
         seconds = example.elapsed_time.total_seconds()
-        color = None
+        color_name = None
 
         if seconds > self.settings.slow_test_threshold:
-            color = colored.yellow
+            color_name = 'yellow'
 
             if seconds > 5 * self.settings.slow_test_threshold:
-                color = colored.red
+                color_name = 'red'
 
-        if color is not None:
-            return color(' (' + self._format_duration(example.elapsed_time) + ')')
+        if color_name is not None:
+            return self._color(color_name, ' (' + self._format_duration(example.elapsed_time) + ')')
 
         return ''
 
     def example_group_started(self, example_group):
-        self._format_example_group(example_group, colored.white)
+        self._format_example_group(example_group, 'white')
 
     def example_group_finished(self, example_group):
         if example_group.parent is None:
             puts()
 
     def example_group_pending(self, example_group):
-        self._format_example_group(example_group, colored.yellow)
+        self._format_example_group(example_group, 'yellow')
 
-    def _format_example_group(self, example_group, color):
-        puts('  ' * self._depth(example_group) + color(example_group.name))
+    def _format_example_group(self, example_group, color_name):
+        puts('  ' * self._depth(example_group) + self._color(color_name, example_group.name))
 
     def summary(self, duration, example_count, failed_count, pending_count):
         duration = self._format_duration(duration)
         if failed_count != 0:
-            puts(colored.red("%d examples failed of %d ran in %s" % (failed_count, example_count, duration)))
+            puts(self._color('red', "%d examples failed of %d ran in %s" % (failed_count, example_count, duration)))
         elif pending_count != 0:
-            puts(colored.yellow("%d examples ran (%d pending) in %s" % (example_count, pending_count, duration)))
+            puts(self._color('yellow', "%d examples ran (%d pending) in %s" % (example_count, pending_count, duration)))
         else:
-            puts(colored.green("%d examples ran in %s" % (example_count, duration)))
+            puts(self._color('green', "%d examples ran in %s" % (example_count, duration)))
 
     def _format_duration(self, duration):
         return '%.4f seconds' % duration.total_seconds()
@@ -117,10 +117,10 @@ class DocumentationFormatter(Formatter):
             for index, failed in enumerate(failed_examples):
                 puts('%d) %s' % (index + 1, self._format_full_example_name(failed)))
                 with indent(3):
-                    puts(colored.red('Failure/Error: %s' % self._format_failing_expectation(failed)))
+                    puts(self._color('red', 'Failure/Error: %s' % self._format_failing_expectation(failed)))
                     puts()
                     puts('Traceback:')
-                    puts(colored.red(self._format_traceback(failed)))
+                    puts(self._color('red', self._format_traceback(failed)))
                     puts()
 
 
@@ -141,17 +141,22 @@ class DocumentationFormatter(Formatter):
     def _format_traceback(self, example_):
         return ''.join([message[2:] for message in traceback.format_tb(example_.error.traceback)[1:]])
 
+    def _color(self, name, text):
+        if not self.settings.no_color:
+            return getattr(colored, name)(text)
+        return text
+
 
 class ProgressFormatter(DocumentationFormatter):
 
     def example_passed(self, example):
-        puts(colored.green('.'), newline=False)
+        puts(self._color('green' ,'.'), newline=False)
 
     def example_failed(self, example):
-        puts(colored.red('F'), newline=False)
+        puts(self._color('red', 'F'), newline=False)
 
     def example_pending(self, example):
-        puts(colored.yellow('*'), newline=False)
+        puts(self._color('yellow', '*'), newline=False)
 
     def example_group_started(self, example_group):
         pass

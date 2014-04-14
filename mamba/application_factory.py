@@ -15,6 +15,7 @@ class ApplicationFactory(object):
         settings_.slow_test_threshold = self.arguments.slow
         settings_.enable_code_coverage = self.arguments.enable_coverage
         settings_.format = self.arguments.format
+        settings_.no_color = self.arguments.no_color
 
         if not is_python3():
             settings_.enable_file_watcher = self.arguments.watch
