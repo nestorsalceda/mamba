@@ -8,6 +8,7 @@ class Settings(object):
         self._enable_code_coverage = False
         self._enable_file_watcher = False
         self._format = 'documentation'
+        self._no_color = False
 
     @property
     def format(self):
@@ -28,6 +29,14 @@ class Settings(object):
     @property
     def enable_code_coverage(self):
         return self._enable_code_coverage
+
+    @property
+    def no_color(self):
+        return self._no_color
+
+    @no_color.setter
+    def no_color(self, value):
+        self._no_color = value
 
     @enable_code_coverage.setter
     def enable_code_coverage(self, value):
