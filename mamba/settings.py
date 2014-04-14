@@ -34,6 +34,10 @@ class Settings(object):
     def no_color(self):
         return self._no_color
 
+    @no_color.setter
+    def no_color(self, value):
+        self._no_color = value
+
     @enable_code_coverage.setter
     def enable_code_coverage(self, value):
         self._enable_code_coverage = value

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import traceback
 
 from clint.textui import indent, puts, colored
@@ -142,7 +143,7 @@ class DocumentationFormatter(Formatter):
         return ''.join([message[2:] for message in traceback.format_tb(example_.error.traceback)[1:]])
 
     def _color(self, name, text):
-        if not self.settings.no_color:
+        if not self.settings.no_color and sys.stdout.isatty():
             return getattr(colored, name)(text)
         return text
 

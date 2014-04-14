@@ -44,5 +44,5 @@ with describe(Settings) as _:
         def it_sets_no_color():
             _.subject.no_color = IRRELEVANT_NO_COLOR
 
-            expect(_.subject).to.have.property('no_color').to.be.equal(IRRELEVANT_ENABLE_NO)
+            expect(_.subject).to.have.property('no_color').to.be.equal(IRRELEVANT_NO_COLOR)
 
