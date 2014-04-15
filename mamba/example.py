@@ -31,7 +31,8 @@ class Example(object):
 
     def _run_inner_test(self, reporter):
         self.run_hook('before_each')
-        self.test()
+        if hasattr(self.test, 'im_func'):
+            self.test.im_func(self.parent.execution_context)
         self.run_hook('after_each')
 
     def run_hook(self, hook):
@@ -85,6 +86,10 @@ class Example(object):
     @error.setter
     def error(self, value):
         self._error = value
+
+    @property
+    def was_run(self):
+        return bool(self.elapsed_time)
 
 
 class PendingExample(Example):

@@ -7,6 +7,8 @@ import inspect
 from mamba import error
 from mamba.example import Example, PendingExample
 
+class ExecutionContext(object):
+    pass
 
 class ExampleGroup(object):
 
@@ -17,6 +19,7 @@ class ExampleGroup(object):
         self.context = context
         self.hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
         self._elapsed_time = timedelta(0)
+        self.execution_context = ExecutionContext()
 
     def run(self, reporter):
         self._start(reporter)
@@ -64,9 +67,9 @@ class ExampleGroup(object):
 
     def run_hook(self, hook):
         for registered in self.hooks.get(hook, []):
-            if callable(registered):
+            if hasattr(registered, 'im_func'):
                 try:
-                    registered()
+                    registered.im_func(self.execution_context)
                 except Exception as exception:
                     self._set_failed()
 

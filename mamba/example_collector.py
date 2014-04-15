@@ -2,7 +2,8 @@
 
 import os
 import sys
-import importlib
+import imp
+import ast
 import contextlib
 
 class ExampleCollector(object):
@@ -13,8 +14,7 @@ class ExampleCollector(object):
     def modules(self):
         for path in self._collect_files_containing_examples():
             with self._load_module_from(path) as module:
-                if self._has_examples(module):
-                    yield module
+                yield module
 
     def _collect_files_containing_examples(self):
         collected = []
@@ -42,14 +42,24 @@ class ExampleCollector(object):
 
     @contextlib.contextmanager
     def _load_module_from(self, path):
-        path, name = self._split_into_module_path_and_name(path)
+        with open(path) as f:
+            tree = ast.parse(f.read(), filename=path)
+            print ast.dump(tree)
+            #print ' ----- '
+            tree = TransformToSpecsNodeTransformer().visit(tree)
+            ast.fix_missing_locations(tree)
+            #print ast.dump(tree)
 
-        try:
-            with self._path(path):
-                yield importlib.import_module(name)
-        finally:
-            if name in sys.modules:
-                del sys.modules[name]
+        name = path.replace('.py', '')
+
+        module = imp.new_module(name)
+        module.__package__ = name.rpartition('.')[0]
+        module.__file__ = path
+
+        code = compile(tree, path, 'exec')
+        exec code in module.__dict__
+
+        yield module
 
     @contextlib.contextmanager
     def _path(self, path):
@@ -80,6 +90,23 @@ class ExampleCollector(object):
 
         return dirname, module_path.replace('.py', '').replace(os.sep, '.')
 
-    def _has_examples(self, module):
-        return hasattr(module, 'examples')
 
+class TransformToSpecsNodeTransformer(ast.NodeTransformer):
+    def visit_With(self, node):
+        super(TransformToSpecsNodeTransformer, self).generic_visit(node)
+
+        func = node.context_expr.func
+        name = func.id
+
+        if name == 'description':
+            subject = node.context_expr.args[0].id
+            return ast.copy_location(ast.ClassDef(name=subject + '__description', bases=[], body=node.body, decorator_list=[]), node)
+
+        if name == 'it':
+            example = node.context_expr.args[0].s
+            return ast.copy_location(ast.FunctionDef(name='it ' + example, args=ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[]), body=node.body, decorator_list=[]), node)
+        if name == 'before':
+            when = node.context_expr.args[0].s
+            return ast.copy_location(ast.FunctionDef(name='before_' + when, args=ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[]), body=node.body, decorator_list=[]), node)
+
+        return node
