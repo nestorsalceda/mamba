@@ -27,9 +27,10 @@ def _successful_test(context):
 
 
 def a_failing_example():
-    return Example(_failing_test)
+    return Example(_WithFailingTest._failing_test)
 
 
-def _failing_test():
-    raise ValueError()
+class _WithFailingTest(object):
+    def _failing_test(self):
+        raise ValueError()
 

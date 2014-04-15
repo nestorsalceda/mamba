@@ -33,19 +33,18 @@ with description(Example):
 
         assert_that(self.reporter.example_passed, called().with_args(self.example))
 
-    #with context('when run failed'):
-    #    @before.each
-    #    def create_and_run_failing_example():
-    #        _.example = a_failing_example()
+    with context('when run failed'):
+        with before('each'):
+            self.example = a_failing_example()
 
-    #        _.example.run(_.reporter)
+            self.example.run(self.reporter)
 
-    #    def it_should_be_marked_as_failed():
-    #        expect(_.example.failed).to.be.true
+        with it('is marked as failed'):
+            expect(self.example.failed).to.be.true
 
-    #    def it_should_keep_the_error_if_example_failed():
-    #        expect(_.example.error).to.not_be.none
+        with it('keeps the error'):
+            expect(self.example.error).to.not_be.none
 
-    #    def it_notifies_is_failed():
-    #        assert_that(_.reporter.example_failed, called().with_args(_.example))
+        with it('notifies its failure'):
+            assert_that(self.reporter.example_failed, called().with_args(self.example))
 

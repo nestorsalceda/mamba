@@ -44,7 +44,7 @@ class ExampleCollector(object):
     def _load_module_from(self, path):
         with open(path) as f:
             tree = ast.parse(f.read(), filename=path)
-            print ast.dump(tree)
+            #print ast.dump(tree)
             #print ' ----- '
             tree = TransformToSpecsNodeTransformer().visit(tree)
             ast.fix_missing_locations(tree)
@@ -102,11 +102,15 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
             subject = node.context_expr.args[0].id
             return ast.copy_location(ast.ClassDef(name=subject + '__description', bases=[], body=node.body, decorator_list=[]), node)
 
+        if name == 'context':
+            subject = node.context_expr.args[0].s
+            return ast.copy_location(ast.ClassDef(name=subject + '__context', bases=[], body=node.body, decorator_list=[]), node)
+
         if name == 'it':
             example = node.context_expr.args[0].s
             return ast.copy_location(ast.FunctionDef(name='it ' + example, args=ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[]), body=node.body, decorator_list=[]), node)
+
         if name == 'before':
             when = node.context_expr.args[0].s
             return ast.copy_location(ast.FunctionDef(name='before_' + when, args=ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[]), body=node.body, decorator_list=[]), node)
-
         return node
