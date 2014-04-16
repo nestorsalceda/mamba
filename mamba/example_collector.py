@@ -117,6 +117,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     def _subject(self, node):
         if isinstance(node.context_expr.args[0], ast.Str):
             return node.context_expr.args[0].s
+        if isinstance(node.context_expr.args[0], ast.Attribute):
+            return node.context_expr.args[0].attr
         return node.context_expr.args[0].id
 
 
