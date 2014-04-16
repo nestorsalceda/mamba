@@ -38,7 +38,7 @@ class Loader(object):
             example_group.hooks[hook.__name__].append(hook)
 
     def _hooks_in(self, example_group):
-        return [method for name, method in inspect.getmembers(example_group, inspect.ismethod) if name.startswith('before')]
+        return [method for name, method in inspect.getmembers(example_group, inspect.ismethod) if name.startswith('before') or name.startswith('after')]
 
     def _load_examples(self, klass, example_group):
         for example in self._examples_in(klass):
