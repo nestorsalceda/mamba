@@ -14,16 +14,17 @@ def a_pending_example_group(subject=IRRELEVANT_SUBJECT):
     return PendingExampleGroup(IRRELEVANT_SUBJECT)
 
 
-def an_example(context):
-    return Example(partial(_successful_test, context))
+def an_example():
+    return Example(_WithSuccessfulTest._successful_test)
+
+
+class _WithSuccessfulTest(object):
+    def _successful_test(self):
+        pass
 
 
 def a_pending_example(context):
     return PendingExample(partial(_successful_test, context))
-
-
-def _successful_test(context):
-    context.was_run = True
 
 
 def a_failing_example():
