@@ -1,15 +1,13 @@
-from mamba import describe, context
-
-with describe('Fixture#with_inner_contexts'):
-    def first_example():
+with description('Fixture#with_inner_contexts'):
+    with it('first example'):
         pass
 
-    def second_example():
+    with it('second example'):
         pass
 
     with context('#inner_context'):
-        def fourth_example():
+        with it('fourth example'):
             pass
 
-    def third_example():
+    with it('third example'):
         pass

@@ -98,16 +98,25 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         func = node.context_expr.func
         name = func.id
 
-        if name == 'description':
-            return ast.copy_location(ast.ClassDef(name=self._subject(node) + '__description', bases=[], body=node.body, decorator_list=[]), node)
+        if name in ('description', '_description'):
+            description_name = self._subject(node)
+            if name == '_description':
+                description_name += '__pending'
+            description_name += '__description'
 
-        if name == 'context':
-            subject = node.context_expr.args[0].s
-            return ast.copy_location(ast.ClassDef(name=subject + '__context', bases=[], body=node.body, decorator_list=[]), node)
+            return ast.copy_location(ast.ClassDef(name=description_name, bases=[], body=node.body, decorator_list=[]), node)
 
-        if name == 'it':
+        if name in ('context', '_context'):
+            context_name = node.context_expr.args[0].s
+            if name == '_context':
+                context_name += '__pending'
+            context_name += '__context'
+
+            return ast.copy_location(ast.ClassDef(name=context_name, bases=[], body=node.body, decorator_list=[]), node)
+
+        if name in ('it', '_it'):
             example = node.context_expr.args[0].s
-            return ast.copy_location(ast.FunctionDef(name='it ' + example, args=ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[]), body=node.body, decorator_list=[]), node)
+            return ast.copy_location(ast.FunctionDef(name=name + ' ' + example, args=ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[]), body=node.body, decorator_list=[]), node)
 
         if name in ['before', 'after']:
             when = node.context_expr.args[0].s

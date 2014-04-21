@@ -2,8 +2,8 @@
 
 import inspect
 
-from mamba.example_group import ExampleGroup
-from mamba.example import Example
+from mamba.example_group import ExampleGroup, PendingExampleGroup
+from mamba.example import Example, PendingExample
 
 class Loader(object):
 
@@ -23,10 +23,12 @@ class Loader(object):
         return [klass for name, klass in inspect.getmembers(module, inspect.isclass) if name.endswith('__description')]
 
     def _create_example_group(self, klass, execution_context=None):
+        if '__pending' in klass.__name__:
+            return PendingExampleGroup(self._name_for(klass), execution_context=execution_context)
         return ExampleGroup(self._name_for(klass), execution_context=execution_context)
 
     def _name_for(self, example_group):
-        return example_group.__name__.replace('__description', '').replace('__context', '')
+        return example_group.__name__.replace('__description', '').replace('__context', '').replace('__pending', '')
 
     def _load_example_group(self, klass, example_group):
         self._load_hooks(klass, example_group)
@@ -42,14 +44,21 @@ class Loader(object):
 
     def _load_examples(self, klass, example_group):
         for example in self._examples_in(klass):
-            example_group.append(Example(example))
+            if example.__name__.startswith('_it') or isinstance(example_group, PendingExampleGroup):
+                example_group.append(PendingExample(example))
+            else:
+                example_group.append(Example(example))
 
     def _examples_in(self, example_group):
-        return [method for name, method in inspect.getmembers(example_group, inspect.ismethod) if name.startswith('it')]
+        return [method for name, method in inspect.getmembers(example_group, inspect.ismethod) if name.startswith('it') or name.startswith('_it')]
 
     def _load_nested_contexts(self, klass, example_group):
         for context in self._contexts_in(klass):
-            nested_example_group = self._create_example_group(context, execution_context=example_group.execution_context)
+            if isinstance(example_group, PendingExampleGroup):
+                nested_example_group = PendingExampleGroup(self._name_for(context), execution_context=example_group.execution_context)
+            else:
+                nested_example_group = self._create_example_group(context, execution_context=example_group.execution_context)
+
             self._load_example_group(context, nested_example_group)
             example_group.append(nested_example_group)
 
