@@ -23,8 +23,8 @@ class _WithSuccessfulTest(object):
         pass
 
 
-def a_pending_example(context):
-    return PendingExample(partial(_successful_test, context))
+def a_pending_example():
+    return PendingExample(_WithSuccessfulTest._successful_test)
 
 
 def a_failing_example():
