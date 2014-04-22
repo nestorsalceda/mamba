@@ -20,7 +20,10 @@ class Loader(object):
         return loaded
 
     def _example_groups_for(self, module):
-        return [klass for name, klass in inspect.getmembers(module, inspect.isclass) if name.endswith('__description')]
+        return [klass for name, klass in inspect.getmembers(module, inspect.isclass) if self._is_example_group(name)]
+
+    def _is_example_group(self, class_name):
+        return class_name.endswith('__description')
 
     def _create_example_group(self, klass, execution_context=None):
         if '__pending' in klass.__name__:
@@ -40,17 +43,29 @@ class Loader(object):
             example_group.hooks[hook.__name__].append(hook)
 
     def _hooks_in(self, example_group):
-        return [method for name, method in inspect.getmembers(example_group, inspect.ismethod) if name.startswith('before') or name.startswith('after')]
+        return [method for name, method in inspect.getmembers(example_group, inspect.ismethod) if self._is_hook(name)]
+
+    def _is_hook(self, method_name):
+        return method_name.startswith('before') or method_name.startswith('after')
 
     def _load_examples(self, klass, example_group):
         for example in self._examples_in(klass):
-            if example.__name__.startswith('_it') or isinstance(example_group, PendingExampleGroup):
+            if self._is_pending_example(example) or self._is_pending_example_group(example_group):
                 example_group.append(PendingExample(example))
             else:
                 example_group.append(Example(example))
 
     def _examples_in(self, example_group):
-        return [method for name, method in inspect.getmembers(example_group, inspect.ismethod) if name.startswith('it') or name.startswith('_it')]
+        return [method for name, method in inspect.getmembers(example_group, inspect.ismethod) if self._is_example(name)]
+
+    def _is_example(self, method_name):
+        return method_name.startswith('it') or method_name.startswith('_it')
+
+    def _is_pending_example(self, example):
+        return example.__name__.startswith('_it')
+
+    def _is_pending_example_group(self, example_group):
+        return isinstance(example_group, PendingExampleGroup)
 
     def _load_nested_contexts(self, klass, example_group):
         for context in self._contexts_in(klass):
@@ -63,4 +78,7 @@ class Loader(object):
             example_group.append(nested_example_group)
 
     def _contexts_in(self, klass):
-        return [class_ for name, class_ in inspect.getmembers(klass, inspect.isclass) if name.endswith('__context')]
+        return [class_ for name, class_ in inspect.getmembers(klass, inspect.isclass) if self._is_context(name)]
+
+    def _is_context(self, class_name):
+        return class_name.endswith('__context')
