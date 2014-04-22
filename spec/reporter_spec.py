@@ -45,17 +45,16 @@ with description(reporter.Reporter) :
 
             expect(self.reporter.failed_examples).to.have(self.example)
 
-    #TODO: Pending
-    #def it_notifies_event_example_pending_to_listeners():
-    #    _.reporter.example_pending(_.example)
+    with context('when event pending'):
+        with it('notifies event pending to listeners'):
+            self.reporter.example_pending(self.example)
 
-    #    assert_that(_.formatter.example_pending, called().with_args(_.example))
+            assert_that(self.formatter.example_pending, called().with_args(self.example))
 
-    #TODO: Pending
-    #def it_increases_pending_counter_when_example_started():
-    #    _.reporter.example_pending(_.example)
+        with it('increases pending counter when example started'):
+            self.reporter.example_pending(self.example)
 
-    #    expect(_.reporter.pending_count).to.be.equal(1)
+            expect(self.reporter.pending_count).to.be.equal(1)
 
     with context('when reporting events for an example group'):
         with before('each'):
@@ -71,13 +70,12 @@ with description(reporter.Reporter) :
 
             assert_that(self.formatter.example_group_finished, called().with_args(self.example_group))
 
-    #TODO: Pending
-    #    def it_notifies_event_example_group_pending_to_listeners():
-    #        _.example_group = a_pending_example_group()
+        with it('notifies exent example group pending to listeners'):
+            self.example_group = a_pending_example_group()
 
-    #        _.reporter.example_group_pending(_.example_group)
+            self.reporter.example_group_pending(self.example_group)
 
-    #        assert_that(_.formatter.example_group_pending, called().with_args(_.example_group))
+            assert_that(self.formatter.example_group_pending, called().with_args(self.example_group))
 
     with context('when finishing'):
         with it('notifies summary to listeners'):
