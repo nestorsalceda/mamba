@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from mamba import describe, context
 from sure import expect
 
 from mamba.settings import Settings
@@ -10,7 +9,7 @@ IRRELEVANT_ENABLE_CODE_COVERAGE = 'irrelevant enable code coverage'
 IRRELEVANT_ENABLE_FILE_WATCHER = 'irrelevant enable file watcher'
 
 
-with describe(Settings) as _:
+with _description(Settings) as _:
     with context('when loading defaults'):
         def it_has_75_millis_as_slow_test_threshold():
             expect(_.subject).to.have.property('slow_test_threshold').to.be.equal(0.075)
