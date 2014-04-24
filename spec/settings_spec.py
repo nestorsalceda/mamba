@@ -11,9 +11,6 @@ IRRELEVANT_ENABLE_FILE_WATCHER = 'irrelevant enable file watcher'
 
 with description(Settings):
 
-    with before('each'):
-        self.subject = Settings()
-
     with context('when loading defaults'):
         with it('has 75 millis as slow test threshold'):
             expect(self.subject).to.have.property('slow_test_threshold').to.be.equal(0.075)
