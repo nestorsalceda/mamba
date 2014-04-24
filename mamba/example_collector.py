@@ -98,21 +98,19 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         func = node.context_expr.func
         name = func.id
 
-        if name in ('description', '_description'):
+        if name in ('description', '_description', 'context', '_context'):
             description_name = self._subject(node)
-            if name == '_description':
+            if name in ('_description', '_context'):
                 description_name += '__pending'
             description_name += '__description'
 
-            return ast.copy_location(ast.ClassDef(name=description_name, bases=[], body=node.body, decorator_list=[]), node)
+            body = []
+            if not isinstance(node.context_expr.args[0], ast.Str):
+                body.append(ast.Assign(targets=[ast.Name(id='_subject_class', ctx=ast.Store())], value=node.context_expr.args[0]))
 
-        if name in ('context', '_context'):
-            context_name = node.context_expr.args[0].s
-            if name == '_context':
-                context_name += '__pending'
-            context_name += '__context'
+            body.extend(node.body)
 
-            return ast.copy_location(ast.ClassDef(name=context_name, bases=[], body=node.body, decorator_list=[]), node)
+            return ast.copy_location(ast.ClassDef(name=description_name, bases=[], body=body, decorator_list=[]), node)
 
         if name in ('it', '_it'):
             example = node.context_expr.args[0].s
@@ -129,5 +127,4 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         if isinstance(node.context_expr.args[0], ast.Attribute):
             return node.context_expr.args[0].attr
         return node.context_expr.args[0].id
-
 

@@ -37,27 +37,22 @@ class ExampleGroup(object):
 
     def _register_subject_creation_in_before_each_hook(self):
         if self._can_create_subject():
-            self.hooks['before_each'].insert(0, self._create_subject)
+            self.hooks['before_each'].insert(0, lambda execution_context: self._create_subject(execution_context))
 
     def _can_create_subject(self):
-        if not self._subject_is_class:
-            return False
+        return self._subject_is_class()
 
-        try:
-            self.subject()
-            return True
-        except:
-            return False
-
-    @property
     def _subject_is_class(self):
         return inspect.isclass(self.subject)
 
-    def _create_subject(self):
+    #TODO: Being executed on every example, instead of try once
+    #      Should be optimized
+    def _create_subject(self, execution_context):
         try:
-            self.context.subject = self.subject()
-        except:
-            pass
+            execution_context.subject = self.subject()
+        except Exception as exc:
+            if hasattr(execution_context, 'subject'):
+                del execution_context.subject
 
     def _run_inner_examples(self, reporter):
         self.run_hook('before_all')
@@ -67,11 +62,13 @@ class ExampleGroup(object):
 
     def run_hook(self, hook):
         for registered in self.hooks.get(hook, []):
-            if hasattr(registered, 'im_func'):
-                try:
+            try:
+                if hasattr(registered, 'im_func'):
                     registered.im_func(self.execution_context)
-                except Exception as exception:
-                    self._set_failed()
+                elif callable(registered):
+                    registered(self.execution_context)
+            except Exception as exception:
+                self._set_failed()
 
     def _set_failed(self):
         type_, value, traceback = sys.exc_info()
@@ -87,7 +84,7 @@ class ExampleGroup(object):
 
     @property
     def name(self):
-        if self._subject_is_class:
+        if self._subject_is_class():
             return self.subject.__name__
         return self.subject
 

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sure import expect
-
+from expects import expect
 
 class Subject(object):
     pass
@@ -22,39 +21,38 @@ class SubjectWithArgumentsAndBeforeEachHook(object):
         pass
 
 
-with _description(Subject) as first_context:
-    def it_should_be_instantiated_automatically():
-        expect(first_context).to.have.property('subject').to.be.a(Subject)
+with description(Subject):
+    with it('is instantiated automatically'):
+        expect(self).to.have.property('subject').to.be.a(Subject)
 
-        first_context.old_subject = first_context.subject
+        self.old_subject = self.subject
 
-    def it_should_be_a_new_instance_every_time():
-        expect(first_context).to.have.property('subject').to.not_be.equal(first_context.old_subject)
+    with it('is instantiated in every example automatically'):
+        expect(self).to.have.property('subject').to.not_be.equal(self.old_subject)
 
-    with description(SubjectWithBeforeHook) as second_context:
+    with description(SubjectWithBeforeHook):
         with before('each'):
-            second_context.executed_hook = True
+            self.executed_hook = True
 
-        def it_should_execute_instance_creation_and_hook():
-            expect(second_context).to.have.property('subject').to.be.a(SubjectWithBeforeHook)
-            expect(second_context).to.have.property('executed_hook').to.be.true
+        with it('executes instance creation and before hook'):
+            expect(self).to.have.property('subject').to.be.a(SubjectWithBeforeHook)
+            expect(self).to.have.property('executed_hook').to.be.true
 
         with context('when acessing subject in before hook'):
             with before('each'):
-                second_context.subject.was_accessed = True
+                self.subject.was_accessed = True
 
-            def it_should_execute_first_instance_creation():
-                expect(second_context.subject).to.have.property('was_accessed').to.be.true
+            with it('executes first the instance creation'):
+                expect(self.subject).to.have.property('was_accessed').to.be.true
 
-    with description(SubjectWithArguments) as third_context:
+    with description(SubjectWithArguments):
+        with it('is not instantiated automatically'):
+            expect(self).to.not_have.property('subject')
 
-        def it_should_be_not_be_instantiated():
-            expect(third_context).to.not_have.property('subject')
-
-    with description(SubjectWithArgumentsAndBeforeEachHook) as __:
+    with description(SubjectWithArgumentsAndBeforeEachHook):
 
         with before('each'):
-            __.created = SubjectWithArgumentsAndBeforeEachHook(None)
+            self.created = SubjectWithArgumentsAndBeforeEachHook(None)
 
-        def it_should_contain_created_attribute():
-            expect(__).to.have.property('created').to.be.a(SubjectWithArgumentsAndBeforeEachHook)
+        with it('contains a created attribute'):
+            expect(self).to.have.property('created').to.be.a(SubjectWithArgumentsAndBeforeEachHook)

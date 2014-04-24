@@ -27,16 +27,16 @@ class Loader(object):
 
     def _create_example_group(self, klass, execution_context=None):
         if '__pending' in klass.__name__:
-            return PendingExampleGroup(self._name_for(klass), execution_context=execution_context)
-        return ExampleGroup(self._name_for(klass), execution_context=execution_context)
+            return PendingExampleGroup(self._subject(klass), execution_context=execution_context)
+        return ExampleGroup(self._subject(klass), execution_context=execution_context)
 
-    def _name_for(self, example_group):
-        return example_group.__name__.replace('__description', '').replace('__context', '').replace('__pending', '')
+    def _subject(self, example_group):
+        return getattr(example_group, '_subject_class', example_group.__name__.replace('__description', '').replace('__pending', ''))
 
     def _load_example_group(self, klass, example_group):
         self._load_hooks(klass, example_group)
         self._load_examples(klass, example_group)
-        self._load_nested_contexts(klass, example_group)
+        self._load_nested_example_groups(klass, example_group)
 
     def _load_hooks(self, klass, example_group):
         for hook in self._hooks_in(klass):
@@ -67,18 +67,13 @@ class Loader(object):
     def _is_pending_example_group(self, example_group):
         return isinstance(example_group, PendingExampleGroup)
 
-    def _load_nested_contexts(self, klass, example_group):
-        for context in self._contexts_in(klass):
+    def _load_nested_example_groups(self, klass, example_group):
+        for nested in self._example_groups_for(klass):
             if isinstance(example_group, PendingExampleGroup):
-                nested_example_group = PendingExampleGroup(self._name_for(context), execution_context=example_group.execution_context)
+                nested_example_group = PendingExampleGroup(self._subject(nested), execution_context=example_group.execution_context)
             else:
-                nested_example_group = self._create_example_group(context, execution_context=example_group.execution_context)
+                nested_example_group = self._create_example_group(nested, execution_context=example_group.execution_context)
 
-            self._load_example_group(context, nested_example_group)
+            self._load_example_group(nested, nested_example_group)
             example_group.append(nested_example_group)
 
-    def _contexts_in(self, klass):
-        return [class_ for name, class_ in inspect.getmembers(klass, inspect.isclass) if self._is_context(name)]
-
-    def _is_context(self, class_name):
-        return class_name.endswith('__context')
