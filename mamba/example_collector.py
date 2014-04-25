@@ -57,7 +57,7 @@ class ExampleCollector(object):
         module.__file__ = path
 
         code = compile(tree, path, 'exec')
-        exec code in module.__dict__
+        exec(code, module.__dict__)
 
         yield module
 
