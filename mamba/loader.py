@@ -13,7 +13,7 @@ class Loader(object):
 
         for klass in example_groups:
             example_group = self._create_example_group(klass)
-            self._load_example_group(klass, example_group)
+            self._add_hooks_examples_and_nested_example_groups_to(klass, example_group)
 
             loaded.append(example_group)
 
@@ -33,7 +33,7 @@ class Loader(object):
     def _subject(self, example_group):
         return getattr(example_group, '_subject_class', example_group.__name__.replace('__description', '').replace('__pending', ''))
 
-    def _load_example_group(self, klass, example_group):
+    def _add_hooks_examples_and_nested_example_groups_to(self, klass, example_group):
         self._load_hooks(klass, example_group)
         self._load_examples(klass, example_group)
         self._load_nested_example_groups(klass, example_group)
@@ -56,10 +56,10 @@ class Loader(object):
                 example_group.append(Example(example))
 
     def _examples_in(self, example_group):
-        return [method for name, method in inspect.getmembers(example_group, inspect.ismethod) if self._is_example(name)]
+        return [method for name, method in inspect.getmembers(example_group, inspect.ismethod) if self._is_example(method)]
 
-    def _is_example(self, method_name):
-        return method_name.startswith('it') or method_name.startswith('_it')
+    def _is_example(self, method):
+        return method.__name__.startswith('it') or self._is_pending_example(method)
 
     def _is_pending_example(self, example):
         return example.__name__.startswith('_it')
@@ -74,6 +74,6 @@ class Loader(object):
             else:
                 nested_example_group = self._create_example_group(nested, execution_context=example_group.execution_context)
 
-            self._load_example_group(nested, nested_example_group)
+            self._add_hooks_examples_and_nested_example_groups_to(nested, nested_example_group)
             example_group.append(nested_example_group)
 
