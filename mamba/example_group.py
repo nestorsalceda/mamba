@@ -12,11 +12,10 @@ class ExecutionContext(object):
 
 class ExampleGroup(object):
 
-    def __init__(self, subject, parent=None, context=None, execution_context=None):
+    def __init__(self, subject, parent=None, execution_context=None):
         self.subject = subject
         self.examples = []
         self.parent = parent
-        self.context = context
         self.hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
         self._elapsed_time = timedelta(0)
         self.execution_context = ExecutionContext() if execution_context is None else execution_context
