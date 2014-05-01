@@ -9,7 +9,7 @@ from mamba.example import Example
 
 with description(Example):
 
-    with before('each'):
+    with before.each:
         self.reporter = Spy(reporter.Reporter)
         self.example = Example(None)
 
@@ -34,7 +34,7 @@ with description(Example):
         assert_that(self.reporter.example_passed, called().with_args(self.example))
 
     with context('when run failed'):
-        with before('each'):
+        with before.each:
             self.example = a_failing_example()
 
             self.example.run(self.reporter)

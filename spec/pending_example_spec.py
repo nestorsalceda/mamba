@@ -9,12 +9,12 @@ from mamba.example import PendingExample
 
 with description(PendingExample):
 
-    with before('each'):
+    with before.each:
         self.example = a_pending_example()
         self.reporter = Spy(reporter.Reporter)
 
     with context('when run'):
-        with before('each'):
+        with before.each:
             self.example.run(self.reporter)
 
         with it('not runs the example'):

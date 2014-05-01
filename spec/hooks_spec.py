@@ -2,17 +2,17 @@ from expects import expect
 
 with description('Hooks'):
 
-    with before('all'):
+    with before.all:
         self.calls = []
         self.calls.append('before_all')
 
-    with after('all'):
+    with after.all:
         self.calls.append('after_all')
 
-    with before('each'):
+    with before.each:
         self.calls.append('before')
 
-    with after('each'):
+    with after.each:
         self.calls.append('after')
 
     with it('was called after before hook'):
@@ -24,13 +24,13 @@ with description('Hooks'):
         self.calls.append('second')
 
     with context('when nested context'):
-        with before('each'):
+        with before.each:
             self.calls.append('before_nested')
 
-        with before('all'):
+        with before.all:
             self.calls.append('before_all_nested')
 
-        with after('all'):
+        with after.all:
             self.calls.append('after_all_nested')
 
         with it('was called in nested context'):
