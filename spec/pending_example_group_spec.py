@@ -10,12 +10,12 @@ from mamba.example_group import PendingExampleGroup
 
 with description(PendingExampleGroup):
 
-    with before('each'):
+    with before.each:
         self.example_group = a_pending_example_group()
         self.reporter = Spy(reporter.Reporter)
 
     with context('when run'):
-        with before('each'):
+        with before.each:
             self.example_group.append(a_pending_example())
 
             self.example_group.run(self.reporter)

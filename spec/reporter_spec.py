@@ -8,14 +8,14 @@ from mamba import reporter, formatters, example, example_group
 
 with description(reporter.Reporter) :
 
-    with before('each'):
+    with before.each:
         self.example = an_example()
         self.formatter = Spy(formatters.Formatter)
         self.reporter = reporter.Reporter(self.formatter)
         self.reporter.start()
 
     with context('when event started'):
-        with before('each'):
+        with before.each:
             self.reporter.example_started(self.example)
 
         with it('notifies event example started to listeners'):
@@ -31,7 +31,7 @@ with description(reporter.Reporter) :
             assert_that(self.formatter.example_passed, called().with_args(self.example))
 
     with context('when event failed'):
-        with before('each'):
+        with before.each:
             self.reporter.example_failed(self.example)
 
         with it('notifies event example failed to listeners'):
@@ -57,7 +57,7 @@ with description(reporter.Reporter) :
             expect(self.reporter.pending_count).to.be.equal(1)
 
     with context('when reporting events for an example group'):
-        with before('each'):
+        with before.each:
             self.example_group = an_example_group()
 
         with it('notifies event example group started to listeners'):

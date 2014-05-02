@@ -10,7 +10,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     def visit_With(self, node):
         super(TransformToSpecsNodeTransformer, self).generic_visit(node)
 
-        name = node.context_expr.func.id
+        name = self._get_name(node)
 
         if name in self.EXAMPLE_GROUPS:
             return self._transform_to_example_group(node, name)
@@ -20,6 +20,14 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
             return self._transform_to_hook(node, name)
 
         return node
+
+    def _get_name(self, node):
+        context_expr = node.context_expr
+
+        if isinstance(context_expr, ast.Attribute):
+            return context_expr.value.id
+
+        return context_expr.func.id
 
     def _transform_to_example_group(self, node, name):
         if self._subject_is_a_class(node):
@@ -50,6 +58,6 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         return ast.copy_location(ast.FunctionDef(name=name + ' ' + example, args=ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[]), body=node.body, decorator_list=[]), node)
 
     def _transform_to_hook(self, node, name):
-        when = node.context_expr.args[0].s
+        when = node.context_expr.attr
         return ast.copy_location(ast.FunctionDef(name=name + '_' + when, args=ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[]), body=node.body, decorator_list=[]), node)
 

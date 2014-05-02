@@ -31,7 +31,7 @@ with description(Subject):
         expect(self).to.have.property('subject').to.not_be.equal(self.old_subject)
 
     with description(SubjectWithBeforeHook):
-        with before('each'):
+        with before.each:
             self.executed_hook = True
 
         with it('executes instance creation and before hook'):
@@ -39,7 +39,7 @@ with description(Subject):
             expect(self).to.have.property('executed_hook').to.be.true
 
         with context('when acessing subject in before hook'):
-            with before('each'):
+            with before.each:
                 self.subject.was_accessed = True
 
             with it('executes first the instance creation'):
@@ -51,7 +51,7 @@ with description(Subject):
 
     with description(SubjectWithArgumentsAndBeforeEachHook):
 
-        with before('each'):
+        with before.each:
             self.created = SubjectWithArgumentsAndBeforeEachHook(None)
 
         with it('contains a created attribute'):

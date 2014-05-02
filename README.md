@@ -26,16 +26,16 @@ with description('mamba'):
             pass
 
         with context('hooks'):
-            with before('all'):
+            with before.all:
                 print 'This code will be run once, before all examples'
 
-            with before('each'):
+            with before.each:
                 print 'This code will be run before each example'
 
-            with after('each'):
+            with after.each:
                 print 'This code will be run after each example'
 
-            with after('all'):
+            with after.all:
                 print 'This code will be run once, after all examples'
 
         with context('pending tests'):

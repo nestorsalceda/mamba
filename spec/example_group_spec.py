@@ -10,7 +10,7 @@ from mamba.example import Example
 
 with description(ExampleGroup):
 
-    with before('each'):
+    with before.each:
         self.example_group = an_example_group()
         self.reporter = Spy(reporter.Reporter)
 
@@ -19,7 +19,7 @@ with description(ExampleGroup):
 
     with context('when run'):
 
-        with before('each'):
+        with before.each:
             self.example = an_example()
             self.example_group.append(self.example)
 
@@ -39,7 +39,7 @@ with description(ExampleGroup):
 
     with context('when run failed'):
 
-        with before('each'):
+        with before.each:
             self.example_group.append(a_failing_example())
 
             self.example_group.run(self.reporter)
@@ -48,7 +48,7 @@ with description(ExampleGroup):
             expect(self.example_group.failed).to.be.true
 
     with context('when before all hook raises an error'):
-        with before('each'):
+        with before.each:
             class _ErrorRaiser(object):
                 def _raise_error(self):
                     raise ValueError()
@@ -59,7 +59,7 @@ with description(ExampleGroup):
 
 
         with context('when has only examples as children'):
-            with before('each'):
+            with before.each:
                 self.example_group.append(an_example())
 
                 self.example_group.run(self.reporter)
@@ -78,7 +78,7 @@ with description(ExampleGroup):
                 assert_that(self.reporter.example_failed, called().with_args(self.example_group.examples[0]))
 
         with context('when has contexts as children'):
-            with before('each'):
+            with before.each:
                 self.example_group.append(an_example_group())
                 self.example_group.examples[0].append(an_example())
 
