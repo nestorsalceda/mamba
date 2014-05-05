@@ -4,14 +4,13 @@ from doublex import Spy, assert_that, called
 from spec.object_mother import *
 
 from mamba import reporter
-from mamba.example import Example
 
 
 with description(Example):
 
     with before.each:
         self.reporter = Spy(reporter.Reporter)
-        self.example = Example(None)
+        self.example = an_example()
 
     with it('runs the example'):
         self.example.run(self.reporter)
@@ -38,6 +37,9 @@ with description(Example):
             self.example = a_failing_example()
 
             self.example.run(self.reporter)
+
+        with it('runs the example'):
+            expect(self.example.was_run).to.be.true
 
         with it('is marked as failed'):
             expect(self.example.failed).to.be.true

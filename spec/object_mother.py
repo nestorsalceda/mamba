@@ -15,7 +15,7 @@ def a_pending_example_group(subject=IRRELEVANT_SUBJECT):
 
 
 def an_example():
-    return Example(_WithSuccessfulTest._successful_test)
+    return Example(_WithSuccessfulTest._successful_test, parent=an_example_group())
 
 
 class _WithSuccessfulTest(object):

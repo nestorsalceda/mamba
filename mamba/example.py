@@ -14,6 +14,7 @@ class Example(object):
         self.parent = parent
         self._error = None
         self._elapsed_time = timedelta(0)
+        self.was_run = False
 
     def run(self, reporter):
         self._start(reporter)
@@ -21,6 +22,7 @@ class Example(object):
             if not self.failed:
                 self._run_inner_test(reporter)
         except Exception as exception:
+            self.was_run = True
             self._set_failed()
         finally:
             self._finish(reporter)
@@ -33,6 +35,7 @@ class Example(object):
         self.run_hook('before_each')
         if hasattr(self.test, 'im_func'):
             self.test.im_func(self.parent.execution_context)
+            self.was_run = True
         self.run_hook('after_each')
 
     def run_hook(self, hook):
@@ -86,10 +89,6 @@ class Example(object):
     @error.setter
     def error(self, value):
         self._error = value
-
-    @property
-    def was_run(self):
-        return bool(self.elapsed_time)
 
 
 class PendingExample(Example):
