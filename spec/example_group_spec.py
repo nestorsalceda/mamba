@@ -70,9 +70,8 @@ with description(ExampleGroup):
             with it('propagates error to all children'):
                 expect(self.example_group.examples[0].error).to.not_be.none
 
-            #FIXME
-            #with it('does not execute any example'):
-            #    expect(self.example_group.examples[0].was_run).to.be.false
+            with _it('does not execute any example'):
+                expect(self.example_group.examples[0].was_run).to.be.false
 
             with it('report child example as failed'):
                 assert_that(self.reporter.example_failed, called().with_args(self.example_group.examples[0]))
