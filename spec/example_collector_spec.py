@@ -110,7 +110,7 @@ with description(ExampleCollector) as _:
             expect(examples_in_root[1]).to.be.a(example_group.PendingExampleGroup)
             expect(examples_in_root[1].examples[0]).to.be.a(example.PendingExample)
 
-    with _context('when loading with relative import'):
+    with context('when loading with relative import'):
         with it('loads module and perform relative import'):
             module = _load_module(WITH_RELATIVE_IMPORT_PATH)
 

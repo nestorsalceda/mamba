@@ -42,6 +42,8 @@ class ExampleCollector(object):
     def _normalize_path(self, path):
         return os.path.normpath(path)
 
+    #TODO: What about managing locks with threads??
+    #Take care with watchdog stuff!!
     @contextlib.contextmanager
     def _load_module_from(self, path):
         with open(path) as f:
@@ -50,43 +52,21 @@ class ExampleCollector(object):
             ast.fix_missing_locations(tree)
 
         name = path.replace('.py', '')
-
-        module = imp.new_module(name)
-        module.__package__ = name.rpartition('.')[0]
-        module.__file__ = path
-
-        code = compile(tree, path, 'exec')
-        exec(code, module.__dict__)
-
-        yield module
-
-    @contextlib.contextmanager
-    def _path(self, path):
-        old_path = list(sys.path)
-
-        sys.path.append(path)
+        package = '.'.join(name.split('/')[:-1])
 
         try:
-            yield
+            module = imp.new_module(name)
+            module.__package__ = package
+            module.__file__ = path
+
+            __import__(package)
+            sys.modules[name] = module
+
+            code = compile(tree, path, 'exec')
+            exec(code, module.__dict__)
+
+            yield module
         finally:
-            sys.path = old_path
-
-    def _split_into_module_path_and_name(self, path):
-        dirname, basename = os.path.split(path)
-
-        module_path = basename
-        package_path = None
-
-        while dirname:
-            if os.path.exists(os.path.join(dirname, '__init__.py')):
-                package_path = dirname
-            elif package_path is not None:
-                break
-
-            dirname, basename = os.path.split(dirname)
-
-            module_path = os.path.join(basename, module_path)
-
-        return dirname, module_path.replace('.py', '').replace(os.sep, '.')
-
+            if name in sys.modules:
+                del sys.modules[name]
 
