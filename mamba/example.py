@@ -2,7 +2,6 @@
 
 import sys
 from datetime import datetime, timedelta
-import inspect
 
 from mamba import error
 
@@ -14,6 +13,7 @@ class Example(object):
         self.parent = parent
         self._error = None
         self._elapsed_time = timedelta(0)
+        self.was_run = False
 
     def run(self, reporter):
         self._start(reporter)
@@ -21,6 +21,7 @@ class Example(object):
             if not self.failed:
                 self._run_inner_test(reporter)
         except Exception as exception:
+            self.was_run = True
             self._set_failed()
         finally:
             self._finish(reporter)
@@ -31,7 +32,9 @@ class Example(object):
 
     def _run_inner_test(self, reporter):
         self.run_hook('before_each')
-        self.test()
+        if hasattr(self.test, 'im_func'):
+            self.test.im_func(self.parent.execution_context)
+            self.was_run = True
         self.run_hook('after_each')
 
     def run_hook(self, hook):
@@ -66,13 +69,6 @@ class Example(object):
     @property
     def name(self):
         return self.test.__name__
-
-    @property
-    def source_line(self):
-        try:
-            return inspect.getsourcelines(self.test)[1]
-        except IndexError:
-            return 'inf'
 
     @property
     def failed(self):

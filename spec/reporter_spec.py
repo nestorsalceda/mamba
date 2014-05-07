@@ -1,5 +1,4 @@
-from mamba import describe, context, before
-from sure import expect
+from expects import expect
 from doublex import *
 
 from spec.object_mother import *
@@ -7,91 +6,91 @@ from spec.object_mother import *
 from mamba import reporter, formatters, example, example_group
 
 
-with describe(reporter.Reporter) as _:
+with description(reporter.Reporter) :
 
-    @before.each
-    def create_reporter_and_attach_formatter():
-        _.example = an_example(_)
-        _.formatter = Spy(formatters.Formatter)
-        _.reporter = reporter.Reporter(_.formatter)
-        _.reporter.start()
+    with before.each:
+        self.example = an_example()
+        self.formatter = Spy(formatters.Formatter)
+        self.reporter = reporter.Reporter(self.formatter)
+        self.reporter.start()
 
-    def it_notifies_event_example_started_to_listeners():
-        _.reporter.example_started(_.example)
+    with context('when event started'):
+        with before.each:
+            self.reporter.example_started(self.example)
 
-        assert_that(_.formatter.example_started, called().with_args(_.example))
+        with it('notifies event example started to listeners'):
+            assert_that(self.formatter.example_started, called().with_args(self.example))
 
-    def it_increases_example_counter_when_example_started():
-        _.reporter.example_started(_.example)
+        with it('increases example counter'):
+            expect(self.reporter.example_count).to.be.equal(1)
 
-        expect(_.reporter.example_count).to.be.equal(1)
+    with context('when event passed'):
+        with it('notifies event example passed to listeners'):
+            self.reporter.example_passed(self.example)
 
-    def it_notifies_event_example_passed_to_listeners():
-        _.reporter.example_passed(_.example)
+            assert_that(self.formatter.example_passed, called().with_args(self.example))
 
-        assert_that(_.formatter.example_passed, called().with_args(_.example))
+    with context('when event failed'):
+        with before.each:
+            self.reporter.example_failed(self.example)
 
-    def it_notifies_event_example_failed_to_listeners():
-        _.reporter.example_failed(_.example)
+        with it('notifies event example failed to listeners'):
+            assert_that(self.formatter.example_failed, called().with_args(self.example))
 
-        assert_that(_.formatter.example_failed, called().with_args(_.example))
+        with it('increases failed counter'):
+            expect(self.reporter.failed_count).to.be.equal(1)
 
-    def it_increases_failed_counter_when_example_failed():
-        _.reporter.example_failed(_.example)
+        with it('keeps failed example'):
+            self.reporter.example_failed(self.example)
 
-        expect(_.reporter.failed_count).to.be.equal(1)
+            expect(self.reporter.failed_examples).to.have(self.example)
 
-    def it_adds_failed_example_when_example_failed():
-        _.reporter.example_failed(_.example)
+    with context('when event pending'):
+        with it('notifies event pending to listeners'):
+            self.reporter.example_pending(self.example)
 
-        expect(_.example).to.be.within(_.reporter.failed_examples)
+            assert_that(self.formatter.example_pending, called().with_args(self.example))
 
-    def it_notifies_event_example_pending_to_listeners():
-        _.reporter.example_pending(_.example)
+        with it('increases pending counter when example started'):
+            self.reporter.example_pending(self.example)
 
-        assert_that(_.formatter.example_pending, called().with_args(_.example))
-
-    def it_increases_pending_counter_when_example_started():
-        _.reporter.example_pending(_.example)
-
-        expect(_.reporter.pending_count).to.be.equal(1)
+            expect(self.reporter.pending_count).to.be.equal(1)
 
     with context('when reporting events for an example group'):
-        @before.each
-        def creates_example_group():
-            _.example_group = an_example_group()
+        with before.each:
+            self.example_group = an_example_group()
 
-        def it_notifies_event_example_group_started_to_listeners():
-            _.reporter.example_group_started(_.example_group)
+        with it('notifies event example group started to listeners'):
+            self.reporter.example_group_started(self.example_group)
 
-            assert_that(_.formatter.example_group_started, called().with_args(_.example_group))
+            assert_that(self.formatter.example_group_started, called().with_args(self.example_group))
 
-        def it_notifies_event_example_group_finished_to_listeners():
-            _.reporter.example_group_finished(_.example_group)
+        with it('notifies event example group finished to listeners'):
+            self.reporter.example_group_finished(self.example_group)
 
-            assert_that(_.formatter.example_group_finished, called().with_args(_.example_group))
+            assert_that(self.formatter.example_group_finished, called().with_args(self.example_group))
 
-        def it_notifies_event_example_group_pending_to_listeners():
-            _.example_group = a_pending_example_group()
+        with it('notifies exent example group pending to listeners'):
+            self.example_group = a_pending_example_group()
 
-            _.reporter.example_group_pending(_.example_group)
+            self.reporter.example_group_pending(self.example_group)
 
-            assert_that(_.formatter.example_group_pending, called().with_args(_.example_group))
+            assert_that(self.formatter.example_group_pending, called().with_args(self.example_group))
 
     with context('when finishing'):
-        def it_notifies_summary_to_listeners():
-            _.reporter.finish()
+        with it('notifies summary to listeners'):
+            self.reporter.finish()
 
-            assert_that(_.formatter.summary, called().with_args(
-                _.reporter.duration,
-                _.reporter.example_count,
-                _.reporter.failed_count,
-                _.reporter.pending_count
+            assert_that(self.formatter.summary, called().with_args(
+                self.reporter.duration,
+                self.reporter.example_count,
+                self.reporter.failed_count,
+                self.reporter.pending_count
             ))
 
-        def it_notifies_failed_examples_to_listeners():
-            _.reporter.finish()
+        with it('notifies failed examples to listeners'):
+            self.reporter.finish()
 
-            assert_that(_.formatter.failures, called().with_args(
-                _.reporter.failed_examples
+            assert_that(self.formatter.failures, called().with_args(
+                self.reporter.failed_examples
             ))

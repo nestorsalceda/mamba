@@ -1,11 +1,8 @@
-from mamba import describe, context, pending
+with _description('Fixture#with_pending_decorator_as_root'):
 
-with pending(describe('Fixture#with_pending_decorator_as_root')):
-
-    def pending_spec():
+    with it('pending spec'):
         pass
 
     with context('when pending context'):
-
-        def pending_spec_inside_context():
+        with it('pending spec inside context'):
             pass

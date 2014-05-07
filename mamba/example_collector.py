@@ -2,8 +2,11 @@
 
 import os
 import sys
-import importlib
+import imp
+import ast
 import contextlib
+
+from mamba import nodetransformers
 
 class ExampleCollector(object):
 
@@ -13,8 +16,7 @@ class ExampleCollector(object):
     def modules(self):
         for path in self._collect_files_containing_examples():
             with self._load_module_from(path) as module:
-                if self._has_examples(module):
-                    yield module
+                yield module
 
     def _collect_files_containing_examples(self):
         collected = []
@@ -40,46 +42,31 @@ class ExampleCollector(object):
     def _normalize_path(self, path):
         return os.path.normpath(path)
 
+    #TODO: What about managing locks with threads??
+    #Take care with watchdog stuff!!
     @contextlib.contextmanager
     def _load_module_from(self, path):
-        path, name = self._split_into_module_path_and_name(path)
+        with open(path) as f:
+            tree = ast.parse(f.read(), filename=path)
+            tree = nodetransformers.TransformToSpecsNodeTransformer().visit(tree)
+            ast.fix_missing_locations(tree)
+
+        name = path.replace('.py', '')
+        package = '.'.join(name.split('/')[:-1])
 
         try:
-            with self._path(path):
-                yield importlib.import_module(name)
+            module = imp.new_module(name)
+            module.__package__ = package
+            module.__file__ = path
+
+            __import__(package)
+            sys.modules[name] = module
+
+            code = compile(tree, path, 'exec')
+            exec(code, module.__dict__)
+
+            yield module
         finally:
             if name in sys.modules:
                 del sys.modules[name]
-
-    @contextlib.contextmanager
-    def _path(self, path):
-        old_path = list(sys.path)
-
-        sys.path.append(path)
-
-        try:
-            yield
-        finally:
-            sys.path = old_path
-
-    def _split_into_module_path_and_name(self, path):
-        dirname, basename = os.path.split(path)
-
-        module_path = basename
-        package_path = None
-
-        while dirname:
-            if os.path.exists(os.path.join(dirname, '__init__.py')):
-                package_path = dirname
-            elif package_path is not None:
-                break
-
-            dirname, basename = os.path.split(dirname)
-
-            module_path = os.path.join(basename, module_path)
-
-        return dirname, module_path.replace('.py', '').replace(os.sep, '.')
-
-    def _has_examples(self, module):
-        return hasattr(module, 'examples')
 
