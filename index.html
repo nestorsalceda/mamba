@@ -31,7 +31,7 @@
           <h1>
 <a name="mamba-the-definitive-testing-tool-for-python" class="anchor" href="#mamba-the-definitive-testing-tool-for-python"><span class="octicon octicon-link"></span></a>mamba: the definitive testing tool for Python</h1>
 
-<p><a href="https://travis-ci.org/nestorsalceda/mamba"><img src="https://travis-ci.org/nestorsalceda/mamba.png" alt="Build Status"></a></p>
+<p><a href="https://travis-ci.org/nestorsalceda/mamba"><img src="https://travis-ci.org/nestorsalceda/mamba.svg" alt="Build Status"></a></p>
 
 <p>mamba is the definitive BDD testing framework for Python. Born under the banner of Behavior Driven Development.</p>
 
@@ -40,95 +40,93 @@
 
 <p>To install mamba, just:</p>
 
-<div class="highlight"><pre>pip install mamba
+<div class="highlight highlight-sh"><pre>pip install mamba
 </pre></div>
 
 <h2>
 <a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h2>
 
-<div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">mamba</span> <span class="kn">import</span> <span class="n">describe</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">before</span><span class="p">,</span> <span class="n">after</span><span class="p">,</span> <span class="n">pending</span>
+<div class="highlight highlight-python"><pre>
 
-<span class="k">with</span> <span class="n">describe</span><span class="p">(</span><span class="s">'mamba'</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">it_should_be_tested_with_mamba_itself</span><span class="p">():</span>
+<span class="k">with</span> <span class="n">description</span><span class="p">(</span><span class="s">'mamba'</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'is tested with mamba itself'</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'when listing features'</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">it_supports_example_groups</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'supports example groups'</span><span class="p">):</span>
             <span class="k">pass</span>
 
         <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'hooks'</span><span class="p">):</span>
-            <span class="nd">@before.all</span>
-            <span class="k">def</span> <span class="nf">run_once_before_specs</span><span class="p">():</span>
-                <span class="k">pass</span>
+            <span class="k">with</span> <span class="n">before</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">'This code will be run once, before all examples'</span>
 
-            <span class="nd">@before.each</span>
-            <span class="k">def</span> <span class="nf">run_before_every_spec</span><span class="p">():</span>
-                <span class="k">pass</span>
+            <span class="k">with</span> <span class="n">before</span><span class="o">.</span><span class="n">each</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">'This code will be run before each example'</span>
 
-            <span class="nd">@after.each</span>
-            <span class="k">def</span> <span class="nf">run_after_every_spec</span><span class="p">():</span>
-                <span class="k">pass</span>
+            <span class="k">with</span> <span class="n">after</span><span class="o">.</span><span class="n">each</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">'This code will be run after each example'</span>
 
-            <span class="nd">@after.all</span>
-            <span class="k">def</span> <span class="nf">run_after_all_specs</span><span class="p">():</span>
-                <span class="k">pass</span>
+            <span class="k">with</span> <span class="n">after</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">'This code will be run once, after all examples'</span>
 
         <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'pending tests'</span><span class="p">):</span>
-            <span class="k">with</span> <span class="n">pending</span><span class="p">(</span><span class="n">context</span><span class="p">(</span><span class="s">'when running pending contexts'</span><span class="p">)):</span>
-                <span class="k">def</span> <span class="nf">it_should_not_run_specs_under_a_pending_context</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">_context</span><span class="p">(</span><span class="s">'when running pending contexts (marked with a underscore)'</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'will not run any spec under a pending context'</span><span class="p">):</span>
                     <span class="k">pass</span>
 
-            <span class="nd">@pending</span>
-            <span class="k">def</span> <span class="nf">it_should_not_run_a_spec_marked_with_pending_decorator</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">_it</span><span class="p">(</span><span class="s">'will not run pending specs (marked with underscore)'</span><span class="p">):</span>
                 <span class="k">pass</span>
 
-        <span class="k">def</span> <span class="nf">it_should_highlight_slow_tests</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'highlights slow tests'</span><span class="p">):</span>
             <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="n">ASampleClass</span><span class="p">)</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
-            <span class="k">def</span> <span class="nf">it_should_have_an_instance_in_subject_property</span><span class="p">():</span>
-                <span class="n">expect</span><span class="p">(</span><span class="n">_</span><span class="o">.</span><span class="n">subject</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">a</span><span class="p">(</span><span class="n">ASampleClass</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="n">ASampleClass</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'has an instance in subject property'</span><span class="p">):</span>
+                <span class="n">expect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subject</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">a</span><span class="p">(</span><span class="n">ASampleClass</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'when writing assertions'</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">it_should_be_usable_with_plain_assertions</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'can be used with plain assertions'</span><span class="p">):</span>
             <span class="k">assert</span> <span class="bp">True</span>
 
-        <span class="k">def</span> <span class="nf">it_should_be_usable_with_hamcrest_style_assertions</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'can be used with hamcrest style assertions'</span><span class="p">):</span>
             <span class="n">assert_that</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">is_</span><span class="p">(</span><span class="bp">True</span><span class="p">))</span>
 
-        <span class="k">def</span> <span class="nf">it_should_be_usable_with_should_dsl_style_assertions</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'can be used with should_dsl style assertions'</span><span class="p">):</span>
             <span class="bp">True</span> <span class="o">|</span><span class="n">should</span><span class="o">|</span> <span class="n">be</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">it_should_be_usable_with_sure_style_assertions</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'can be used with sure style assertions'</span><span class="p">):</span>
             <span class="bp">True</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
 
             <span class="n">expect</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
 
-        <span class="k">def</span> <span class="nf">it_should_be_assertion_framework_agnostic</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'is assertion framework agnostic'</span><span class="p">):</span>
             <span class="k">pass</span>
 
     <span class="k">with</span> <span class="n">context</span><span class="p">(</span><span class="s">'when using tests doubles'</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">it_should_be_usable_with_mockito</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'can be used with mockito'</span><span class="p">):</span>
             <span class="n">stub</span> <span class="o">=</span> <span class="n">mock</span><span class="p">()</span>
             <span class="n">when</span><span class="p">(</span><span class="n">stub</span><span class="p">)</span><span class="o">.</span><span class="n">is_usable_with_mockito</span><span class="p">()</span><span class="o">.</span><span class="n">thenReturn</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
             <span class="n">expect</span><span class="p">(</span><span class="n">stub</span><span class="o">.</span><span class="n">is_usable_with_mockito</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
 
-        <span class="k">def</span> <span class="nf">it_should_be_usable_with_doublex</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'can be used with doublex'</span><span class="p">):</span>
             <span class="k">with</span> <span class="n">Spy</span><span class="p">()</span> <span class="k">as</span> <span class="n">sender</span><span class="p">:</span>
                 <span class="n">sender</span><span class="o">.</span><span class="n">is_usable_with_doublex</span><span class="p">()</span><span class="o">.</span><span class="n">returns</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
             <span class="n">assert_that</span><span class="p">(</span><span class="n">sender</span><span class="o">.</span><span class="n">is_usable_with_doublex</span><span class="p">(),</span> <span class="n">is_</span><span class="p">(</span><span class="bp">True</span><span class="p">))</span>
             <span class="n">assert_that</span><span class="p">(</span><span class="n">sender</span><span class="o">.</span><span class="n">is_usable_with_doublex</span><span class="p">,</span> <span class="n">called</span><span class="p">())</span>
 
-        <span class="k">def</span> <span class="nf">it_should_be_usable_with_mock</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'can be used with mock'</span><span class="p">):</span>
             <span class="n">is_usable_with_mock</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">(</span><span class="n">return_value</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
             <span class="k">assert</span> <span class="n">mock</span><span class="p">()</span>
 
-        <span class="k">def</span> <span class="nf">it_should_be_test_doubles_framework_agnostic</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'is test doubles framework agnostic'</span><span class="p">):</span>
             <span class="k">pass</span>
+
+    <span class="k">with</span> <span class="n">_context</span><span class="p">(</span><span class="s">'when listing pending features'</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">it</span><span class="p">(</span><span class="s">'supports python 3'</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 </pre></div>
 
 <h2>
@@ -149,7 +147,7 @@
 
           <p class="repo-owner"><a href="https://github.com/nestorsalceda/mamba"></a> is maintained by <a href="https://github.com/nestorsalceda">nestorsalceda</a>.</p>
 
-          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
         </aside>
       </div>
     </div>
