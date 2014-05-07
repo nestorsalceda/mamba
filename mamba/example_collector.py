@@ -7,11 +7,13 @@ import ast
 import contextlib
 
 from mamba import nodetransformers
+from mamba.infrastructure import is_python3
 
 class ExampleCollector(object):
 
     def __init__(self, paths):
         self.paths = paths
+        self._node_transformer = nodetransformers.TransformToSpecsPython3NodeTransformer() if is_python3() else nodetransformers.TransformToSpecsNodeTransformer()
 
     def modules(self):
         for path in self._collect_files_containing_examples():
@@ -48,7 +50,7 @@ class ExampleCollector(object):
     def _load_module_from(self, path):
         with open(path) as f:
             tree = ast.parse(f.read(), filename=path)
-            tree = nodetransformers.TransformToSpecsNodeTransformer().visit(tree)
+            tree = self._node_transformer.visit(tree)
             ast.fix_missing_locations(tree)
 
         name = path.replace('.py', '')

@@ -56,7 +56,8 @@ class Loader(object):
                 example_group.append(Example(example))
 
     def _examples_in(self, example_group):
-        return [method for name, method in inspect.getmembers(example_group, inspect.ismethod) if self._is_example(method)]
+        result = [method for name, method in inspect.getmembers(example_group, inspect.isfunction) if self._is_example(method)]
+        return result
 
     def _is_example(self, method):
         return method.__name__.startswith('it') or self._is_pending_example(method)
