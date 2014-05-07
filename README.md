@@ -92,6 +92,10 @@ with description('mamba'):
 
         with it('is test doubles framework agnostic'):
             pass
+
+    with _context('when listing pending features'):
+        with it('supports python 3'):
+            raise NotImplementedError()
 ```
 
 
