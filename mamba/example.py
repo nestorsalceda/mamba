@@ -2,7 +2,6 @@
 
 import sys
 from datetime import datetime, timedelta
-import inspect
 
 from mamba import error
 
@@ -70,13 +69,6 @@ class Example(object):
     @property
     def name(self):
         return self.test.__name__
-
-    @property
-    def source_line(self):
-        try:
-            return inspect.getsourcelines(self.test)[1]
-        except IndexError:
-            return 'inf'
 
     @property
     def failed(self):

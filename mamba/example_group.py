@@ -106,9 +106,6 @@ class ExampleGroup(object):
         for example in self.examples:
             example.error = value
 
-    @property
-    def source_line(self):
-        return float('inf')
 
 class PendingExampleGroup(ExampleGroup):
 
