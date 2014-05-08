@@ -21,6 +21,9 @@ with description('mamba'):
     with it('is tested with mamba itself'):
         pass
 
+    with it('supports python 3'):
+        pass
+
     with context('when listing features'):
         with it('supports example groups'):
             pass
@@ -93,9 +96,6 @@ with description('mamba'):
         with it('is test doubles framework agnostic'):
             pass
 
-    with _context('when listing pending features'):
-        with it('supports python 3'):
-            raise NotImplementedError()
 ```
 
 
