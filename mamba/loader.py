@@ -4,8 +4,12 @@ import inspect
 
 from mamba.example_group import ExampleGroup, PendingExampleGroup
 from mamba.example import Example, PendingExample
+from mamba.infrastructure import is_python3
 
 class Loader(object):
+
+    def __init__(self):
+        self._predicate_for_examples = inspect.isfunction if is_python3() else inspect.ismethod
 
     def load_examples_from(self, module):
         loaded = []
@@ -56,8 +60,7 @@ class Loader(object):
                 example_group.append(Example(example))
 
     def _examples_in(self, example_group):
-        result = [method for name, method in inspect.getmembers(example_group, inspect.isfunction) if self._is_example(method)]
-        return result
+        return [method for name, method in inspect.getmembers(example_group, self._predicate_for_examples) if self._is_example(method)]
 
     def _is_example(self, method):
         return method.__name__.startswith('it') or self._is_pending_example(method)
