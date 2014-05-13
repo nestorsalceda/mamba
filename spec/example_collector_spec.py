@@ -41,12 +41,6 @@ with description(ExampleCollector) as _:
 
             expect(inspect.ismodule(module)).to.be.true
 
-        with it('unloads module when finished'):
-            module = _load_module(IRRELEVANT_PATH)
-            name = module.__name__
-
-            expect(sys.modules).not_to.have(name)
-
     #FIXME: Mixed responsabilities in test [collect, load]??
     with context('when loading'):
         with it('orders examples by line number'):

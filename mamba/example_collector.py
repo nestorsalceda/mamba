@@ -50,11 +50,7 @@ class ExampleCollector(object):
     def _load_module_from(self, path):
         name = path.replace('.py', '')
 
-        try:
-            yield self._module_from_ast(name, path)
-        finally:
-            if name in sys.modules:
-                del sys.modules[name]
+        yield self._module_from_ast(name, path)
 
     def _module_from_ast(self, name, path):
         tree = self._parse_and_transform_ast(path)
@@ -65,7 +61,6 @@ class ExampleCollector(object):
         module.__file__ = path
 
         __import__(package)
-        sys.modules[name] = module
 
         code = compile(tree, path, 'exec')
         exec(code, module.__dict__)
