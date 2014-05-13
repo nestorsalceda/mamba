@@ -47,20 +47,6 @@ with description(ExampleCollector) as _:
 
             expect(sys.modules).not_to.have(name)
 
-        with it('restores PYTHONPATH when finished from absolute path'):
-            old_path = list(sys.path)
-
-            module = _load_module(IRRELEVANT_PATH)
-
-            expect(sys.path).to.equal(old_path)
-
-        with it('restores PYTHONPATH when finished from relative path'):
-            old_path = list(sys.path)
-
-            module = _load_module(spec_relpath('without_inner_contexts.py'))
-
-            expect(sys.path).to.equal(old_path)
-
     #FIXME: Mixed responsabilities in test [collect, load]??
     with context('when loading'):
         with it('orders examples by line number'):
