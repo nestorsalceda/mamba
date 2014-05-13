@@ -48,27 +48,34 @@ class ExampleCollector(object):
     #Take care with watchdog stuff!!
     @contextlib.contextmanager
     def _load_module_from(self, path):
+        name = path.replace('.py', '')
+
+        try:
+            yield self._module_from_ast(name, path)
+        finally:
+            if name in sys.modules:
+                del sys.modules[name]
+
+    def _module_from_ast(self, name, path):
+        tree = self._parse_and_transform_ast(path)
+        package = '.'.join(name.split('/')[:-1])
+
+        module = imp.new_module(name)
+        module.__package__ = package
+        module.__file__ = path
+
+        __import__(package)
+        sys.modules[name] = module
+
+        code = compile(tree, path, 'exec')
+        exec(code, module.__dict__)
+
+        return module
+
+    def _parse_and_transform_ast(self, path):
         with open(path) as f:
             tree = ast.parse(f.read(), filename=path)
             tree = self._node_transformer.visit(tree)
             ast.fix_missing_locations(tree)
-
-        name = path.replace('.py', '')
-        package = '.'.join(name.split('/')[:-1])
-
-        try:
-            module = imp.new_module(name)
-            module.__package__ = package
-            module.__file__ = path
-
-            __import__(package)
-            sys.modules[name] = module
-
-            code = compile(tree, path, 'exec')
-            exec(code, module.__dict__)
-
-            yield module
-        finally:
-            if name in sys.modules:
-                del sys.modules[name]
+            return tree
 
