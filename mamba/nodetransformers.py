@@ -37,7 +37,16 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         if self._subject_is_a_class(node):
             node.body.insert(0, ast.Assign(targets=[ast.Name(id='_subject_class', ctx=ast.Store())], value=context_expr.args[0]))
 
-        return ast.copy_location(ast.ClassDef(name=self._description_name(node, name), bases=[], keywords=[], body=node.body, decorator_list=[]), node)
+        return ast.copy_location(
+            ast.ClassDef(
+                name=self._description_name(node, name),
+                bases=[],
+                keywords=[],
+                body=node.body,
+                decorator_list=[]
+            ),
+            node
+        )
 
     def _description_name(self, node, name):
         context_expr = self._context_expr_for(node)
