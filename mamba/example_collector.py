@@ -57,10 +57,14 @@ class ExampleCollector(object):
         package = '.'.join(name.split('/')[:-1])
 
         module = imp.new_module(name)
-        module.__package__ = package
         module.__file__ = path
 
-        __import__(package)
+        try:
+            __import__(package)
+            module.__package__ = package
+        except ImportError:
+            # No parent package available, so skip it
+            pass
 
         code = compile(tree, path, 'exec')
         exec(code, module.__dict__)
