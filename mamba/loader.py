@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import inspect
+import types
 
 from mamba.example_group import ExampleGroup, PendingExampleGroup
 from mamba.example import Example, PendingExample
@@ -41,6 +42,7 @@ class Loader(object):
         self._load_hooks(klass, example_group)
         self._load_examples(klass, example_group)
         self._load_nested_example_groups(klass, example_group)
+        self._load_helper_methods_to_execution_context(klass, example_group.execution_context)
 
     def _load_hooks(self, klass, example_group):
         for hook in self._hooks_in(klass):
@@ -80,4 +82,10 @@ class Loader(object):
 
             self._add_hooks_examples_and_nested_example_groups_to(nested, nested_example_group)
             example_group.append(nested_example_group)
+
+    def _load_helper_methods_to_execution_context(self, klass, execution_context):
+        helper_methods = [method for name, method in inspect.getmembers(klass, self._predicate_for_examples) if not self._is_example(method)]
+
+        for method in helper_methods:
+            setattr(execution_context, method.__name__, types.MethodType(method.im_func, execution_context, execution_context.__class__))
 
