@@ -1,5 +1,5 @@
 from expects import expect
-from doublex import Spy, assert_that, called
+from doublex import Spy
 
 from spec.object_mother import *
 
@@ -25,12 +25,12 @@ with description(Example):
     with it('notifies when is started'):
         self.example.run(self.reporter)
 
-        assert_that(self.reporter.example_started, called().with_args(self.example))
+        expect(self.reporter.example_started).to.have.been.called.with_args(self.example)
 
     with it('notifies when passed'):
         self.example.run(self.reporter)
 
-        assert_that(self.reporter.example_passed, called().with_args(self.example))
+        expect(self.reporter.example_passed).to.have.been.called.with_args(self.example)
 
     with context('when run failed'):
         with before.each:
@@ -48,5 +48,5 @@ with description(Example):
             expect(self.example.error).to.not_be.none
 
         with it('notifies its failure'):
-            assert_that(self.reporter.example_failed, called().with_args(self.example))
+            expect(self.reporter.example_failed).to.have.been.called.with_args(self.example)
 

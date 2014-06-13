@@ -1,5 +1,5 @@
 from expects import expect
-from doublex import assert_that, Spy, called
+from doublex import Spy
 
 from spec.object_mother import *
 
@@ -21,4 +21,4 @@ with description(PendingExample):
             expect(self.example.was_run).to.be.false
 
         with it('notifies is pending'):
-            assert_that(self.reporter.example_pending, called().with_args(self.example))
+            expect(self.reporter.example_pending).to.have.been.called.with_args(self.example)
