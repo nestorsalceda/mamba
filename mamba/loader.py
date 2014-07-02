@@ -87,5 +87,8 @@ class Loader(object):
         helper_methods = [method for name, method in inspect.getmembers(klass, self._predicate_for_examples) if not self._is_example(method)]
 
         for method in helper_methods:
-            setattr(execution_context, method.__name__, types.MethodType(method.im_func, execution_context, execution_context.__class__))
+            if is_python3():
+                setattr(execution_context, method.__name__, types.MethodType(method, execution_context))
+            else:
+                setattr(execution_context, method.__name__, types.MethodType(method.im_func, execution_context, execution_context.__class__))
 
