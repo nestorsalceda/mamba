@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import collections
 
-class Error(object):
+Error = collections.namedtuple('Error', ('exception', 'traceback'))
 
-    def __init__(self, exception, traceback):
-        self.exception = exception
-        self.traceback = traceback

@@ -2,6 +2,7 @@
 
 import sys
 import traceback
+import inspect
 
 from clint.textui import indent, puts, colored
 
@@ -119,8 +120,6 @@ class DocumentationFormatter(Formatter):
                 puts('%d) %s' % (index + 1, self._format_full_example_name(failed)))
                 with indent(3):
                     puts(self._color('red', 'Failure/Error: %s' % self._format_failing_expectation(failed)))
-                    puts()
-                    puts('Traceback:')
                     puts(self._color('red', self._format_traceback(failed)))
                     puts()
 
@@ -137,10 +136,21 @@ class DocumentationFormatter(Formatter):
         return ' '.join(result)
 
     def _format_failing_expectation(self, example_):
-        return str(example_.error.exception)
+        tb = example_.error.traceback.tb_next.tb_next
+        filename = inspect.getsourcefile(tb)
+
+        return """{source_line}
+    {exc_type}: {exc_msg}
+        """.format(
+            source_line=open(filename).read().splitlines()[tb.tb_lineno-1].strip(),
+            exc_type=type(example_.error.exception).__name__,
+            exc_msg=str(example_.error.exception),
+            filename=filename,
+            lineno=tb.tb_lineno
+        )
 
     def _format_traceback(self, example_):
-        return ''.join([message[2:] for message in traceback.format_tb(example_.error.traceback)[1:]])
+        return ''.join([message[2:] for message in reversed(traceback.format_tb(example_.error.traceback)[1:])])
 
     def _color(self, name, text):
         if not self.settings.no_color and sys.stdout.isatty():
