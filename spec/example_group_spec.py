@@ -1,11 +1,10 @@
 from expects import expect
-from doublex import *
+from doublex import Spy
 
 from spec.object_mother import *
 
 from mamba import reporter
 from mamba.example_group import ExampleGroup
-from mamba.example import Example
 
 
 with description(ExampleGroup):
@@ -32,10 +31,10 @@ with description(ExampleGroup):
             expect(self.example_group.elapsed_time.total_seconds()).to.be.above(0)
 
         with it('notifies that an example group was started'):
-            assert_that(self.reporter.example_group_started, called().with_args(self.example_group))
+            expect(self.reporter.example_group_started).to.have.been.called.with_args(self.example_group)
 
         with it('notifies that an example group is finished'):
-            assert_that(self.reporter.example_group_finished, called().with_args(self.example_group))
+            expect(self.reporter.example_group_finished).to.have.been.called.with_args(self.example_group)
 
     with context('when run failed'):
 
@@ -74,7 +73,7 @@ with description(ExampleGroup):
                 expect(self.example_group.examples[0].was_run).to.be.false
 
             with it('report child example as failed'):
-                assert_that(self.reporter.example_failed, called().with_args(self.example_group.examples[0]))
+                expect(self.reporter.example_failed).to.have.been.called.with_args(self.example_group.examples[0])
 
         with context('when has contexts as children'):
             with before.each:

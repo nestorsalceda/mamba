@@ -1,10 +1,9 @@
 from expects import expect
-from doublex import Spy, assert_that, called
+from doublex import Spy
 
 from spec.object_mother import *
 
 from mamba import reporter
-from mamba.example import PendingExample
 from mamba.example_group import PendingExampleGroup
 
 
@@ -24,7 +23,7 @@ with description(PendingExampleGroup):
             expect(self.example_group.examples[0].was_run).to.be.false
 
         with it('notifies that an example group is pending'):
-            assert_that(self.reporter.example_group_pending, called().with_args(self.example_group))
+            expect(self.reporter.example_group_pending).to.have.been.called.with_args(self.example_group)
 
     with context('when adding a new examples as children'):
 
