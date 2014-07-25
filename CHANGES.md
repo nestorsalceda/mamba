@@ -1,5 +1,9 @@
 # ChangeLog
 
+## Version 0.8.1
+
+* Improved failure traceback
+
 ## Version 0.8
 
 * Add support for --no-color option for turn off all output coloring
