@@ -1,6 +1,6 @@
 #mamba: the definitive testing tool for Python
 
-[![Build Status](https://travis-ci.org/nestorsalceda/mamba.png)](https://travis-ci.org/nestorsalceda/mamba)
+[![Build Status](https://travis-ci.org/nestorsalceda/mamba.svg)](https://travis-ci.org/nestorsalceda/mamba)
 
 mamba is the definitive BDD testing framework for Python. Born under the banner of Behavior Driven Development.
 
@@ -16,88 +16,86 @@ pip install mamba
 
 ```python
 
-from mamba import describe, context, before, after, pending
 
-with describe('mamba'):
-    def it_should_be_tested_with_mamba_itself():
+with description('mamba'):
+    with it('is tested with mamba itself'):
+        pass
+
+    with it('supports python 3'):
         pass
 
     with context('when listing features'):
-        def it_supports_example_groups():
+        with it('supports example groups'):
             pass
 
         with context('hooks'):
-            @before.all
-            def run_once_before_specs():
-                pass
+            with before.all:
+                print 'This code will be run once, before all examples'
 
-            @before.each
-            def run_before_every_spec():
-                pass
+            with before.each:
+                print 'This code will be run before each example'
 
-            @after.each
-            def run_after_every_spec():
-                pass
+            with after.each:
+                print 'This code will be run after each example'
 
-            @after.all
-            def run_after_all_specs():
-                pass
+            with after.all:
+                print 'This code will be run once, after all examples'
 
         with context('pending tests'):
-            with pending(context('when running pending contexts')):
-                def it_should_not_run_specs_under_a_pending_context():
+            with _context('when running pending contexts (marked with a underscore)'):
+                with it('will not run any spec under a pending context'):
                     pass
 
-            @pending
-            def it_should_not_run_a_spec_marked_with_pending_decorator():
+            with _it('will not run pending specs (marked with underscore)'):
                 pass
 
-        def it_should_highlight_slow_tests():
+        with it('highlights slow tests'):
             sleep(10)
 
-        with context(ASampleClass) as _:
-            def it_should_have_an_instance_in_subject_property():
-                expect(_.subject).to.be.a(ASampleClass)
+        with context(ASampleClass):
+            with it('has an instance in subject property'):
+                expect(self.subject).to.be.a(ASampleClass)
 
     with context('when writing assertions'):
-        def it_should_be_usable_with_plain_assertions():
+        with it('can be used with plain assertions'):
             assert True
 
-        def it_should_be_usable_with_hamcrest_style_assertions():
+        with it('can be used with hamcrest style assertions'):
             assert_that(True, is_(True))
 
-        def it_should_be_usable_with_should_dsl_style_assertions():
+        with it('can be used with should_dsl style assertions'):
             True |should| be(True)
 
-        def it_should_be_usable_with_sure_style_assertions():
+        with it('can be used with sure style assertions'):
             True.should.be.true
 
             expect(True).to.be.true
 
-        def it_should_be_assertion_framework_agnostic():
+        with it('is assertion framework agnostic'):
             pass
 
     with context('when using tests doubles'):
-        def it_should_be_usable_with_mockito():
+        with it('can be used with mockito'):
             stub = mock()
             when(stub).is_usable_with_mockito().thenReturn(True)
 
             expect(stub.is_usable_with_mockito()).to.be.true
 
-        def it_should_be_usable_with_doublex():
+        with it('can be used with doublex'):
             with Spy() as sender:
                 sender.is_usable_with_doublex().returns(True)
 
             assert_that(sender.is_usable_with_doublex(), is_(True))
             assert_that(sender.is_usable_with_doublex, called())
 
-        def it_should_be_usable_with_mock():
+        with it('can be used with mock'):
             is_usable_with_mock = Mock(return_value=True)
 
             assert mock()
 
-        def it_should_be_test_doubles_framework_agnostic():
+        with it('is test doubles framework agnostic'):
             pass
+
 ```
 
 

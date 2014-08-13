@@ -1,3 +1,2 @@
-sure==1.2.1
-doublex==1.7
-PyHamcrest==1.8.0
+expects
+doublex-expects

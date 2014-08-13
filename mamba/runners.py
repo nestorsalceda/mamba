@@ -15,8 +15,9 @@ class Runner(object):
 
 class BaseRunner(Runner):
 
-    def __init__(self, example_collector, reporter):
+    def __init__(self, example_collector, loader, reporter):
         self.example_collector = example_collector
+        self.loader = loader
         self.reporter = reporter
         self._has_failed_examples = False
 
@@ -29,7 +30,7 @@ class BaseRunner(Runner):
         self.reporter.finish()
 
     def _run_examples_in(self, module):
-        for example in module.examples:
+        for example in self.loader.load_examples_from(module):
             example.run(self.reporter)
 
             if example.failed:

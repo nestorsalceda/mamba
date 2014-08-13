@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from mamba import settings, formatters, reporter, runners, example_collector
+from mamba import settings, formatters, reporter, runners, example_collector, loader
 from mamba.infrastructure import is_python3
 
 
@@ -15,6 +15,7 @@ class ApplicationFactory(object):
         settings_.slow_test_threshold = self.arguments.slow
         settings_.enable_code_coverage = self.arguments.enable_coverage
         settings_.format = self.arguments.format
+        settings_.no_color = self.arguments.no_color
 
         if not is_python3():
             settings_.enable_file_watcher = self.arguments.watch
@@ -35,7 +36,7 @@ class ApplicationFactory(object):
 
     def create_runner(self):
         settings = self.create_settings()
-        runner = runners.BaseRunner(self.create_example_collector(), self.create_reporter())
+        runner = runners.BaseRunner(self.create_example_collector(), loader.Loader(), self.create_reporter())
 
         if settings.enable_code_coverage:
             runner = runners.CodeCoverageRunner(runner)

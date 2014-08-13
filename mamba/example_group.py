@@ -7,16 +7,18 @@ import inspect
 from mamba import error
 from mamba.example import Example, PendingExample
 
+class ExecutionContext(object):
+    pass
 
 class ExampleGroup(object):
 
-    def __init__(self, subject, parent=None, context=None):
+    def __init__(self, subject, parent=None, execution_context=None):
         self.subject = subject
         self.examples = []
         self.parent = parent
-        self.context = context
         self.hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
         self._elapsed_time = timedelta(0)
+        self.execution_context = ExecutionContext() if execution_context is None else execution_context
 
     def run(self, reporter):
         self._start(reporter)
@@ -34,27 +36,22 @@ class ExampleGroup(object):
 
     def _register_subject_creation_in_before_each_hook(self):
         if self._can_create_subject():
-            self.hooks['before_each'].insert(0, self._create_subject)
+            self.hooks['before_each'].insert(0, lambda execution_context: self._create_subject(execution_context))
 
     def _can_create_subject(self):
-        if not self._subject_is_class:
-            return False
+        return self._subject_is_class()
 
-        try:
-            self.subject()
-            return True
-        except:
-            return False
-
-    @property
     def _subject_is_class(self):
         return inspect.isclass(self.subject)
 
-    def _create_subject(self):
+    #TODO: Being executed on every example, instead of try once
+    #      Should be optimized
+    def _create_subject(self, execution_context):
         try:
-            self.context.subject = self.subject()
-        except:
-            pass
+            execution_context.subject = self.subject()
+        except Exception as exc:
+            if hasattr(execution_context, 'subject'):
+                del execution_context.subject
 
     def _run_inner_examples(self, reporter):
         self.run_hook('before_all')
@@ -64,11 +61,13 @@ class ExampleGroup(object):
 
     def run_hook(self, hook):
         for registered in self.hooks.get(hook, []):
-            if callable(registered):
-                try:
-                    registered()
-                except Exception as exception:
-                    self._set_failed()
+            try:
+                if hasattr(registered, 'im_func'):
+                    registered.im_func(self.execution_context)
+                elif callable(registered):
+                    registered(self.execution_context)
+            except Exception as exception:
+                self._set_failed()
 
     def _set_failed(self):
         type_, value, traceback = sys.exc_info()
@@ -84,7 +83,7 @@ class ExampleGroup(object):
 
     @property
     def name(self):
-        if self._subject_is_class:
+        if self._subject_is_class():
             return self.subject.__name__
         return self.subject
 
@@ -107,9 +106,6 @@ class ExampleGroup(object):
         for example in self.examples:
             example.error = value
 
-    @property
-    def source_line(self):
-        return float('inf')
 
 class PendingExampleGroup(ExampleGroup):
 

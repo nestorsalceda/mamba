@@ -1,145 +1,94 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import imp
 import inspect
-import contextlib
+import types
 
-from mamba import example, example_group
+from mamba.example_group import ExampleGroup, PendingExampleGroup
+from mamba.example import Example, PendingExample
+from mamba.infrastructure import is_python3
 
+class Loader(object):
 
-class _Factory(object):
+    def __init__(self):
+        self._predicate_for_examples = inspect.isfunction if is_python3() else inspect.ismethod
 
-    def create_root_example_group(self, subject, context, marked_as_pending):
-        if marked_as_pending is False:
-            return example_group.ExampleGroup(subject, context=context)
+    def load_examples_from(self, module):
+        loaded = []
+        example_groups = self._example_groups_for(module)
 
-        return example_group.PendingExampleGroup(subject, context=context)
+        for klass in example_groups:
+            example_group = self._create_example_group(klass)
+            self._add_hooks_examples_and_nested_example_groups_to(klass, example_group)
 
-    def create_example_group(self, subject, context, parent, marked_as_pending):
-        if self._is_a_pending_example_group(parent, marked_as_pending):
-            return example_group.PendingExampleGroup(subject, context=context)
+            loaded.append(example_group)
 
-        return example_group.ExampleGroup(subject, context=context)
+        return loaded
 
-    def _is_a_pending_example_group(self, parent, marked_as_pending):
-        parent_marked_as_pending = isinstance(parent, example_group.PendingExampleGroup)
+    def _example_groups_for(self, module):
+        return [klass for name, klass in inspect.getmembers(module, inspect.isclass) if self._is_example_group(name)]
 
-        return marked_as_pending or parent_marked_as_pending
+    def _is_example_group(self, class_name):
+        return class_name.endswith('__description')
 
-    def create_example(self, code, parent):
-        if self._is_a_pending_example(code, parent):
-            return example.PendingExample(code)
+    def _create_example_group(self, klass, execution_context=None):
+        if '__pending' in klass.__name__:
+            return PendingExampleGroup(self._subject(klass), execution_context=execution_context)
+        return ExampleGroup(self._subject(klass), execution_context=execution_context)
 
-        return example.Example(code)
+    def _subject(self, example_group):
+        return getattr(example_group, '_subject_class', example_group.__name__.replace('__description', '').replace('__pending', ''))
 
-    def _is_a_pending_example(self, code, parent):
-        marked_as_pending = getattr(code, 'pending', False)
-        parent_marked_as_pending = isinstance(parent, example_group.PendingExampleGroup)
+    def _add_hooks_examples_and_nested_example_groups_to(self, klass, example_group):
+        self._load_hooks(klass, example_group)
+        self._load_examples(klass, example_group)
+        self._load_nested_example_groups(klass, example_group)
+        self._load_helper_methods_to_execution_context(klass, example_group.execution_context)
 
-        return marked_as_pending or parent_marked_as_pending
+    def _load_hooks(self, klass, example_group):
+        for hook in self._hooks_in(klass):
+            example_group.hooks[hook.__name__].append(hook)
 
-class _Context(object):
-    pass
+    def _hooks_in(self, example_group):
+        return [method for name, method in inspect.getmembers(example_group, inspect.ismethod) if self._is_hook(name)]
 
+    def _is_hook(self, method_name):
+        return method_name.startswith('before') or method_name.startswith('after')
 
-class describe(object):
-
-    def __init__(self, subject):
-        self.subject = subject
-        self.locals_before = None
-        self.context = _Context()
-        self.factory = _Factory()
-
-    def __enter__(self):
-        frame = inspect.currentframe().f_back
-        self.locals_before = set(frame.f_locals.keys())
-
-        if not self._is_initialized(frame):
-            self._initialize(frame)
-
-        if self._is_root_example(frame):
-            self._create_root_example_and_make_it_current(frame)
-        else:
-            self._create_inner_example_group_and_make_it_current(frame)
-
-        return self.context
-
-    def _is_initialized(self, frame):
-        return 'examples' in frame.f_locals
-
-    def _initialize(self, frame):
-        frame.f_locals['examples'] = []
-        frame.f_locals['current_example'] = None
-
-    def _is_root_example(self, frame):
-        return frame.f_locals['current_example'] is None
-
-    def _create_root_example_and_make_it_current(self, frame):
-        frame.f_locals['current_example'] = self.factory.create_root_example_group(self.subject, self.context, self._marked_as_pending)
-        frame.f_locals['examples'].append(frame.f_locals['current_example'])
-
-    @property
-    def _marked_as_pending(self):
-        return getattr(self, 'pending', False)
-
-    def _create_inner_example_group_and_make_it_current(self, frame):
-        current = self.factory.create_example_group(self.subject, self.context, frame.f_locals['current_example'], self._marked_as_pending)
-
-        frame.f_locals['current_example'].append(current)
-        frame.f_locals['current_example'] = current
-
-    def __exit__(self, type, value, traceback):
-        frame = inspect.currentframe().f_back
-
-        self._load_examples_or_hooks(frame)
-        self._sort_loaded_examples(frame)
-        self._make_parent_as_current_example(frame)
-
-    def _load_examples_or_hooks(self, frame):
-        current = frame.f_locals['current_example']
-
-        for function in self._get_examples_or_hooks_from(frame):
-            code = frame.f_locals[function]
-            if self._is_hook(code):
-                self._load_hooks(function, code, current)
+    def _load_examples(self, klass, example_group):
+        for example in self._examples_in(klass):
+            if self._is_pending_example(example) or self._is_pending_example_group(example_group):
+                example_group.append(PendingExample(example))
             else:
-                self._load_example(code, current)
+                example_group.append(Example(example))
 
-    def _get_examples_or_hooks_from(self, frame):
-        possible_examples = set(frame.f_locals.keys()) - self.locals_before
+    def _examples_in(self, example_group):
+        return [method for name, method in inspect.getmembers(example_group, self._predicate_for_examples) if self._is_example(method)]
 
-        return [example for example in possible_examples if self._is_example_or_hook(example, frame)]
+    def _is_example(self, method):
+        return method.__name__.startswith('it') or self._is_pending_example(method)
 
-    def _is_example_or_hook(self, example, frame):
-        return self._is_public_function(example, frame.f_locals[example]) and not self._is_already_loaded(frame.f_locals[example])
+    def _is_pending_example(self, example):
+        return example.__name__.startswith('_it')
 
-    def _is_public_function(self, function, code):
-        return callable(code) and not function.startswith('_')
+    def _is_pending_example_group(self, example_group):
+        return isinstance(example_group, PendingExampleGroup)
 
-    def _is_already_loaded(self, code):
-        return getattr(code, '_loaded', False)
+    def _load_nested_example_groups(self, klass, example_group):
+        for nested in self._example_groups_for(klass):
+            if isinstance(example_group, PendingExampleGroup):
+                nested_example_group = PendingExampleGroup(self._subject(nested), execution_context=example_group.execution_context)
+            else:
+                nested_example_group = self._create_example_group(nested, execution_context=example_group.execution_context)
 
-    def _is_hook(self, function):
-        return getattr(function, 'hook', [])
+            self._add_hooks_examples_and_nested_example_groups_to(nested, nested_example_group)
+            example_group.append(nested_example_group)
 
-    def _load_hooks(self, function, code, current):
-        current.hooks['%s_%s' % (code.hook['where'], code.hook['when'])].append(code)
-        self._mark_as_loaded(code)
+    def _load_helper_methods_to_execution_context(self, klass, execution_context):
+        helper_methods = [method for name, method in inspect.getmembers(klass, self._predicate_for_examples) if not self._is_example(method)]
 
-    def _mark_as_loaded(self, code):
-        code._loaded = True
-
-    def _load_example(self, code, current):
-        current.append(self.factory.create_example(code, current))
-        self._mark_as_loaded(code)
-
-    def _sort_loaded_examples(self, frame):
-        frame.f_locals['current_example'].examples.sort(key=lambda x: x.source_line)
-
-    def _make_parent_as_current_example(self, frame):
-        frame.f_locals['current_example'] = frame.f_locals['current_example'].parent
-
-
-context = describe
+        for method in helper_methods:
+            if is_python3():
+                setattr(execution_context, method.__name__, types.MethodType(method, execution_context))
+            else:
+                setattr(execution_context, method.__name__, types.MethodType(method.im_func, execution_context, execution_context.__class__))
 

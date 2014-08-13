@@ -4,72 +4,94 @@ import os
 import sys
 import inspect
 
-from mamba import describe, context, example, example_group, before
+from mamba import example, example_group, loader
 from mamba.example_collector import ExampleCollector
-from sure import expect
 
-IRRELEVANT_PATH = os.path.join(os.path.dirname(__file__), 'fixtures', 'without_inner_contexts.py')
-PENDING_DECORATOR_PATH = os.path.join(os.path.dirname(__file__), 'fixtures', 'with_pending_decorator.py')
-PENDING_DECORATOR_AS_ROOT_PATH = os.path.join(os.path.dirname(__file__), 'fixtures', 'with_pending_decorator_as_root.py')
+from expects import expect
 
 
-with describe(ExampleCollector) as _:
+def spec_relpath(name):
+    return os.path.join('spec', 'fixtures', name)
 
+
+def spec_abspath(name):
+    return os.path.join(os.path.dirname(__file__), 'fixtures', name)
+
+
+IRRELEVANT_PATH = spec_abspath('without_inner_contexts.py')
+PENDING_DECORATOR_PATH = spec_abspath('with_pending_decorator.py')
+PENDING_DECORATOR_AS_ROOT_PATH = spec_abspath('with_pending_decorator_as_root.py')
+WITH_RELATIVE_IMPORT_PATH = spec_abspath('with_relative_import.py')
+
+
+def _load_module(path):
+    example_collector = ExampleCollector([path])
+    return list(example_collector.modules())[0]
+
+
+with description(ExampleCollector) as _:
     with context('when loading from file'):
-
-        def it_should_loads_the_module():
+        with it('loads module from absolute path'):
             module = _load_module(IRRELEVANT_PATH)
 
             expect(inspect.ismodule(module)).to.be.true
 
-        def _load_module(path):
-            example_collector = ExampleCollector([path])
-            return list(example_collector.modules())[0]
+        with it('loads module from relative path'):
+            module = _load_module(spec_relpath('without_inner_contexts.py'))
 
-        def it_should_unload_module_when_finished():
-            module = _load_module(IRRELEVANT_PATH)
-            name = module.__name__
+            expect(inspect.ismodule(module)).to.be.true
 
-            expect(sys.modules).to_not.contain(name)
+    #FIXME: Mixed responsabilities in test [collect, load]??
+    with context('when loading'):
+        with it('orders examples by line number'):
+            module = _load_module(spec_abspath('without_inner_contexts.py'))
 
-    def it_should_order_by_line_number_without_inner_context():
-        path = os.path.join(os.path.dirname(__file__), 'fixtures', 'without_inner_contexts.py')
+            examples = loader.Loader().load_examples_from(module)
 
-        module = _load_module(path)
+            expect(examples).to.have.length(1)
+            expect([example.name for example in examples[0].examples]).to.be.equal(['it first example', 'it second example', 'it third example'])
 
-        expect(module.examples).to.have.length_of(1)
-        expect([example.name for example in module.examples[0].examples]).to.be.equal(['first_example', 'second_example', 'third_example'])
+        with it('places examples together and groups at the end'):
+            module = _load_module(spec_abspath('with_inner_contexts.py'))
 
-    def it_should_put_examples_together_and_groups_at_last():
-        path = os.path.join(os.path.dirname(__file__), 'fixtures', 'with_inner_contexts.py')
+            examples = loader.Loader().load_examples_from(module)
 
-        module = _load_module(path)
-
-        expect(module.examples).to.have.length_of(1)
-        expect([example.name for example in module.examples[0].examples]).to.be.equal(['first_example', 'second_example', 'third_example', '#inner_context'])
+            expect(examples).to.have.length(1)
+            expect([example.name for example in examples[0].examples]).to.be.equal(['it first example', 'it second example', 'it third example', '#inner_context'])
 
     with context('when a pending decorator loaded'):
-        def it_should_mark_example_as_pending():
-            module = _load_module(PENDING_DECORATOR_AS_ROOT_PATH)
+        with it('mark example as pending'):
+            module = _load_module(PENDING_DECORATOR_PATH)
 
-            expect(module.examples).to.have.length_of(1)
-            expect(module.examples[0].examples[0]).to.be.a(example.PendingExample)
+            examples = loader.Loader().load_examples_from(module)
 
-        def it_should_mark_example_group_as_pending():
-            module = _load_module(PENDING_DECORATOR_AS_ROOT_PATH)
+            expect(examples).to.have.length(1)
+            expect(examples[0].examples[0]).to.be.a(example.PendingExample)
 
-            expect(module.examples).to.have.length_of(1)
-            expect(module.examples[0].examples[1]).to.be.a(example_group.PendingExampleGroup)
+        with it('marks example group as pending'):
+            module = _load_module(PENDING_DECORATOR_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples).to.have.length(1)
+            expect(examples[0].examples[1]).to.be.a(example_group.PendingExampleGroup)
 
     with context('when a pending decorator loaded_as_root'):
-        def it_should_mark_inner_examples_as_pending():
+        with it('mark inner examples as pending'):
             module = _load_module(PENDING_DECORATOR_AS_ROOT_PATH)
 
-            expect(module.examples).to.have.length_of(1)
-            examples_in_root = module.examples[0].examples
+            examples = loader.Loader().load_examples_from(module)
 
-            expect(examples_in_root).to.have.length_of(2)
+            expect(examples).to.have.length(1)
+            examples_in_root = examples[0].examples
+
+            expect(examples_in_root).to.have.length(2)
             expect(examples_in_root[0]).to.be.a(example.PendingExample)
             expect(examples_in_root[1]).to.be.a(example_group.PendingExampleGroup)
             expect(examples_in_root[1].examples[0]).to.be.a(example.PendingExample)
 
+    with context('when loading with relative import'):
+        with it('loads module and perform relative import'):
+            module = _load_module(WITH_RELATIVE_IMPORT_PATH)
+
+            expect(module).to.have.property('HelperClass')
