@@ -15,7 +15,8 @@ pip install mamba
 ##Overview
 
 ```python
-
+# Importing mamba is not needed!
+# import mamba
 
 with description('mamba'):
     with it('is tested with mamba itself'):

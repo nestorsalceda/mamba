@@ -6,7 +6,7 @@ from spec.object_mother import *
 from mamba import reporter, formatters, example_group
 
 
-with description(reporter.Reporter) :
+with description(reporter.Reporter):
 
     with before.each:
         self.example = an_example()
