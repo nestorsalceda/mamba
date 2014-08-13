@@ -26,7 +26,7 @@ class ApplicationFactory(object):
         settings = self.create_settings()
         if settings.format == 'progress':
             return formatters.ProgressFormatter(settings)
-        return formatters.DocumentationFormatter(settings)
+        return formatters.GritterFormatter(settings)
 
     def create_example_collector(self):
         return example_collector.ExampleCollector(self.arguments.specs)
