@@ -1,4 +1,5 @@
-from expects import expect
+from expects import *
+from doublex_expects import have_been_called_with
 from doublex import Spy
 
 from spec.object_mother import *
@@ -14,7 +15,7 @@ with description(ExampleGroup):
         self.reporter = Spy(reporter.Reporter)
 
     with it('has same name than subject'):
-        expect(self.example_group.name).to.be(IRRELEVANT_SUBJECT)
+        expect(self.example_group.name).to(be(IRRELEVANT_SUBJECT))
 
     with context('when run'):
 
@@ -25,16 +26,16 @@ with description(ExampleGroup):
             self.example_group.run(self.reporter)
 
         with it('runs the example'):
-            expect(self.example.was_run).to.be.true
+            expect(self.example.was_run).to(be_true)
 
         with it('calculates elapsed time'):
-            expect(self.example_group.elapsed_time.total_seconds()).to.be.above(0)
+            expect(self.example_group.elapsed_time.total_seconds()).to(be_above(0))
 
         with it('notifies that an example group was started'):
-            expect(self.reporter.example_group_started).to.have.been.called.with_args(self.example_group)
+            expect(self.reporter.example_group_started).to(have_been_called_with(self.example_group))
 
         with it('notifies that an example group is finished'):
-            expect(self.reporter.example_group_finished).to.have.been.called.with_args(self.example_group)
+            expect(self.reporter.example_group_finished).to(have_been_called_with(self.example_group))
 
     with context('when run failed'):
 
@@ -44,7 +45,7 @@ with description(ExampleGroup):
             self.example_group.run(self.reporter)
 
         with it('is marked as failed'):
-            expect(self.example_group.failed).to.be.true
+            expect(self.example_group.failed).to(be_true)
 
     with context('when before all hook raises an error'):
         with before.each:
@@ -64,16 +65,16 @@ with description(ExampleGroup):
                 self.example_group.run(self.reporter)
 
             with it('maks failed all children'):
-                expect(self.example_group.examples[0].failed).to.be.true
+                expect(self.example_group.examples[0].failed).to(be_true)
 
             with it('propagates error to all children'):
-                expect(self.example_group.examples[0].error).to.not_be.none
+                expect(self.example_group.examples[0].error).not_to(be_none)
 
             with it('does not execute any example'):
-                expect(self.example_group.examples[0].was_run).to.be.false
+                expect(self.example_group.examples[0].was_run).to(be_false)
 
             with it('report child example as failed'):
-                expect(self.reporter.example_failed).to.have.been.called.with_args(self.example_group.examples[0])
+                expect(self.reporter.example_failed).to(have_been_called_with(self.example_group.examples[0]))
 
         with context('when has contexts as children'):
             with before.each:
@@ -83,7 +84,7 @@ with description(ExampleGroup):
                 self.example_group.run(self.reporter)
 
             with it('marks failed all children in context'):
-                expect(self.example_group.examples[0].failed).to.be.true
+                expect(self.example_group.examples[0].failed).to(be_true)
 
             with it('propagates error to all children in context'):
-                expect(self.example_group.examples[0].error).to.not_be.none
+                expect(self.example_group.examples[0].error).not_to(be_none)
