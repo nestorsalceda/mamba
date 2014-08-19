@@ -1,4 +1,4 @@
-from expects import expect
+from expects import *
 
 
 RETURN_VALUE = '42'
@@ -9,10 +9,10 @@ with description('Refactoring goodies'):
         return return_value
 
     with it('uses methods defined inside its context'):
-        expect(self.a_method()).to.be.equal(RETURN_VALUE)
+        expect(self.a_method()).to(equal(RETURN_VALUE))
 
     with context('when using nested contexts'):
 
         with it('uses methods defined inside its parent'):
-            expect(self.a_method()).to.be.equal(RETURN_VALUE)
+            expect(self.a_method()).to(equal(RETURN_VALUE))
 

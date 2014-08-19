@@ -1,4 +1,5 @@
-from expects import expect
+from expects import *
+from doublex_expects import have_been_called_with
 from doublex import Spy
 
 from spec.object_mother import *
@@ -18,7 +19,7 @@ with description(PendingExample):
             self.example.run(self.reporter)
 
         with it('not runs the example'):
-            expect(self.example.was_run).to.be.false
+            expect(self.example.was_run).to(be_false)
 
         with it('notifies is pending'):
-            expect(self.reporter.example_pending).to.have.been.called.with_args(self.example)
+            expect(self.reporter.example_pending).to(have_been_called_with(self.example))
