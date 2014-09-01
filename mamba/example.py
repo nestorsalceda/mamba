@@ -49,8 +49,10 @@ class Example(object):
         self._elapsed_time = datetime.utcnow() - self._begin
         if self.failed:
             reporter.example_failed(self)
-        else:
+        elif self.was_run:
             reporter.example_passed(self)
+        else:
+            reporter.example_pending(self)
 
     @property
     def _parents(self):
@@ -84,6 +86,5 @@ class Example(object):
 
 
 class PendingExample(Example):
-
     def run(self, reporter):
         reporter.example_pending(self)
