@@ -34,7 +34,9 @@ class Example(object):
         self.run_hook('before_each')
         if hasattr(self.test, 'im_func'):
             self.test.im_func(self.parent.execution_context)
-            self.was_run = True
+        else:
+            self.test(self.parent.execution_context)
+        self.was_run = True
         self.run_hook('after_each')
 
     def run_hook(self, hook):
@@ -49,8 +51,10 @@ class Example(object):
         self._elapsed_time = datetime.utcnow() - self._begin
         if self.failed:
             reporter.example_failed(self)
-        else:
+        elif self.was_run:
             reporter.example_passed(self)
+        else:
+            reporter.example_pending(self)
 
     @property
     def _parents(self):
@@ -84,6 +88,5 @@ class Example(object):
 
 
 class PendingExample(Example):
-
     def run(self, reporter):
         reporter.example_pending(self)
