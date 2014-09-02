@@ -24,10 +24,11 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     def _get_name(self, node):
         context_expr = self._context_expr_for(node)
 
+        if isinstance(context_expr, ast.Call):
+            return context_expr.func.id
+
         if isinstance(context_expr, ast.Attribute):
             return context_expr.value.id
-
-        return context_expr.func.id
 
     def _context_expr_for(self, node):
         return node.context_expr
