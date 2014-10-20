@@ -1,5 +1,13 @@
 # ChangeLog
 
+## Version 0.8.2
+
+* Fixes loading a file without package name
+* Use newer expect version
+* Report all example that have not been executed as pending
+* Fix exampe execution in python3
+* Update watchdog requirements
+
 ## Version 0.8.1
 
 * Improved failure traceback
