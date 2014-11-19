@@ -1,8 +1,9 @@
-python:
-        version:
-                - 2.7
-                - 3.4
-                - pypy-2.2.1
+machine:
+        python:
+                version:
+                        - 2.7
+                        - 3.4
+                        - pypy-2.2.1
 dependencies:
         post:
                 - pip install -r requirements -r requiements-dev.txt
