@@ -62,6 +62,26 @@ with description('Errors in hooks'):
 
                 expect(isinstance(self.example.error.exception, NotImplementedError)).to(be_true)
 
+    with context('when an error was raised in a after.each hook'):
+        with before.each:
+            self.example_group.hooks['after_each'].append(self._error)
+
+        with it('marks example as failed'):
+            self.example = an_example()
+            self.example_group.append(self.example)
+
+            self.example_group.run(self.reporter)
+
+            expect(self.example.error).not_to(be_none)
+
+        with context('when example also launches an error'):
+            with it('keeps the error happened in example'):
+                self.example = a_failing_example()
+                self.example_group.append(self.example)
+
+                self.example_group.run(self.reporter)
+
+                expect(isinstance(self.example.error.exception, ValueError)).to(be_true)
 
     def _error(self):
         raise NotImplementedError()
