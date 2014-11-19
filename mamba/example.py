@@ -22,7 +22,8 @@ class Example(object):
                 self._run_inner_test(reporter)
         except Exception as exception:
             self.was_run = True
-            self._set_failed()
+            if self.error is None:
+                self._set_failed()
         finally:
             self._finish(reporter)
 
