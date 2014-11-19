@@ -136,7 +136,7 @@ class DocumentationFormatter(Formatter):
         return ' '.join(result)
 
     def _format_failing_expectation(self, example_):
-        tb = example_.error.traceback.tb_next.tb_next
+        tb = self._traceback(example_)
         filename = inspect.getsourcefile(tb)
 
         return """{source_line}
@@ -144,13 +144,19 @@ class DocumentationFormatter(Formatter):
         """.format(
             source_line=open(filename).read().splitlines()[tb.tb_lineno-1].strip(),
             exc_type=type(example_.error.exception).__name__,
-            exc_msg=str(example_.error.exception),
-            filename=filename,
-            lineno=tb.tb_lineno
+            exc_msg=str(example_.error.exception)
         )
 
+    def _traceback(self, example_):
+        tb = example_.error.traceback.tb_next
+        if tb.tb_next is not None:
+            tb = tb.tb_next
+
+        return tb
+
     def _format_traceback(self, example_):
-        return ''.join([message[2:] for message in reversed(traceback.format_tb(example_.error.traceback)[1:])])
+        tb = self._traceback(example_)
+        return ''.join([message[2:] for message in reversed(traceback.format_tb(tb))])
 
     def _color(self, name, text):
         if not self.settings.no_color and sys.stdout.isatty():
