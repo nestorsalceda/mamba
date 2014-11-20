@@ -31,8 +31,6 @@ with description('Errors in hooks'):
 
                     self.example_group.run(self.reporter)
 
-                    print(self.example.error)
-
                     expect(isinstance(self.example.error.exception, NotImplementedError)).to(be_true)
 
             with it('keeps the error happened in hook'):
