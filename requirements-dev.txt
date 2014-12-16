@@ -1,2 +1,3 @@
 expects>=0.4.2,<0.5
 doublex-expects>=0.4,<0.5
+mock==1.0.1

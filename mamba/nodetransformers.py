@@ -25,6 +25,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         context_expr = self._context_expr_for(node)
 
         if isinstance(context_expr, ast.Call):
+            if hasattr(context_expr.func, 'value'):
+                return context_expr.func.value.id
             return context_expr.func.id
 
         if isinstance(context_expr, ast.Attribute):
