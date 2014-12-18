@@ -1,5 +1,11 @@
 # ChangeLog
 
+## Version 0.8.3
+
+* Upgrade coverage
+* Fix error reporting in hooks
+* Add support for mock.patch
+
 ## Version 0.8.2
 
 * Fixes loading a file without package name
