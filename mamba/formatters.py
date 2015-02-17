@@ -6,6 +6,8 @@ import inspect
 
 from clint.textui import indent, puts, colored
 
+from mamba.infrastructure import total_seconds
+
 
 class Formatter(object):
 
@@ -69,7 +71,7 @@ class DocumentationFormatter(Formatter):
         return example.name.replace('_', ' ')
 
     def _format_slow_test(self, example):
-        seconds = example.elapsed_time.total_seconds()
+        seconds = total_seconds(example.elapsed_time)
         color_name = None
 
         if seconds > self.settings.slow_test_threshold:
@@ -106,7 +108,7 @@ class DocumentationFormatter(Formatter):
             puts(self._color('green', "%d examples ran in %s" % (example_count, duration)))
 
     def _format_duration(self, duration):
-        return '%.4f seconds' % duration.total_seconds()
+        return '%.4f seconds' % total_seconds(duration)
 
     def failures(self, failed_examples):
         if not failed_examples:

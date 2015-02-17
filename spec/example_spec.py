@@ -4,7 +4,8 @@ from doublex import Spy
 
 from spec.object_mother import *
 
-from mamba import reporter
+from mamba import reporter, infrastructure
+from mamba.infrastructure import total_seconds
 
 
 with description(Example):
@@ -21,7 +22,7 @@ with description(Example):
     with it('calculates elapsed time'):
         self.example.run(self.reporter)
 
-        expect(self.example.elapsed_time.total_seconds()).to(be_above(0))
+        expect(total_seconds(self.example.elapsed_time)).to(be_above(0))
 
     with it('notifies when is started'):
         self.example.run(self.reporter)
