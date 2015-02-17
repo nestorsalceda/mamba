@@ -1,5 +1,9 @@
 # ChangeLog
 
+## Version 0.8.4
+
+* Added Python 2.6 support
+
 ## Version 0.8.3
 
 * Upgrade coverage
