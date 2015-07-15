@@ -141,9 +141,10 @@ class DocumentationFormatter(Formatter):
         tb = self._traceback(example_)
         filename = inspect.getsourcefile(tb)
 
-        return """{source_line}
+        return """{filename} {source_line}
     {exc_type}: {exc_msg}
         """.format(
+            filename=filename,
             source_line=open(filename).read().splitlines()[tb.tb_lineno-1].strip(),
             exc_type=type(example_.error.exception).__name__,
             exc_msg=str(example_.error.exception)
