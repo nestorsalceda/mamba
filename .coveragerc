@@ -1,0 +1,4 @@
+[run]
+source = ./mamba
+omit = ./mamba/__init__.py, ./mamba/infrastructure/__init__.py
+branch = True
