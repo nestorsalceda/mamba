@@ -97,6 +97,18 @@ with description('mamba'):
         with it('is test doubles framework agnostic'):
             pass
 
+    with context('when code coverage measurement is desired'):
+        with it('collects them if you pass `--enable-coverage`'):
+            pass
+
+        with it('calls `coverage` directly in order to compute it'):
+            # see https://pypi.python.org/pypi/coverage/
+            pass
+
+        with it('is configured in a `.coveragerc` file at the root of your project'):
+            # see http://nedbatchelder.com/code/coverage/config.html
+            pass
+
 ```
 
 
