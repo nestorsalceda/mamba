@@ -73,7 +73,7 @@ class Example(object):
 
     @property
     def name(self):
-        return self.test.__name__
+        return self.test.__name__[10:]
 
     @property
     def failed(self):

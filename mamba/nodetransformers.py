@@ -7,6 +7,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     EXAMPLES = ('it', '_it')
     HOOKS = ('before', 'after')
 
+    sequence = 1
+
     def visit_With(self, node):
         super(TransformToSpecsNodeTransformer, self).generic_visit(node)
 
@@ -63,7 +65,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         if name in self.PENDING_EXAMPLE_GROUPS:
             description_name += '__pending'
 
-        description_name += '__description'
+        description_name = '{0:08d}__{1}__description'.format(self.sequence, description_name)
+        self.sequence += 1
 
         return description_name
 
@@ -71,10 +74,11 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         return not isinstance(self._context_expr_for(node).args[0], ast.Str)
 
     def _transform_to_example(self, node, name):
-        example = self._context_expr_for(node).args[0].s
+        example_name = '{0:08d}__{1} {2}'.format(self.sequence, name, self._context_expr_for(node).args[0].s)
+        self.sequence += 1
         return ast.copy_location(
             ast.FunctionDef(
-                name=name + ' ' + example,
+                name=example_name,
                 args=self._generate_self(),
                 body=node.body,
                 decorator_list=[]
