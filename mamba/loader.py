@@ -33,7 +33,11 @@ class Loader(object):
         return ExampleGroup(self._subject(klass), execution_context=execution_context)
 
     def _subject(self, example_group):
-        return getattr(example_group, '_subject_class', example_group.__name__.replace('__description', '').replace('__pending', ''))
+        subject = getattr(example_group, '_subject_class', example_group.__name__.replace('__description', '').replace('__pending', ''))
+        if isinstance(subject, str):
+            return subject[10:]
+        else:
+            return subject
 
     def _add_hooks_examples_and_nested_example_groups_to(self, klass, example_group):
         self._load_hooks(klass, example_group)
@@ -65,10 +69,10 @@ class Loader(object):
         return inspect.getmembers(klass, inspect.isfunction if is_python3() else inspect.ismethod)
 
     def _is_example(self, method):
-        return method.__name__.startswith('it') or self._is_pending_example(method)
+        return method.__name__[10:].startswith('it') or self._is_pending_example(method)
 
     def _is_pending_example(self, example):
-        return example.__name__.startswith('_it')
+        return example.__name__[10:].startswith('_it')
 
     def _is_pending_example_group(self, example_group):
         return isinstance(example_group, PendingExampleGroup)

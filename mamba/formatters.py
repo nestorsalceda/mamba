@@ -68,7 +68,10 @@ class DocumentationFormatter(Formatter):
         puts('  ' * self._depth(example) + symbol + ' ' + self._format_example_name(example) + self._format_slow_test(example))
 
     def _format_example_name(self, example):
-        return example.name.replace('_', ' ')
+        name = example.name
+        if name[8:10] == '__' and name[:8].isdigit():
+            name = name[10:]
+        return name.replace('_', ' ')
 
     def _format_slow_test(self, example):
         seconds = total_seconds(example.elapsed_time)
