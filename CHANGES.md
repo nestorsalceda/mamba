@@ -1,5 +1,11 @@
 # ChangeLog
 
+## Version 0.8.5
+
+* Show spec filename in each error
+* Use .coveragerc file
+* Run examples in natural order
+
 ## Version 0.8.4
 
 * Added Python 2.6 support
