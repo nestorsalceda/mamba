@@ -66,8 +66,10 @@ class ExampleCollector(object):
             # No parent package available, so skip it
             pass
 
+        self._prepare_path_for_local_packages()
         code = compile(tree, path, 'exec')
         exec(code, module.__dict__)
+        self._restore_path()
 
         return module
 
@@ -78,3 +80,11 @@ class ExampleCollector(object):
             ast.fix_missing_locations(tree)
             return tree
 
+    def _prepare_path_for_local_packages(self):
+        if os.getcwd().endswith('spec') or os.getcwd().endswith('specs'):
+            sys.path.append('..')
+        else:
+            sys.path.append('.')
+
+    def _restore_path(self):
+        sys.path.pop()
