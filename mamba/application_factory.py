@@ -7,7 +7,6 @@ from mamba.infrastructure import is_python3
 class ApplicationFactory(object):
 
     def __init__(self, arguments):
-        self._instances = {}
         self.arguments = arguments
 
     def create_settings(self):
