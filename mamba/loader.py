@@ -39,8 +39,11 @@ class Loader(object):
         return getattr(
             example_group,
             '_subject_class',
-            example_group.__name__.replace('__description', '').replace('__pending', '')[10:]
+            self._generate_default_subject(example_group)
         )
+
+    def _generate_default_subject(self, example_group):
+        return example_group.__name__.replace('__description', '').replace('__pending', '')[10:]
 
     def _add_hooks_examples_and_nested_example_groups_to(self, klass, example_group):
         self._load_hooks(klass, example_group)
