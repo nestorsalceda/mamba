@@ -84,13 +84,13 @@ class Loader(object):
         return isinstance(example_group, PendingExampleGroup)
 
     def _load_nested_example_groups(self, klass, example_group):
-        for nested in self._top_level_classes_in(klass):
+        for nested_class in self._top_level_classes_in(klass):
             if isinstance(example_group, PendingExampleGroup):
-                nested_example_group = PendingExampleGroup(self._subject(nested), execution_context=example_group.execution_context)
+                nested_example_group = PendingExampleGroup(self._subject(nested_class), execution_context=example_group.execution_context)
             else:
-                nested_example_group = self._create_example_group(nested, execution_context=example_group.execution_context)
+                nested_example_group = self._create_example_group(nested_class, execution_context=example_group.execution_context)
 
-            self._add_hooks_examples_and_nested_example_groups_to(nested, nested_example_group)
+            self._add_hooks_examples_and_nested_example_groups_to(nested_class, nested_example_group)
             example_group.append(nested_example_group)
 
     def _load_helper_methods_to_execution_context(self, klass, execution_context):
