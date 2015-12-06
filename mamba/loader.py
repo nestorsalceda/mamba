@@ -36,11 +36,11 @@ class Loader(object):
         return ExampleGroup(self._subject(klass), execution_context=execution_context)
 
     def _subject(self, example_group):
-        subject = getattr(example_group, '_subject_class', example_group.__name__.replace('__description', '').replace('__pending', ''))
-        if isinstance(subject, str):
-            return subject[10:]
-        else:
-            return subject
+        return getattr(
+            example_group,
+            '_subject_class',
+            example_group.__name__.replace('__description', '').replace('__pending', '')[10:]
+        )
 
     def _add_hooks_examples_and_nested_example_groups_to(self, klass, example_group):
         self._load_hooks(klass, example_group)
