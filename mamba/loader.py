@@ -22,7 +22,10 @@ class Loader(object):
         return loaded
 
     def _example_groups_for(self, module):
-        return [klass for name, klass in inspect.getmembers(module, inspect.isclass) if self._is_example_group(name)]
+        return [klass for class_name, klass in self._classes_in(module) if self._is_example_group(class_name)]
+
+    def _classes_in(self, module):
+        return inspect.getmembers(module, inspect.isclass)
 
     def _is_example_group(self, class_name):
         return class_name.endswith('__description')
