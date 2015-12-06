@@ -56,7 +56,10 @@ class Loader(object):
             example_group.hooks[hook.__name__].append(hook)
 
     def _hooks_in(self, example_group):
-        return [method for name, method in self._methods_for(example_group) if self._is_hook(name)]
+        return [method for name, method in self._methods_in(example_group) if self._is_hook(name)]
+
+    def _methods_in(self, klass):
+        return inspect.getmembers(klass, inspect.isfunction if is_python3() else inspect.ismethod)
 
     def _is_hook(self, method_name):
         return method_name.startswith('before') or method_name.startswith('after')
@@ -69,10 +72,7 @@ class Loader(object):
                 example_group.append(Example(example))
 
     def _examples_in(self, example_group):
-        return [method for name, method in self._methods_for(example_group) if self._is_example(method)]
-
-    def _methods_for(self, klass):
-        return inspect.getmembers(klass, inspect.isfunction if is_python3() else inspect.ismethod)
+        return [method for name, method in self._methods_in(example_group) if self._is_example(method)]
 
     def _is_example(self, method):
         return method.__name__[10:].startswith('it') or self._is_pending_example(method)
@@ -94,7 +94,7 @@ class Loader(object):
             example_group.append(nested_example_group)
 
     def _load_helper_methods_to_execution_context(self, klass, execution_context):
-        helper_methods = [method for name, method in self._methods_for(klass) if not self._is_example(method)]
+        helper_methods = [method for name, method in self._methods_in(klass) if not self._is_example(method)]
 
         for method in helper_methods:
             if is_python3():
