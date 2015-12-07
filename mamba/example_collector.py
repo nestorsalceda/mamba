@@ -21,32 +21,38 @@ class ExampleCollector(object):
                 yield module
 
     def _collect_paths_to_spec_files(self):
-        collected = []
+        paths_to_spec_files = []
         for path in self.paths_to_specs:
             if not os.path.exists(path):
                 continue
 
             if os.path.isdir(path):
-                collected.extend(self._collect_spec_files_in_directory(path))
+                paths_to_spec_files.extend(self._collect_paths_to_spec_files_in_directory(path))
             else:
-                collected.append(path)
+                paths_to_spec_files.append(path)
 
-        return collected
+        return paths_to_spec_files
 
+    def _collect_paths_to_spec_files_in_directory(self, path_to_directory):
+        paths_to_spec_files = []
+        for root, _, file_names in os.walk(path_to_directory):
+            paths_to_spec_files.extend([
+                self._assemble_path_to_spec_file(root, file_name)
+                for file_name in file_names if self._is_name_of_spec_file(file_name)
+            ])
 
-    def _collect_spec_files_in_directory(self, directory):
-        collected = []
-        for root, dirs, files in os.walk(directory):
-            collected.extend([os.path.join(self._normalize_path(root), file_)
-                    for file_ in files if self._is_name_of_spec_file(file_)])
-        collected.sort()
-        return collected
+        paths_to_spec_files.sort()
+
+        return paths_to_spec_files
+
+    def _assemble_path_to_spec_file(self, path_to_directory, name_of_spec_file):
+        return os.path.join(self._normalize_path(path_to_directory), name_of_spec_file)
 
     def _normalize_path(self, path):
         return os.path.normpath(path)
 
-    def _is_name_of_spec_file(self, filename):
-        return filename.endswith('_spec.py')
+    def _is_name_of_spec_file(self, file_name):
+        return file_name.endswith('_spec.py')
 
     #TODO: What about managing locks with threads??
     #Take care with watchdog stuff!!
