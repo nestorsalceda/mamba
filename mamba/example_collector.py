@@ -11,29 +11,30 @@ from mamba.infrastructure import is_python3
 
 class ExampleCollector(object):
 
-    def __init__(self, paths):
-        self.paths = paths
+    def __init__(self, paths_to_spec_directories_or_files):
+        self.paths_to_specs = paths_to_spec_directories_or_files
         self._node_transformer = nodetransformers.TransformToSpecsPython3NodeTransformer() if is_python3() else nodetransformers.TransformToSpecsNodeTransformer()
 
     def modules(self):
-        for path in self._collect_files_containing_examples():
-            with self._load_module_from(path) as module:
+        for path_to_spec_file in self._collect_paths_to_spec_files():
+            with self._load_module_from(path_to_spec_file) as module:
                 yield module
 
-    def _collect_files_containing_examples(self):
+    def _collect_paths_to_spec_files(self):
         collected = []
-        for path in self.paths:
+        for path in self.paths_to_specs:
             if not os.path.exists(path):
                 continue
 
             if os.path.isdir(path):
-                collected.extend(self._collect_files_in_directory(path))
+                collected.extend(self._collect_spec_files_in_directory(path))
             else:
                 collected.append(path)
+
         return collected
 
 
-    def _collect_files_in_directory(self, directory):
+    def _collect_spec_files_in_directory(self, directory):
         collected = []
         for root, dirs, files in os.walk(directory):
             collected.extend([os.path.join(self._normalize_path(root), file_)
