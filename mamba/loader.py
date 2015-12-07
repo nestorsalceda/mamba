@@ -11,9 +11,8 @@ from mamba.infrastructure import is_python3
 class Loader(object):
     def load_examples_from(self, module):
         loaded = []
-        top_level_classes = self._top_level_classes_in(module)
 
-        for klass in top_level_classes:
+        for klass in self._top_level_classes_in(module):
             example_group = self._create_example_group(klass)
             self._add_hooks_examples_and_nested_example_groups_to(klass, example_group)
 
