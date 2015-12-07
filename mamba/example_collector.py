@@ -68,6 +68,16 @@ class ExampleCollector(object):
 
     def _module_from_ast(self, module_name, path_to_spec_file):
         tree = self._parse_and_transform_ast(path_to_spec_file)
+        module = self._create_module_object(module_name, path_to_spec_file)
+
+        self._prepare_path_for_local_packages()
+        code = compile(tree, path_to_spec_file, 'exec')
+        exec(code, module.__dict__)
+        self._restore_path()
+
+        return module
+
+    def _create_module_object(self, module_name, path_to_spec_file):
         package_name = '.'.join(module_name.split('/')[:-1])
 
         module = imp.new_module(module_name)
@@ -79,12 +89,6 @@ class ExampleCollector(object):
         except (ImportError, ValueError):
             # No parent package available, so skip it
             pass
-
-
-        self._prepare_path_for_local_packages()
-        code = compile(tree, path_to_spec_file, 'exec')
-        exec(code, module.__dict__)
-        self._restore_path()
 
         return module
 
