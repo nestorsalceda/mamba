@@ -38,12 +38,15 @@ class ExampleCollector(object):
         collected = []
         for root, dirs, files in os.walk(directory):
             collected.extend([os.path.join(self._normalize_path(root), file_)
-                    for file_ in files if file_.endswith('_spec.py')])
+                    for file_ in files if self._is_name_of_spec_file(file_)])
         collected.sort()
         return collected
 
     def _normalize_path(self, path):
         return os.path.normpath(path)
+
+    def _is_name_of_spec_file(self, filename):
+        return filename.endswith('_spec.py')
 
     #TODO: What about managing locks with threads??
     #Take care with watchdog stuff!!
