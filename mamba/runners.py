@@ -30,10 +30,10 @@ class BaseRunner(Runner):
         self.reporter.finish()
 
     def _run_examples_in(self, module):
-        for example in self.loader.load_examples_from(module):
-            example.run(self.reporter)
+        for example_group in self.loader.load_examples_from(module):
+            example_group.run(self.reporter)
 
-            if example.failed:
+            if example_group.failed:
                 self._has_failed_examples = True
 
     @property
