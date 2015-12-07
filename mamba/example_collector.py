@@ -71,8 +71,8 @@ class ExampleCollector(object):
         module = self._create_module_object(module_name, path_to_spec_file)
 
         with self._allow_importing_local_non_installed_modules():
-            code = compile(tree, path_to_spec_file, 'exec')
-            exec(code, module.__dict__)
+            code = self._create_code_object_from_ast(tree, path_to_spec_file)
+            self._execute_code_object_in_namespace(code, module.__dict__)
 
         return module
 
@@ -113,3 +113,9 @@ class ExampleCollector(object):
 
     def _remove_last_item_from_system_path(self):
         sys.path.pop()
+
+    def _create_code_object_from_ast(self, ast, path_to_spec_file):
+        return compile(ast, path_to_spec_file, 'exec')
+
+    def _execute_code_object_in_namespace(self, code_object, namespace):
+        exec(code_object, namespace)
