@@ -58,15 +58,18 @@ class ExampleCollector(object):
     #Take care with watchdog stuff!!
     @contextlib.contextmanager
     def _load_module_from(self, path):
-        name = path.replace('.py', '')
+        module_name = self._dump_file_extension(path)
 
-        yield self._module_from_ast(name, path)
+        yield self._module_from_ast(module_name, path)
 
-    def _module_from_ast(self, name, path):
+    def _dump_file_extension(self, path_to_file):
+        return os.path.splitext(path_to_file)[0]
+
+    def _module_from_ast(self, module_name, path):
         tree = self._parse_and_transform_ast(path)
-        package = '.'.join(name.split('/')[:-1])
+        package = '.'.join(module_name.split('/')[:-1])
 
-        module = imp.new_module(name)
+        module = imp.new_module(module_name)
         module.__file__ = path
 
         try:
