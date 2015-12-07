@@ -94,11 +94,15 @@ class Loader(object):
             example_group.append(nested_example_group)
 
     def _load_helper_methods_to_execution_context(self, klass, execution_context):
-        helper_methods = [method for name, method in self._methods_in(klass) if not self._is_example(method)]
-
-        for method in helper_methods:
+        for method in self._helper_methods_in(klass):
             if is_python3():
                 setattr(execution_context, method.__name__, types.MethodType(method, execution_context))
             else:
                 setattr(execution_context, method.__name__, types.MethodType(method.im_func, execution_context, execution_context.__class__))
+
+    def _helper_methods_in(self, klass):
+        return [method for name, method in self._methods_in(klass) if self._is_helper_method(method)]
+
+    def _is_helper_method(self, method):
+        return not self._is_example(method)
 
