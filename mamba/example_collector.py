@@ -70,10 +70,9 @@ class ExampleCollector(object):
         tree = self._parse_and_transform_ast(path_to_spec_file)
         module = self._create_module_object(module_name, path_to_spec_file)
 
-        self._prepare_path_for_local_packages()
-        code = compile(tree, path_to_spec_file, 'exec')
-        exec(code, module.__dict__)
-        self._restore_path()
+        with self._allow_importing_local_non_installed_modules():
+            code = compile(tree, path_to_spec_file, 'exec')
+            exec(code, module.__dict__)
 
         return module
 
@@ -100,11 +99,17 @@ class ExampleCollector(object):
             ast.fix_missing_locations(tree)
             return tree
 
-    def _prepare_path_for_local_packages(self):
+    @contextlib.contextmanager
+    def _allow_importing_local_non_installed_modules(self):
+        self._append_parent_directory_of_spec_directory_to_system_path()
+        yield
+        self._remove_last_item_from_system_path()
+
+    def _append_parent_directory_of_spec_directory_to_system_path(self):
         if os.getcwd().endswith('spec') or os.getcwd().endswith('specs'):
             sys.path.append('..')
         else:
             sys.path.append('.')
 
-    def _restore_path(self):
+    def _remove_last_item_from_system_path(self):
         sys.path.pop()
