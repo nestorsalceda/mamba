@@ -85,10 +85,11 @@ class ExampleCollector(object):
 
         try:
             __import__(package_name)
-            module.__package__ = package_name
         except (ImportError, ValueError):
             # No parent package available, so skip it
             pass
+        else:
+            module.__package__ = package_name
 
         return module
 
