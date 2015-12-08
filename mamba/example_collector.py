@@ -17,9 +17,10 @@ class ExampleCollector(object):
         self._node_transformer = nodetransformers.TransformToSpecsPython3NodeTransformer() if is_python3() else nodetransformers.TransformToSpecsNodeTransformer()
 
     def modules(self):
-        for path_to_spec_file in self._collect_paths_to_spec_files():
-            with self._load_module_from(path_to_spec_file) as module:
-                yield module
+        return [
+            self._load_module_from(path)
+            for path in self._collect_paths_to_spec_files()
+        ]
 
     def _collect_paths_to_spec_files(self):
         paths_to_spec_files = []
@@ -57,11 +58,10 @@ class ExampleCollector(object):
 
     #TODO: What about managing locks with threads??
     #Take care with watchdog stuff!!
-    @contextlib.contextmanager
     def _load_module_from(self, path_to_spec_file):
         module_name = self._dump_file_extension(path_to_spec_file)
 
-        yield self._module_from_ast(module_name, path_to_spec_file)
+        return self._module_from_ast(module_name, path_to_spec_file)
 
     def _dump_file_extension(self, path_to_file):
         return os.path.splitext(path_to_file)[0]
