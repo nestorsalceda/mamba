@@ -69,9 +69,9 @@ class ExampleCollector(object):
     def _module_from_ast(self, module_name, path_to_spec_file):
         tree = self._parse_and_transform_ast(path_to_spec_file)
         module = self._create_module_object(module_name, path_to_spec_file)
+        code = self._create_code_object_from_ast(tree, path_to_spec_file)
 
         with self._allow_importing_local_non_installed_modules():
-            code = self._create_code_object_from_ast(tree, path_to_spec_file)
             self._execute_code_object_in_namespace(code, module.__dict__)
 
         return module
