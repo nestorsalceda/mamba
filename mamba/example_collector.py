@@ -101,6 +101,9 @@ class ExampleCollector(object):
             ast.fix_missing_locations(tree)
             return tree
 
+    def _create_code_object_from_ast(self, ast, path_to_spec_file):
+        return compile(ast, path_to_spec_file, 'exec')
+
     @contextlib.contextmanager
     def _allow_importing_local_non_installed_modules(self):
         self._append_parent_directory_of_spec_directory_to_system_path()
@@ -115,9 +118,6 @@ class ExampleCollector(object):
 
     def _remove_last_item_from_system_path(self):
         sys.path.pop()
-
-    def _create_code_object_from_ast(self, ast, path_to_spec_file):
-        return compile(ast, path_to_spec_file, 'exec')
 
     def _execute_code_object_in_namespace(self, code_object, namespace):
         exec(code_object, namespace)
