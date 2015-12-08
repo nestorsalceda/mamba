@@ -79,10 +79,14 @@ class ExampleCollector(object):
         return module
 
     def _create_module_object(self, module_name, path_to_spec_file):
-        package_name = '.'.join(module_name.split('/')[:-1])
-
         module = imp.new_module(module_name)
         module.__file__ = path_to_spec_file
+        self._import_package_of_module(module)
+
+        return module
+
+    def _import_package_of_module(self, module):
+        package_name = '.'.join(module.__name__.split('/')[:-1])
 
         try:
             __import__(package_name)
@@ -91,8 +95,6 @@ class ExampleCollector(object):
             pass
         else:
             module.__package__ = package_name
-
-        return module
 
     def _parse_and_transform_ast(self, path_to_spec_file):
         with open(path_to_spec_file) as spec_file:
