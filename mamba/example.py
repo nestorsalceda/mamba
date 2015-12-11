@@ -63,7 +63,7 @@ class Example(object):
     def _parents(self):
         parents = []
         parent = self.parent
-        while parent:
+        while parent is not None:
             parents.append(parent)
             parent = parent.parent
 
