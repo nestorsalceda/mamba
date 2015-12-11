@@ -11,7 +11,7 @@ class Example(object):
     def __init__(self, test, parent=None):
         self._test = test
         self.parent = parent
-        self._error = None
+        self.error = None
         self._elapsed_time = timedelta(0)
         self._was_run = False
 
@@ -78,14 +78,6 @@ class Example(object):
     @property
     def failed(self):
         return self.error is not None
-
-    @property
-    def error(self):
-        return self._error
-
-    @error.setter
-    def error(self, value):
-        self._error = value
 
     @property
     def was_run(self):
