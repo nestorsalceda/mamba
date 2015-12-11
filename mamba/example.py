@@ -22,8 +22,7 @@ class Example(object):
                 self._run_inner_test(reporter)
         except Exception as exception:
             self._was_run = True
-            if self.error is None:
-                self._set_failed()
+            self._set_failed()
         finally:
             self._finish(reporter)
 
@@ -45,6 +44,9 @@ class Example(object):
             parent.run_hook(hook)
 
     def _set_failed(self):
+        if self.failed:
+            return
+
         type_, value, traceback = sys.exc_info()
         self.error = error.Error(value, traceback)
 
