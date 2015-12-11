@@ -9,7 +9,7 @@ from mamba import error
 class Example(object):
 
     def __init__(self, test, parent=None):
-        self.test = test
+        self._test = test
         self.parent = parent
         self._error = None
         self._elapsed_time = timedelta(0)
@@ -33,10 +33,10 @@ class Example(object):
 
     def _run_inner_test(self, reporter):
         self.run_hook('before_each')
-        if hasattr(self.test, 'im_func'):
-            self.test.im_func(self.parent.execution_context)
+        if hasattr(self._test, 'im_func'):
+            self._test.im_func(self.parent.execution_context)
         else:
-            self.test(self.parent.execution_context)
+            self._test(self.parent.execution_context)
         self._was_run = True
         self.run_hook('after_each')
 
@@ -73,7 +73,7 @@ class Example(object):
 
     @property
     def name(self):
-        return self.test.__name__[10:]
+        return self._test.__name__[10:]
 
     @property
     def failed(self):
