@@ -13,7 +13,7 @@ class Example(object):
         self.parent = parent
         self._error = None
         self._elapsed_time = timedelta(0)
-        self.was_run = False
+        self._was_run = False
 
     def run(self, reporter):
         self._start(reporter)
@@ -21,7 +21,7 @@ class Example(object):
             if not self.failed:
                 self._run_inner_test(reporter)
         except Exception as exception:
-            self.was_run = True
+            self._was_run = True
             if self.error is None:
                 self._set_failed()
         finally:
@@ -37,7 +37,7 @@ class Example(object):
             self.test.im_func(self.parent.execution_context)
         else:
             self.test(self.parent.execution_context)
-        self.was_run = True
+        self._was_run = True
         self.run_hook('after_each')
 
     def run_hook(self, hook):
@@ -52,7 +52,7 @@ class Example(object):
         self._elapsed_time = datetime.utcnow() - self._begin
         if self.failed:
             reporter.example_failed(self)
-        elif self.was_run:
+        elif self._was_run:
             reporter.example_passed(self)
         else:
             reporter.example_pending(self)
@@ -86,6 +86,11 @@ class Example(object):
     @error.setter
     def error(self, value):
         self._error = value
+
+    @property
+    def was_run(self):
+        return self._was_run
+
 
 
 class PendingExample(Example):
