@@ -53,10 +53,8 @@ with description(ExampleGroup):
             class _ErrorRaiser(object):
                 def _raise_error(self):
                     raise ValueError()
-            #TODO: Law of Demeter!
-            #_.example_group.add_hook('before_all', _raise_error)
-            self.example_group.hooks['before_all'] = []
-            self.example_group.hooks['before_all'].append(_ErrorRaiser._raise_error)
+
+            self.example_group.add_hook('before_all',_ErrorRaiser._raise_error)
 
 
         with context('when has only examples as children'):

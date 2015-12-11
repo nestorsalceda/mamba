@@ -16,7 +16,7 @@ class ExampleGroup(object):
         self.subject = subject
         self.examples = []
         self.parent = parent
-        self.hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
+        self._hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
         self._elapsed_time = timedelta(0)
         self.execution_context = ExecutionContext() if execution_context is None else execution_context
 
@@ -36,7 +36,7 @@ class ExampleGroup(object):
 
     def _register_subject_creation_in_before_each_hook(self):
         if self._can_create_subject():
-            self.hooks['before_each'].insert(0, lambda execution_context: self._create_subject(execution_context))
+            self._hooks['before_each'].insert(0, lambda execution_context: self._create_subject(execution_context))
 
     def _can_create_subject(self):
         return self._subject_is_class()
@@ -60,7 +60,7 @@ class ExampleGroup(object):
         self.run_hook('after_all')
 
     def run_hook(self, hook):
-        for registered in self.hooks.get(hook, []):
+        for registered in self._hooks.get(hook, []):
             try:
                 if hasattr(registered, 'im_func'):
                     registered.im_func(self.execution_context)
@@ -76,6 +76,9 @@ class ExampleGroup(object):
     def _finish(self, reporter):
         self._elapsed_time = datetime.utcnow() - self._begin
         reporter.example_group_finished(self)
+
+    def add_hook(self, name, hook_function):
+        self._hooks[name].append(hook_function)
 
     @property
     def elapsed_time(self):
