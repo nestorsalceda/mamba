@@ -68,16 +68,16 @@ class Example(object):
         return reversed(parents)
 
     @property
-    def elapsed_time(self):
-        return self._elapsed_time
-
-    @property
     def name(self):
         return self._test.__name__[10:]
 
     @property
     def failed(self):
         return self.error is not None
+
+    @property
+    def elapsed_time(self):
+        return self._elapsed_time
 
     @property
     def was_run(self):
