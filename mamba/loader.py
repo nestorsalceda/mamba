@@ -10,26 +10,18 @@ from mamba.infrastructure import is_python3
 
 class Loader(object):
     def load_examples_from(self, module):
-        loaded = []
+        return [
+            self._create_example_group(klass)
+            for klass in self._top_level_classes_in(module)
+        ]
 
-        for klass in self._top_level_classes_in(module):
-            example_group = self._create_example_group(klass)
-            self._add_hooks_examples_and_nested_example_groups_to(klass, example_group)
+    def _create_example_group(self, klass):
+        example_group = self._create_bare_example_group(klass)
+        self._add_hooks_examples_and_nested_example_groups_to(klass, example_group)
 
-            loaded.append(example_group)
+        return example_group
 
-        return loaded
-
-    def _top_level_classes_in(self, an_object):
-        return [klass for class_name, klass in self._classes_in(an_object) if self._is_name_of_example_group(class_name)]
-
-    def _classes_in(self, an_object):
-        return inspect.getmembers(an_object, inspect.isclass)
-
-    def _is_name_of_example_group(self, class_name):
-        return class_name.endswith('__description')
-
-    def _create_example_group(self, klass, execution_context=None):
+    def _create_bare_example_group(self, klass, execution_context=None):
         if '__pending' in klass.__name__:
             return PendingExampleGroup(self._subject(klass), execution_context=execution_context)
         return ExampleGroup(self._subject(klass), execution_context=execution_context)
@@ -87,7 +79,7 @@ class Loader(object):
             if self._is_pending_example_group(example_group):
                 nested_example_group = PendingExampleGroup(self._subject(nested_class), execution_context=example_group.execution_context)
             else:
-                nested_example_group = self._create_example_group(nested_class, execution_context=example_group.execution_context)
+                nested_example_group = self._create_bare_example_group(nested_class, execution_context=example_group.execution_context)
 
             self._add_hooks_examples_and_nested_example_groups_to(nested_class, nested_example_group)
             example_group.append(nested_example_group)
@@ -110,3 +102,12 @@ class Loader(object):
             return types.MethodType(method, an_object)
         else:
             return types.MethodType(method.im_func, an_object, an_object.__class__)
+
+    def _top_level_classes_in(self, an_object):
+        return [klass for class_name, klass in self._classes_in(an_object) if self._is_name_of_example_group(class_name)]
+
+    def _classes_in(self, an_object):
+        return inspect.getmembers(an_object, inspect.isclass)
+
+    def _is_name_of_example_group(self, class_name):
+        return class_name.endswith('__description')
