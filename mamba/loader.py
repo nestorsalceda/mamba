@@ -56,13 +56,13 @@ class Loader(object):
         return method_name.startswith('before') or method_name.startswith('after')
 
     def _load_examples(self, klass, example_group):
-        for example in self._examples_in(klass):
-            if self._is_name_of_pending_example(example.__name__) or self._is_pending_example_group(example_group):
-                example_group.append(PendingExample(example))
+        for method in self._methods_representing_examples_in(klass):
+            if self._is_name_of_pending_example(method.__name__) or self._is_pending_example_group(example_group):
+                example_group.append(PendingExample(method))
             else:
-                example_group.append(Example(example))
+                example_group.append(Example(method))
 
-    def _examples_in(self, klass):
+    def _methods_representing_examples_in(self, klass):
         return [method for name, method in self._methods_in(klass) if self._is_name_of_example(name)]
 
     def _is_name_of_example(self, name):
