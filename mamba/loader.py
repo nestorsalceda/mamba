@@ -26,15 +26,15 @@ class Loader(object):
             return PendingExampleGroup(self._subject(klass), execution_context=execution_context)
         return ExampleGroup(self._subject(klass), execution_context=execution_context)
 
-    def _subject(self, example_group):
+    def _subject(self, klass):
         return getattr(
-            example_group,
+            klass,
             '_subject_class',
-            self._generate_default_subject(example_group)
+            self._generate_default_subject(klass)
         )
 
-    def _generate_default_subject(self, example_group):
-        return example_group.__name__.replace('__description', '').replace('__pending', '')[10:]
+    def _generate_default_subject(self, klass):
+        return klass.__name__.replace('__description', '').replace('__pending', '')[10:]
 
     def _add_hooks_examples_and_nested_example_groups_to(self, klass, example_group):
         self._load_hooks(klass, example_group)
