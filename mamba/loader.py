@@ -57,19 +57,19 @@ class Loader(object):
 
     def _load_examples(self, klass, example_group):
         for example in self._examples_in(klass):
-            if self._is_pending_example(example) or self._is_pending_example_group(example_group):
+            if self._is_name_of_pending_example(example.__name__) or self._is_pending_example_group(example_group):
                 example_group.append(PendingExample(example))
             else:
                 example_group.append(Example(example))
 
     def _examples_in(self, klass):
-        return [method for name, method in self._methods_in(klass) if self._is_example(method)]
+        return [method for name, method in self._methods_in(klass) if self._is_name_of_example(name)]
 
-    def _is_example(self, method):
-        return method.__name__[10:].startswith('it') or self._is_pending_example(method)
+    def _is_name_of_example(self, name):
+        return name[10:].startswith('it') or self._is_name_of_pending_example(name)
 
-    def _is_pending_example(self, example):
-        return example.__name__[10:].startswith('_it')
+    def _is_name_of_pending_example(self, name):
+        return name[10:].startswith('_it')
 
     def _is_pending_example_group(self, example_group):
         return isinstance(example_group, PendingExampleGroup)
@@ -89,10 +89,10 @@ class Loader(object):
             self._add_method_to_execution_context(helper_method, execution_context)
 
     def _helper_methods_in(self, klass):
-        return [method for name, method in self._methods_in(klass) if self._is_helper_method(method)]
+        return [method for name, method in self._methods_in(klass) if self._is_name_of_helper_method(name)]
 
-    def _is_helper_method(self, method):
-        return not self._is_example(method)
+    def _is_name_of_helper_method(self, name):
+        return not self._is_name_of_example(name)
 
     def _add_method_to_execution_context(self, method, execution_context):
         setattr(execution_context, method.__name__, self._create_method_bound_to_object(method, execution_context))
