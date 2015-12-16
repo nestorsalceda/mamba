@@ -23,10 +23,10 @@ class Loader(object):
 
     def _create_bare_example_group(self, klass, execution_context=None):
         if '__pending' in klass.__name__:
-            return PendingExampleGroup(self._subject(klass), execution_context=execution_context)
-        return ExampleGroup(self._subject(klass), execution_context=execution_context)
+            return PendingExampleGroup(self._subject_of(klass), execution_context=execution_context)
+        return ExampleGroup(self._subject_of(klass), execution_context=execution_context)
 
-    def _subject(self, klass):
+    def _subject_of(self, klass):
         return getattr(
             klass,
             '_subject_class',
@@ -77,7 +77,7 @@ class Loader(object):
     def _load_nested_example_groups(self, klass, example_group):
         for nested_class in self._top_level_classes_in(klass):
             if self._is_pending_example_group(example_group):
-                nested_example_group = PendingExampleGroup(self._subject(nested_class), execution_context=example_group.execution_context)
+                nested_example_group = PendingExampleGroup(self._subject_of(nested_class), execution_context=example_group.execution_context)
             else:
                 nested_example_group = self._create_bare_example_group(nested_class, execution_context=example_group.execution_context)
 
