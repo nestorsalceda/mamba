@@ -77,9 +77,9 @@ class Loader(object):
     def _load_nested_example_groups(self, klass, example_group):
         for nested_class in self._top_level_classes_in(klass):
             if self._is_pending_example_group(example_group):
-                nested_example_group = PendingExampleGroup(self._subject_of(nested_class), execution_context=example_group.execution_context)
+                nested_example_group = PendingExampleGroup(self._subject_of(nested_class), example_group.execution_context)
             else:
-                nested_example_group = self._create_bare_example_group(nested_class, execution_context=example_group.execution_context)
+                nested_example_group = self._create_bare_example_group(nested_class, example_group.execution_context)
 
             self._add_hooks_examples_and_nested_example_groups_to(nested_class, nested_example_group)
             example_group.append(nested_example_group)
