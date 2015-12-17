@@ -47,8 +47,11 @@ class Example(object):
         if self.failed:
             return
 
-        type_, value, traceback = sys.exc_info()
+        value, traceback = self._get_value_and_traceback_of_the_exception_currently_being_handled()
         self.error = error.Error(value, traceback)
+
+    def _get_value_and_traceback_of_the_exception_currently_being_handled(self):
+        return sys.exc_info()[1:]
 
     def _finish(self, reporter):
         self._elapsed_time = datetime.utcnow() - self._begin
