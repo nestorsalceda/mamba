@@ -84,6 +84,15 @@ class Loader(object):
             self._add_hooks_examples_and_nested_example_groups_to(nested_class, nested_example_group)
             example_group.append(nested_example_group)
 
+    def _top_level_classes_in(self, an_object):
+        return [klass for class_name, klass in self._classes_in(an_object) if self._is_name_of_example_group(class_name)]
+
+    def _classes_in(self, an_object):
+        return inspect.getmembers(an_object, inspect.isclass)
+
+    def _is_name_of_example_group(self, class_name):
+        return class_name.endswith('__description')
+
     def _load_helper_methods_to_execution_context(self, klass, execution_context):
         for helper_method in self._helper_methods_in(klass):
             self._add_method_to_execution_context(helper_method, execution_context)
@@ -102,12 +111,3 @@ class Loader(object):
             return types.MethodType(method, an_object)
         else:
             return types.MethodType(method.im_func, an_object, an_object.__class__)
-
-    def _top_level_classes_in(self, an_object):
-        return [klass for class_name, klass in self._classes_in(an_object) if self._is_name_of_example_group(class_name)]
-
-    def _classes_in(self, an_object):
-        return inspect.getmembers(an_object, inspect.isclass)
-
-    def _is_name_of_example_group(self, class_name):
-        return class_name.endswith('__description')
