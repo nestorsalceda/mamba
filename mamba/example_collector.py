@@ -97,11 +97,23 @@ class ExampleCollector(object):
             module.__package__ = package_name
 
     def _transform_ast_of_source_code_at(self, path_to_spec_file):
-        with open(path_to_spec_file) as spec_file:
-            tree = ast.parse(spec_file.read(), filename=path_to_spec_file)
-            tree = self._node_transformer.visit(tree)
-            ast.fix_missing_locations(tree)
-            return tree
+        original_source_code = self._read_contents_of_file_at(path_to_spec_file)
+        ast_of_original_source_code = self._get_ast_of(original_source_code, path_to_spec_file)
+
+        return self._transform_ast(ast_of_original_source_code)
+
+    def _read_contents_of_file_at(self, path):
+        with open(path) as file_:
+            return file_.read()
+
+    def _get_ast_of(self, source, file_name):
+        return ast.parse(source, filename=file_name)
+
+    def _transform_ast(self, an_ast):
+        transformed_ast = self._node_transformer.visit(an_ast)
+        ast.fix_missing_locations(transformed_ast)
+
+        return transformed_ast
 
     def _create_code_object_from_ast(self, ast, path_to_spec_file):
         return compile(ast, path_to_spec_file, 'exec')
