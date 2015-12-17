@@ -68,19 +68,19 @@ class ExampleCollector(object):
 
     def _module_from_ast(self, module_name, path_to_spec_file):
         module = self._create_module_object(module_name, path_to_spec_file)
-        code = self._create_code_object_from_ast(
+        code_object_of_transformed_ast = self._create_code_object_from_ast(
             self._parse_and_transform_ast(path_to_spec_file),
             path_to_spec_file
         )
 
         with self._allow_importing_local_non_installed_modules():
-            self._execute_code_object_in_namespace(code, module.__dict__)
+            self._execute_code_object_in_namespace(code_object_of_transformed_ast, module.__dict__)
 
         return module
 
-    def _create_module_object(self, module_name, path_to_spec_file):
+    def _create_module_object(self, module_name, path_to_code_of_module):
         module = imp.new_module(module_name)
-        module.__file__ = path_to_spec_file
+        module.__file__ = path_to_code_of_module
         self._import_package_of_module(module)
 
         return module
