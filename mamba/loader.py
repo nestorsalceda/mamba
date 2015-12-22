@@ -109,5 +109,4 @@ class Loader(object):
     def _create_method_bound_to_object(self, method, an_object):
         if is_python3():
             return types.MethodType(method, an_object)
-        else:
-            return types.MethodType(method.im_func, an_object, an_object.__class__)
+        return types.MethodType(method.im_func, an_object, an_object.__class__)
