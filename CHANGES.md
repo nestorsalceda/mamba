@@ -1,5 +1,11 @@
 # ChangeLog
 
+## Version 0.8.6
+
+* Check for python 3.5
+* Stick only minimal dependencies versions
+* Allow loading of local non-installed modules and packages
+
 ## Version 0.8.5
 
 * Show spec filename in each error
