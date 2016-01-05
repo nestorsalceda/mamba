@@ -1,26 +1,26 @@
 # -*- coding: utf-8 -*-
 
-from mamba import settings, formatters, reporter, runners, example_collector, loader
+from mamba import formatters, reporter, runners, example_collector, loader
+from mamba.settings import Settings
 from mamba.infrastructure import is_python3
 
 
 class ApplicationFactory(object):
 
     def __init__(self, arguments):
-        self._instances = {}
-        self.arguments = arguments
+        self._arguments = arguments
 
     def create_settings(self):
-        settings_ = settings.Settings()
-        settings_.slow_test_threshold = self.arguments.slow
-        settings_.enable_code_coverage = self.arguments.enable_coverage
-        settings_.format = self.arguments.format
-        settings_.no_color = self.arguments.no_color
+        settings = Settings()
+        settings.slow_test_threshold = self._arguments.slow
+        settings.enable_code_coverage = self._arguments.enable_coverage
+        settings.format = self._arguments.format
+        settings.no_color = self._arguments.no_color
 
         if not is_python3():
-            settings_.enable_file_watcher = self.arguments.watch
+            settings.enable_file_watcher = self._arguments.watch
 
-        return settings_
+        return settings
 
     def create_formatter(self):
         settings = self.create_settings()
@@ -29,7 +29,7 @@ class ApplicationFactory(object):
         return formatters.ProgressFormatter(settings)
 
     def create_example_collector(self):
-        return example_collector.ExampleCollector(self.arguments.specs)
+        return example_collector.ExampleCollector(self._arguments.specs)
 
     def create_reporter(self):
         return reporter.Reporter(self.create_formatter())
