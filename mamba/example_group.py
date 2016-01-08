@@ -37,8 +37,10 @@ class ExampleGroup(object):
         reporter.example_group_started(self)
 
     def _register_subject_creation_in_before_each_hook(self):
-        if self._can_create_subject():
-            self._hooks['before_each'].insert(0, lambda execution_context: self._create_subject(execution_context))
+        if not self._can_create_subject():
+            return
+
+        self._hooks['before_each'].insert(0, lambda execution_context: self._create_subject(execution_context))
 
     def _can_create_subject(self):
         return self._subject_is_class()
