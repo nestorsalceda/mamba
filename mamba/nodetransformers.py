@@ -1,25 +1,56 @@
 import ast
 
 
-class TransformToSpecsNodeTransformer(ast.NodeTransformer):
-    PENDING_EXAMPLE_GROUPS = ('_description', '_context', '_describe')
-    EXAMPLE_GROUPS = ('description', 'context', 'describe') + PENDING_EXAMPLE_GROUPS
-    EXAMPLES = ('it', '_it')
-    HOOKS = ('before', 'after')
+class MambaIdentifiers(object):
+    @property
+    def ACTIVE_EXAMPLE_GROUP(self):
+        return ('description', 'context', 'describe')
 
+    @property
+    def PENDING_EXAMPLE_GROUP(self):
+        return self._compute_pending_identifiers(self.ACTIVE_EXAMPLE_GROUP)
+
+    def _compute_pending_identifiers(self, identifiers):
+        return tuple('_' + identifier for identifier in identifiers)
+
+    @property
+    def EXAMPLE_GROUP(self):
+        return self.ACTIVE_EXAMPLE_GROUP + self.PENDING_EXAMPLE_GROUP
+
+    @property
+    def ACTIVE_EXAMPLE(self):
+        return ('it',)
+
+    @property
+    def PENDING_EXAMPLE(self):
+        return self._compute_pending_identifiers(self.ACTIVE_EXAMPLE)
+
+    @property
+    def EXAMPLE(self):
+        return self.ACTIVE_EXAMPLE + self.PENDING_EXAMPLE
+
+    @property
+    def HOOKS(self):
+        return ('before', 'after')
+
+
+
+
+class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     def __init__(self):
         self.sequence = 1
+        self._MAMBA_IDENTIFIERS = MambaIdentifiers()
 
     def visit_With(self, node):
         super(TransformToSpecsNodeTransformer, self).generic_visit(node)
 
         name = self._get_name(node)
 
-        if name in self.EXAMPLE_GROUPS:
+        if name in self._MAMBA_IDENTIFIERS.EXAMPLE_GROUP:
             return self._transform_to_example_group(node, name)
-        if name in self.EXAMPLES:
+        if name in self._MAMBA_IDENTIFIERS.EXAMPLE:
             return self._transform_to_example(node, name)
-        if name in self.HOOKS:
+        if name in self._MAMBA_IDENTIFIERS.HOOKS:
             return self._transform_to_hook(node, name)
 
         return node
@@ -63,7 +94,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         else:
             description_name = context_expr.args[0].id
 
-        if name in self.PENDING_EXAMPLE_GROUPS:
+        if name in self._MAMBA_IDENTIFIERS.PENDING_EXAMPLE_GROUP:
             description_name += '__pending'
 
         description_name = '{0:08d}__{1}__description'.format(self.sequence, description_name)
