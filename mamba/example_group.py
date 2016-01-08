@@ -6,6 +6,8 @@ import inspect
 
 from mamba import error
 from mamba.example import Example, PendingExample
+from mamba.infrastructure import retrieve_unbound_method_from
+
 
 class ExecutionContext(object):
     pass
@@ -62,10 +64,7 @@ class ExampleGroup(object):
     def run_hook(self, hook):
         for registered in self._hooks.get(hook, []):
             try:
-                if hasattr(registered, 'im_func'):
-                    registered.im_func(self.execution_context)
-                elif callable(registered):
-                    registered(self.execution_context)
+                registered(self.execution_context)
             except Exception as exception:
                 self._set_failed()
 
@@ -78,7 +77,7 @@ class ExampleGroup(object):
         reporter.example_group_finished(self)
 
     def add_hook(self, name, hook_function):
-        self._hooks[name].append(hook_function)
+        self._hooks[name].append(retrieve_unbound_method_from(hook_function))
 
     @property
     def elapsed_time(self):

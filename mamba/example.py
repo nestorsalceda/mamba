@@ -4,12 +4,13 @@ import sys
 from datetime import datetime, timedelta
 
 from mamba import error
+from mamba.infrastructure import retrieve_unbound_method_from
 
 
 class Example(object):
 
     def __init__(self, test, parent=None):
-        self._test = test
+        self._test = retrieve_unbound_method_from(test)
         self.parent = parent
         self.error = None
         self._elapsed_time = timedelta(0)
@@ -32,10 +33,7 @@ class Example(object):
 
     def _run_inner_test(self, reporter):
         self.run_hook('before_each')
-        if hasattr(self._test, 'im_func'):
-            self._test.im_func(self.parent.execution_context)
-        else:
-            self._test(self.parent.execution_context)
+        self._test(self.parent.execution_context)
         self._was_run = True
         self.run_hook('after_each')
 
