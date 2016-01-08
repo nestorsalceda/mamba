@@ -120,10 +120,10 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         return ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[])
 
     def _transform_to_hook(self, node, name):
-        when = self._context_expr_for(node).attr
+        scope_of_hook = self._context_expr_for(node).attr
         return ast.copy_location(
             ast.FunctionDef(
-                name=name + '_' + when,
+                name=name + '_' + scope_of_hook,
                 args=self._generate_self(),
                 body=node.body,
                 decorator_list=[]
