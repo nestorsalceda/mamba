@@ -7,7 +7,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     EXAMPLES = ('it', '_it')
     HOOKS = ('before', 'after')
 
-    sequence = 1
+    def __init__(self):
+        self.sequence = 1
 
     def visit_With(self, node):
         super(TransformToSpecsNodeTransformer, self).generic_visit(node)
