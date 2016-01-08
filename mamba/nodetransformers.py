@@ -34,11 +34,9 @@ class MambaIdentifiers(object):
         return ('before', 'after')
 
 
-
-
 class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     def __init__(self):
-        self.sequence = 1
+        self._node_count = 1
         self._MAMBA_IDENTIFIERS = MambaIdentifiers()
 
     def visit_With(self, node):
@@ -97,8 +95,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         if name in self._MAMBA_IDENTIFIERS.PENDING_EXAMPLE_GROUP:
             description_name += '__pending'
 
-        description_name = '{0:08d}__{1}__description'.format(self.sequence, description_name)
-        self.sequence += 1
+        description_name = '{0:08d}__{1}__description'.format(self._node_count, description_name)
+        self._node_count += 1
 
         return description_name
 
@@ -106,8 +104,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         return not isinstance(self._context_expr_for(node).args[0], ast.Str)
 
     def _transform_to_example(self, node, name):
-        example_name = '{0:08d}__{1} {2}'.format(self.sequence, name, self._context_expr_for(node).args[0].s)
-        self.sequence += 1
+        example_name = '{0:08d}__{1} {2}'.format(self._node_count, name, self._context_expr_for(node).args[0].s)
+        self._node_count += 1
         return ast.copy_location(
             ast.FunctionDef(
                 name=example_name,
