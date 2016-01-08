@@ -61,10 +61,10 @@ class ExampleGroup(object):
             example.run(reporter)
         self.run_hook('after_all')
 
-    def run_hook(self, hook):
-        for registered in self._hooks.get(hook, []):
+    def run_hook(self, name):
+        for hook in self._hooks.get(name, []):
             try:
-                registered(self.execution_context)
+                hook(self.execution_context)
             except Exception as exception:
                 self._set_failed()
 
