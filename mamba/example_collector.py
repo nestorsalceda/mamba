@@ -13,7 +13,7 @@ class ExampleCollector(object):
 
     def __init__(self, paths):
         self.paths = paths
-        self._node_transformer = nodetransformers.TransformToSpecsPython3NodeTransformer() if is_python3() else nodetransformers.TransformToSpecsNodeTransformer()
+        self._node_transformer = nodetransformers.MambaSyntaxToClassBasedSyntaxPython3() if is_python3() else nodetransformers.MambaSyntaxToClassBasedSyntax()
 
     def modules(self):
         for path in self._collect_files_containing_examples():

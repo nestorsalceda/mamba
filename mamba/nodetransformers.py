@@ -34,13 +34,13 @@ class MambaIdentifiers(object):
         return ('before', 'after')
 
 
-class TransformToSpecsNodeTransformer(ast.NodeTransformer):
+class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
     def __init__(self):
         self._node_count = 1
         self._MAMBA_IDENTIFIERS = MambaIdentifiers()
 
     def visit_With(self, node):
-        super(TransformToSpecsNodeTransformer, self).generic_visit(node)
+        super(MambaSyntaxToClassBasedSyntax, self).generic_visit(node)
 
         name = self._get_name(node)
 
@@ -132,8 +132,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         )
 
 
-class TransformToSpecsPython3NodeTransformer(TransformToSpecsNodeTransformer):
-
+class MambaSyntaxToClassBasedSyntaxPython3(MambaSyntaxToClassBasedSyntax):
     def _context_expr_for(self, node):
         return node.items[0].context_expr
 
