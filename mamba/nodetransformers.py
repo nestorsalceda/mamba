@@ -68,13 +68,14 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
         return node.context_expr
 
     def _transform_to_example_group(self, node, name):
-        context_expr = self._context_expr_for(node)
-        if self._subject_is_a_class(node):
-            node.body.insert(0, ast.Assign(targets=[ast.Name(id='_subject_class', ctx=ast.Store())], value=context_expr.args[0]))
+        argument_of_example_group = self._context_expr_for(node).args[0]
+
+        if not self._represents_a_string_literal(argument_of_example_group):
+            self._insert_subject_registration_assignment(node, argument_of_example_group)
 
         return ast.copy_location(
             ast.ClassDef(
-                name=self._description_name(node, name),
+                name=self._description_name(argument_of_example_group, name),
                 bases=[],
                 keywords=[],
                 body=node.body,
@@ -83,14 +84,22 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
             node
         )
 
-    def _description_name(self, node, name):
-        context_expr = self._context_expr_for(node)
-        if isinstance(context_expr.args[0], ast.Str):
-            description_name = context_expr.args[0].s
-        elif isinstance(context_expr.args[0], ast.Attribute):
-            description_name = context_expr.args[0].attr
+    def _represents_a_string_literal(self, node):
+        return isinstance(node, ast.Str)
+
+    def _insert_subject_registration_assignment(self, node, node_representing_subject):
+        node.body.insert(0, self._create_assignment_of_name_to_value('_subject_class', node_representing_subject))
+
+    def _create_assignment_of_name_to_value(self, name, ast_of_value):
+        return ast.Assign(targets=[ast.Name(id=name, ctx=ast.Store())], value=ast_of_value)
+
+    def _description_name(self, argument_of_example_group, name):
+        if self._represents_a_string_literal(argument_of_example_group):
+            description_name = argument_of_example_group.s
+        elif isinstance(argument_of_example_group, ast.Attribute):
+            description_name = argument_of_example_group.attr
         else:
-            description_name = context_expr.args[0].id
+            description_name = argument_of_example_group.id
 
         if name in self._MAMBA_IDENTIFIERS.PENDING_EXAMPLE_GROUP:
             description_name += '__pending'
@@ -99,9 +108,6 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
         self._node_count += 1
 
         return description_name
-
-    def _subject_is_a_class(self, node):
-        return not isinstance(self._context_expr_for(node).args[0], ast.Str)
 
     def _transform_to_example(self, node, name):
         example_name = '{0:08d}__{1} {2}'.format(self._node_count, name, self._context_expr_for(node).args[0].s)
