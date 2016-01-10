@@ -42,6 +42,9 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
     def visit_With(self, node):
         super(MambaSyntaxToClassBasedSyntax, self).generic_visit(node)
 
+        if not self._is_relevant_with_statement(node):
+            return node
+
         name = self._mamba_identifier_of(node)
 
         if name in self._MAMBA_IDENTIFIERS.EXAMPLE_GROUP:
@@ -52,6 +55,9 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
             return self._transform_to_hook(node, name)
 
         return node
+
+    def _is_relevant_with_statement(self, node):
+        return self._matches_structure_of_example_group_or_example_declaration(node) or self._matches_structure_of_hook_declaration(node)
 
     def _matches_structure_of_example_group_or_example_declaration(self, node):
         context_expr = self._context_expr_for(node)
