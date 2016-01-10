@@ -88,7 +88,7 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
 
         return ast.copy_location(
             ast.ClassDef(
-                name=self._description_name(argument_of_example_group, name),
+                name=self._compute_title_of_example_group(argument_of_example_group, name),
                 bases=[],
                 keywords=[],
                 body=node.body,
@@ -106,7 +106,7 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
     def _create_assignment_of_name_to_value(self, name, ast_of_value):
         return ast.Assign(targets=[ast.Name(id=name, ctx=ast.Store())], value=ast_of_value)
 
-    def _description_name(self, argument_of_example_group, name):
+    def _compute_title_of_example_group(self, argument_of_example_group, name):
         if self._represents_a_string_literal(argument_of_example_group):
             description_name = argument_of_example_group.s
         elif isinstance(argument_of_example_group, ast.Attribute):
