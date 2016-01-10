@@ -36,7 +36,7 @@ class MambaIdentifiers(object):
 
 class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
     def __init__(self):
-        self._node_count = 1
+        self._number_of_examples_and_example_groups_processed = 0
         self._MAMBA_IDENTIFIERS = MambaIdentifiers()
 
     def visit_With(self, node):
@@ -117,14 +117,14 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
         if name in self._MAMBA_IDENTIFIERS.PENDING_EXAMPLE_GROUP:
             description_name += '__pending'
 
-        description_name = '{0:08d}__{1}__description'.format(self._node_count, description_name)
-        self._node_count += 1
+        description_name = '{0:08d}__{1}__description'.format(self._number_of_examples_and_example_groups_processed, description_name)
+        self._number_of_examples_and_example_groups_processed += 1
 
         return description_name
 
     def _transform_to_example(self, node, name):
-        example_name = '{0:08d}__{1} {2}'.format(self._node_count, name, self._context_expr_for(node).args[0].s)
-        self._node_count += 1
+        example_name = '{0:08d}__{1} {2}'.format(self._number_of_examples_and_example_groups_processed, name, self._context_expr_for(node).args[0].s)
+        self._number_of_examples_and_example_groups_processed += 1
         return ast.copy_location(
             ast.FunctionDef(
                 name=example_name,
