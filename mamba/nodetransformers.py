@@ -42,7 +42,7 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
     def visit_With(self, node):
         super(MambaSyntaxToClassBasedSyntax, self).generic_visit(node)
 
-        name = self._get_name(node)
+        name = self._mamba_identifier_of(node)
 
         if name in self._MAMBA_IDENTIFIERS.EXAMPLE_GROUP:
             return self._transform_to_example_group(node, name)
@@ -53,16 +53,20 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
 
         return node
 
-    def _get_name(self, node):
+    def _matches_structure_of_example_group_or_example_declaration(self, node):
         context_expr = self._context_expr_for(node)
+        return isinstance(context_expr, ast.Call) and isinstance(context_expr.func, ast.Name)
 
-        if isinstance(context_expr, ast.Call):
-            if hasattr(context_expr.func, 'value'):
-                return context_expr.func.value.id
-            return context_expr.func.id
+    def _matches_structure_of_hook_declaration(self, node):
+        context_expr = self._context_expr_for(node)
+        return isinstance(context_expr, ast.Attribute) and isinstance(context_expr.value, ast.Name)
 
-        if isinstance(context_expr, ast.Attribute):
-            return context_expr.value.id
+    def _mamba_identifier_of(self, node):
+        if self._matches_structure_of_example_group_or_example_declaration(node):
+            return self._context_expr_for(node).func.id
+
+        if self._matches_structure_of_hook_declaration(node):
+            return self._context_expr_for(node).value.id
 
     def _context_expr_for(self, node):
         return node.context_expr
