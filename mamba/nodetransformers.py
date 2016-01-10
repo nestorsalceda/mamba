@@ -40,7 +40,7 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
         self._MAMBA_IDENTIFIERS = MambaIdentifiers()
 
     def visit_With(self, node):
-        super(MambaSyntaxToClassBasedSyntax, self).generic_visit(node)
+        self._transform_nested_nodes_of(node)
 
         if not self._is_relevant_with_statement(node):
             return node
@@ -55,6 +55,9 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
             return self._transform_to_hook(node, name)
 
         return node
+
+    def _transform_nested_nodes_of(self, node):
+        super(MambaSyntaxToClassBasedSyntax, self).generic_visit(node)
 
     def _is_relevant_with_statement(self, node):
         return self._matches_structure_of_example_group_or_example_declaration(node) or self._matches_structure_of_hook_declaration(node)
