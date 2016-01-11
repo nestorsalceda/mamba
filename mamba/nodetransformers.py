@@ -1,5 +1,7 @@
 import ast
 
+from mamba.infrastructure import is_python3
+
 
 class MambaIdentifiers(object):
     @property
@@ -29,15 +31,22 @@ class MambaIdentifiers(object):
     def EXAMPLE(self):
         return self.ACTIVE_EXAMPLE + self.PENDING_EXAMPLE
 
-    @property
-    def HOOKS(self):
-        return ('before', 'after')
+    class HOOKS(object):
+        @property
+        def RUN_ORDERS(self):
+            return ('before', 'after')
+
+        @property
+        def SCOPES(self):
+            return ('all', 'each')
 
 
 class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
     def __init__(self):
         self._number_of_examples_and_example_groups_processed = 0
         self._MAMBA_IDENTIFIERS = MambaIdentifiers()
+
+        self._hook_transformer_class = HookDeclarationToMethodDeclaration
 
     def visit_With(self, node):
         self._transform_nested_nodes_of(node)
@@ -51,8 +60,12 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
             return self._transform_to_example_group(node, name)
         if name in self._MAMBA_IDENTIFIERS.EXAMPLE:
             return self._transform_to_example(node, name)
-        if name in self._MAMBA_IDENTIFIERS.HOOKS:
-            return self._transform_to_hook(node, name)
+        try:
+            transformer = self._hook_transformer_class(node)
+        except NodeShouldNotBeTransformed:
+            pass
+        else:
+            return transformer.transform()
 
         return node
 
@@ -73,9 +86,6 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
     def _mamba_identifier_of(self, node):
         if self._matches_structure_of_example_group_or_example_declaration(node):
             return self._context_expr_for(node).func.id
-
-        if self._matches_structure_of_hook_declaration(node):
-            return self._context_expr_for(node).value.id
 
     def _context_expr_for(self, node):
         return node.context_expr
@@ -138,18 +148,6 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
     def _generate_self(self):
         return ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[])
 
-    def _transform_to_hook(self, node, name):
-        scope_of_hook = self._context_expr_for(node).attr
-        return ast.copy_location(
-            ast.FunctionDef(
-                name=name + '_' + scope_of_hook,
-                args=self._generate_self(),
-                body=node.body,
-                decorator_list=[]
-            ),
-            node
-        )
-
 
 class MambaSyntaxToClassBasedSyntaxPython3(MambaSyntaxToClassBasedSyntax):
     def _context_expr_for(self, node):
@@ -165,3 +163,141 @@ class MambaSyntaxToClassBasedSyntaxPython3(MambaSyntaxToClassBasedSyntax):
             defaults=[]
         )
 
+
+class HookDeclarationToMethodDeclaration(object):
+    def __init__(self, with_statement_node):
+        self._hook_declaration = HookDeclaration(WithStatement(with_statement_node))
+
+    def transform(self):
+        return MethodDeclaration(
+            self._compute_name_of_method_declaration(),
+            self._hook_declaration.body
+        ).toAst()
+
+    def _compute_name_of_method_declaration(self):
+        return self._hook_declaration.run_order + '_' + self._hook_declaration.scope
+
+
+class WithStatement(object):
+    def __init__(self, with_statement_node):
+        self._with_statement_node = with_statement_node
+
+    if is_python3():
+        @property
+        def argument(self):
+            return self._with_statement_node.items[0].context_expr
+    else:
+        @property
+        def argument(self):
+            return self._with_statement_node.context_expr
+
+    @property
+    def body(self):
+        return self._with_statement_node.body
+
+
+class HookDeclaration(object):
+    def __init__(self, with_statement):
+        self._HOOK_IDENTIFIERS = MambaIdentifiers.HOOKS()
+        self._attribute_lookup = AttributeLookupOnAName(with_statement.argument)
+        self._body = with_statement.body
+
+        if not self._is_valid():
+            raise NotAHookDeclaration(with_statement.argument)
+
+    def _is_valid(self):
+        return self._has_valid_run_order() and self._has_valid_scope()
+
+    def _has_valid_run_order(self):
+        return self.run_order in self._HOOK_IDENTIFIERS.RUN_ORDERS
+
+    def _has_valid_scope(self):
+        return self.scope in self._HOOK_IDENTIFIERS.SCOPES
+
+    @property
+    def run_order(self):
+        return self._attribute_lookup.name
+
+    @property
+    def scope(self):
+        return self._attribute_lookup.attribute
+
+    @property
+    def body(self):
+        return self._body
+
+
+class AttributeLookupOnAName(object):
+    def __init__(self, node):
+        self._node = node
+
+        if not self._is_valid():
+            raise NotAnAttributeLookupOnAName(node)
+
+    def _is_valid(self):
+        return self._is_attribute_lookup() and isinstance(self._node.value, ast.Name)
+
+    def _is_attribute_lookup(self):
+        return isinstance(self._node, ast.Attribute)
+
+    @property
+    def name(self):
+        return self._node.value.id
+
+    @property
+    def attribute(self):
+        return self._node.attr
+
+
+class MethodDeclaration(object):
+    def __init__(self, name, body):
+        self._name = name
+        self._body = body
+
+    def toAst(self):
+        return ast.FunctionDef(
+            name=self._name,
+            args=self._generate_empty_parameter_list_for_method(),
+            body=self._body,
+            decorator_list=[]
+        )
+
+
+    if is_python3():
+        def _generate_empty_parameter_list_for_method(self):
+            return ast.arguments(
+                args=[ast.arg(arg='self', annotation=None)],
+                vararg=None,
+                kwonlyargs=[],
+                kw_defaults=[],
+                kwarg=None,
+                defaults=[]
+            )
+    else:
+        def _generate_empty_parameter_list_for_method(self):
+            return ast.arguments(
+                args=[ast.Name(id='self', ctx=ast.Param())],
+                vararg=None,
+                kwarg=None,
+                defaults=[]
+            )
+
+
+class NodeShouldNotBeTransformed(Exception):
+    pass
+
+class NotAHookDeclaration(NodeShouldNotBeTransformed):
+    def __init__(self, node):
+        self.message = 'The node {0} is not a hook declaration: it doesn\'t match the  hook declaration syntax'.format(
+            node
+        )
+
+        super(NotAHookDeclaration, self).__init__(self.message)
+
+class NotAnAttributeLookupOnAName(NodeShouldNotBeTransformed):
+    def __init__(self, node):
+        self.message = 'The node {0} is not an attribute lookup on a name'.format(
+            node
+        )
+
+        super(NotAnAttributeLookupOnAName, self).__init__(self.message)

@@ -3,25 +3,25 @@
 import os
 import sys
 import inspect
+import functools
+
+from expects import *
 
 from mamba import example, example_group, loader
 from mamba.example_collector import ExampleCollector
 
-from expects import *
+from .helpers import absolute_path_to_fixture_file
+absolute_path_to_fixture_file = functools.partial(absolute_path_to_fixture_file, __file__)
 
 
-def spec_relpath(name):
+def relative_path_to_fixture_file(name):
     return os.path.join('spec', 'fixtures', name)
 
 
-def spec_abspath(name):
-    return os.path.join(os.path.dirname(__file__), 'fixtures', name)
-
-
-IRRELEVANT_PATH = spec_abspath('without_inner_contexts.py')
-PENDING_DECORATOR_PATH = spec_abspath('with_pending_decorator.py')
-PENDING_DECORATOR_AS_ROOT_PATH = spec_abspath('with_pending_decorator_as_root.py')
-WITH_RELATIVE_IMPORT_PATH = spec_abspath('with_relative_import.py')
+IRRELEVANT_PATH = absolute_path_to_fixture_file('without_inner_contexts.py')
+PENDING_DECORATOR_PATH = absolute_path_to_fixture_file('with_pending_decorator.py')
+PENDING_DECORATOR_AS_ROOT_PATH = absolute_path_to_fixture_file('with_pending_decorator_as_root.py')
+WITH_RELATIVE_IMPORT_PATH = absolute_path_to_fixture_file('with_relative_import.py')
 
 
 def _load_module(path):
@@ -37,14 +37,14 @@ with description(ExampleCollector) as _:
             expect(inspect.ismodule(module)).to(be_true)
 
         with it('loads module from relative path'):
-            module = _load_module(spec_relpath('without_inner_contexts.py'))
+            module = _load_module(relative_path_to_fixture_file('without_inner_contexts.py'))
 
             expect(inspect.ismodule(module)).to(be_true)
 
     #FIXME: Mixed responsabilities in test [collect, load]??
     with context('when loading'):
         with it('orders examples by line number'):
-            module = _load_module(spec_abspath('without_inner_contexts.py'))
+            module = _load_module(absolute_path_to_fixture_file('without_inner_contexts.py'))
 
             examples = loader.Loader().load_examples_from(module)
 
@@ -52,7 +52,7 @@ with description(ExampleCollector) as _:
             expect([example.name for example in examples[0].examples]).to(equal(['it first example', 'it second example', 'it third example']))
 
         with it('places examples together and groups at the end'):
-            module = _load_module(spec_abspath('with_inner_contexts.py'))
+            module = _load_module(absolute_path_to_fixture_file('with_inner_contexts.py'))
 
             examples = loader.Loader().load_examples_from(module)
 
