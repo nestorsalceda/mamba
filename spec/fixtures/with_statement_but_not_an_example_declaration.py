@@ -4,7 +4,7 @@ with my_custom_context_manager:
 with something():
     pass
 
-with wrong_example('whatever'):
+with not_an_example('whatever'):
     pass
 
 with it(42):
@@ -16,5 +16,5 @@ with it(False):
 with _it(-3.6):
     pass
 
-with _it(lambda: 'no, this is wrong'):
+with _it(lambda: 'no, this is not an example'):
     pass

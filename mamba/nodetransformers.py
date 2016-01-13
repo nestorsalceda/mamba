@@ -4,21 +4,18 @@ from mamba.infrastructure import is_python3
 
 
 class MambaIdentifiers(object):
-    @property
-    def ACTIVE_EXAMPLE_GROUP(self):
-        return ('description', 'context', 'describe')
+    class EXAMPLE_GROUP(object):
+        @property
+        def ACTIVE(self):
+            return ('description', 'context', 'describe')
 
-    @property
-    def PENDING_EXAMPLE_GROUP(self):
-        return self._compute_pending_identifiers(self.ACTIVE_EXAMPLE_GROUP)
+        @property
+        def PENDING(self):
+            return MambaIdentifiers._compute_pending_identifiers(self.ACTIVE)
 
-    @staticmethod
-    def _compute_pending_identifiers(identifiers):
-        return tuple('_' + identifier for identifier in identifiers)
-
-    @property
-    def EXAMPLE_GROUP(self):
-        return self.ACTIVE_EXAMPLE_GROUP + self.PENDING_EXAMPLE_GROUP
+        @property
+        def ALL(self):
+            return self.ACTIVE + self.PENDING
 
     class EXAMPLE(object):
         @property
@@ -42,27 +39,22 @@ class MambaIdentifiers(object):
         def SCOPES(self):
             return ('all', 'each')
 
+    @staticmethod
+    def _compute_pending_identifiers(identifiers):
+        return tuple('_' + identifier for identifier in identifiers)
+
 
 class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
     def __init__(self):
-        self._number_of_examples_and_example_groups_processed = 0
-        self._MAMBA_IDENTIFIERS = MambaIdentifiers()
-
         self._transformer_classes = [
             ExampleDeclarationToMethodDeclaration,
+            ExampleGroupDeclarationToClassDeclaration,
             HookDeclarationToMethodDeclaration
         ]
 
     def visit_With(self, node):
         self._transform_nested_nodes_of(node)
 
-        if not self._is_relevant_with_statement(node):
-            return node
-
-        name = self._mamba_identifier_of(node)
-
-        if name in self._MAMBA_IDENTIFIERS.EXAMPLE_GROUP:
-            return self._transform_to_example_group(node, name)
         for transformer_class in self._transformer_classes:
             try:
                 transformer = transformer_class(node)
@@ -75,72 +67,6 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
 
     def _transform_nested_nodes_of(self, node):
         super(MambaSyntaxToClassBasedSyntax, self).generic_visit(node)
-
-    def _is_relevant_with_statement(self, node):
-        return self._matches_structure_of_example_group_or_example_declaration(node) or self._matches_structure_of_hook_declaration(node)
-
-    def _matches_structure_of_example_group_or_example_declaration(self, node):
-        context_expr = self._context_expr_for(node)
-        return isinstance(context_expr, ast.Call) and isinstance(context_expr.func, ast.Name)
-
-    def _matches_structure_of_hook_declaration(self, node):
-        context_expr = self._context_expr_for(node)
-        return isinstance(context_expr, ast.Attribute) and isinstance(context_expr.value, ast.Name)
-
-    def _mamba_identifier_of(self, node):
-        if self._matches_structure_of_example_group_or_example_declaration(node):
-            return self._context_expr_for(node).func.id
-
-    def _context_expr_for(self, node):
-        return node.context_expr
-
-    def _transform_to_example_group(self, node, name):
-        argument_of_example_group = self._context_expr_for(node).args[0]
-
-        if not self._represents_a_string_literal(argument_of_example_group):
-            self._insert_subject_registration_assignment(node, argument_of_example_group)
-
-        return ast.copy_location(
-            ast.ClassDef(
-                name=self._compute_title_of_example_group(argument_of_example_group, name),
-                bases=[],
-                keywords=[],
-                body=node.body,
-                decorator_list=[]
-            ),
-            node
-        )
-
-    def _represents_a_string_literal(self, node):
-        return isinstance(node, ast.Str)
-
-    def _insert_subject_registration_assignment(self, node, node_representing_subject):
-        node.body.insert(0, self._create_assignment_of_name_to_value('_subject_class', node_representing_subject))
-
-    def _create_assignment_of_name_to_value(self, name, ast_of_value):
-        return ast.Assign(targets=[ast.Name(id=name, ctx=ast.Store())], value=ast_of_value)
-
-    def _compute_title_of_example_group(self, argument_of_example_group, name):
-        if self._represents_a_string_literal(argument_of_example_group):
-            description_name = argument_of_example_group.s
-        elif isinstance(argument_of_example_group, ast.Attribute):
-            description_name = argument_of_example_group.attr
-        else:
-            description_name = argument_of_example_group.id
-
-        if name in self._MAMBA_IDENTIFIERS.PENDING_EXAMPLE_GROUP:
-            description_name += '__pending'
-
-        description_name = '{0:08d}__{1}__description'.format(self._number_of_examples_and_example_groups_processed, description_name)
-        self._number_of_examples_and_example_groups_processed += 1
-
-        return description_name
-
-
-class MambaSyntaxToClassBasedSyntaxPython3(MambaSyntaxToClassBasedSyntax):
-    def _context_expr_for(self, node):
-        return node.items[0].context_expr
-
 
 
 class HookDeclarationToMethodDeclaration(object):
@@ -241,7 +167,6 @@ class MethodDeclaration(object):
             decorator_list=[]
         )
 
-
     if is_python3():
         def _generate_empty_parameter_list_for_method(self):
             return ast.arguments(
@@ -310,13 +235,32 @@ class ExampleDeclaration(object):
 
 class CallOnANameWhereFirstArgumentIsString(object):
     def __init__(self, node):
+        self._call = CallOnANameWithAtLeastOneArgument(node)
+
+        if not self._first_argument_is_string():
+            raise NotACallOnANameWhereFirstArgumentIsString(node)
+
+    def _first_argument_is_string(self):
+        return isinstance(self._call.first_argument_node, ast.Str)
+
+    @property
+    def called_name(self):
+        return self._call.called_name
+
+    @property
+    def first_argument(self):
+        return self._call.first_argument_node.s
+
+
+class CallOnANameWithAtLeastOneArgument(object):
+    def __init__(self, node):
         self._node = node
 
         if not self._is_valid():
-            raise NotACallOnANameWhereFirstArgumentIsString(node)
+            raise NotACallOnANameWithAtLeastOneArgument(node)
 
     def _is_valid(self):
-        return self._is_call_on_a_name() and self._first_argument_is_string()
+        return self._is_call_on_a_name() and self._has_at_least_one_argument()
 
     def _is_call_on_a_name(self):
         return self._is_call() and self._called_expression_is_name()
@@ -327,19 +271,16 @@ class CallOnANameWhereFirstArgumentIsString(object):
     def _called_expression_is_name(self):
         return isinstance(self._node.func, ast.Name)
 
-    def _first_argument_is_string(self):
-        return self._has_arguments() and isinstance(self._node.args[0], ast.Str)
-
-    def _has_arguments(self):
-        return len(self._node.args) > 0
+    def _has_at_least_one_argument(self):
+        return len(self._node.args) >= 1
 
     @property
     def called_name(self):
         return self._node.func.id
 
     @property
-    def first_argument(self):
-        return self._node.args[0].s
+    def first_argument_node(self):
+        return self._node.args[0]
 
 
 class Counter(object):
@@ -351,6 +292,173 @@ class Counter(object):
         Counter._current_number += 1
 
         return next_number
+
+
+class ExampleGroupDeclarationToClassDeclaration(object):
+    _ACTIVE_EXAMPlE_GROUP_MARKER = 'description'
+    _PENDING_EXAMPLE_GROUP_MARKER = 'pending__' + _ACTIVE_EXAMPlE_GROUP_MARKER
+
+    _NAME_OF_CLASS_VARIABLE_HOLDING_SUBJECT_CLASS = '_subject_class'
+
+    def __init__(self, with_statement_node):
+        self._example_group_declaration = ExampleGroupDeclaration(WithStatement(with_statement_node))
+
+    def transform(self):
+        return ClassDeclaration(
+            self._compute_name_of_class(),
+            self._compute_body_of_class()
+        ).toAst()
+
+    def _compute_name_of_class(self):
+        return '__'.join([
+            self._compute_id_of_class(),
+            self._example_group_declaration.wording,
+            self._compute_marker_for_example_group()
+        ])
+
+    def _compute_id_of_class(self):
+        return '{0:08d}'.format(Counter.get_next())
+
+    def _compute_marker_for_example_group(self):
+        if self._example_group_declaration.is_pending:
+            return ExampleGroupDeclarationToClassDeclaration._PENDING_EXAMPLE_GROUP_MARKER
+        return ExampleGroupDeclarationToClassDeclaration._ACTIVE_EXAMPlE_GROUP_MARKER
+
+    def _compute_body_of_class(self):
+        declared_body = self._example_group_declaration.body
+        if not self._example_group_declaration.has_explicit_subject_declaration:
+            return declared_body
+
+        return [self._create_assignment_of_subject_name()] + declared_body
+
+    def _create_assignment_of_subject_name(self):
+        return AssignmentOfExpressionToName(
+            left_hand_side_name=ExampleGroupDeclarationToClassDeclaration._NAME_OF_CLASS_VARIABLE_HOLDING_SUBJECT_CLASS,
+            right_hand_side=self._example_group_declaration.subject_node
+        ).toAst()
+
+
+class ExampleGroupDeclaration(object):
+    def __init__(self, with_statement):
+        self._EXAMPLE_GROUP_IDENTIFIERS = MambaIdentifiers.EXAMPLE_GROUP()
+        self._body = with_statement.body
+
+        try:
+            self._call = CallOnANameWhereFirstArgumentIsString(with_statement.argument)
+        except NotACallOnANameWhereFirstArgumentIsString:
+            try:
+                self._call = CallOnANameWhereFirstArgumentIsName(with_statement.argument)
+            except NotACallOnANameWhereFirstArgumentIsName:
+                self._call = CallOnANameWhereFirstArgumentIsAttributeLookup(with_statement.argument)
+
+
+        if not self._is_valid():
+            raise NotAnExampleGroupDeclaration(with_statement.argument)
+
+    def _is_valid(self):
+        return self._call.called_name in self._EXAMPLE_GROUP_IDENTIFIERS.ALL
+
+    @property
+    def wording(self):
+        if self.has_explicit_subject_declaration:
+            return self._call.name_passed_as_first_argument
+        return self._call.first_argument
+
+    @property
+    def is_pending(self):
+        return self._call.called_name in self._EXAMPLE_GROUP_IDENTIFIERS.PENDING
+
+    @property
+    def body(self):
+        return self._body
+
+    @property
+    def has_explicit_subject_declaration(self):
+        return hasattr(self._call, 'name_passed_as_first_argument')
+
+    @property
+    def subject_node(self):
+        return self._call.first_argument_node
+
+
+class ClassDeclaration(object):
+    def __init__(self, name, body):
+        self._name = name
+        self._body = body
+
+    def toAst(self):
+        return ast.ClassDef(
+            decorator_list=[],
+            name=self._name,
+            bases=[],
+            keywords=[],
+            starargs=None,
+            kwargs=None,
+            body=self._body
+        )
+
+
+class CallOnANameWhereFirstArgumentIsName(object):
+    def __init__(self, node):
+        self._call = CallOnANameWithAtLeastOneArgument(node)
+
+        if not self._first_argument_is_name():
+            raise NotACallOnANameWhereFirstArgumentIsName(node)
+
+    def _first_argument_is_name(self):
+        return isinstance(self._call.first_argument_node, ast.Name)
+
+    @property
+    def called_name(self):
+        return self._call.called_name
+
+    @property
+    def name_passed_as_first_argument(self):
+        return self._call.first_argument_node.id
+
+    @property
+    def first_argument_node(self):
+        return self._call.first_argument_node
+
+
+class AssignmentOfExpressionToName(object):
+    def __init__(self, left_hand_side_name, right_hand_side):
+        self._left_hand_side_name = left_hand_side_name
+        self._right_hand_side = right_hand_side
+
+    def toAst(self):
+        return ast.Assign(
+            targets=[ast.Name(id=self._left_hand_side_name, ctx=ast.Store())],
+            value=self._compute_right_hand_side()
+        )
+
+    def _compute_right_hand_side(self):
+        if not isinstance(self._right_hand_side, basestring):
+            return self._right_hand_side
+        return ast.Name(id=self._right_hand_side, ctx=ast.Load())
+
+
+class CallOnANameWhereFirstArgumentIsAttributeLookup(object):
+    def __init__(self, node):
+        self._call = CallOnANameWithAtLeastOneArgument(node)
+
+        if not self._first_argument_is_attribute_lookup():
+            raise NotACallOnANameWhereFirstArgumentIsAttributeLookup(node)
+
+    def _first_argument_is_attribute_lookup(self):
+        return isinstance(self._call.first_argument_node, ast.Attribute)
+
+    @property
+    def called_name(self):
+        return self._call.called_name
+
+    @property
+    def name_passed_as_first_argument(self):
+        return self._call.first_argument_node.attr
+
+    @property
+    def first_argument_node(self):
+        return self._call.first_argument_node
 
 
 class NodeShouldNotBeTransformed(Exception):
@@ -387,3 +495,35 @@ class NotACallOnANameWhereFirstArgumentIsString(NodeShouldNotBeTransformed):
         )
 
         super(NotACallOnANameWhereFirstArgumentIsString, self).__init__(self.message)
+
+class NotAnExampleGroupDeclaration(NodeShouldNotBeTransformed):
+    def __init__(self, node):
+        self.message = 'The node {0} is not an example group declaration: it doesn\'t match the example group declaration syntax'.format(
+            node
+        )
+
+        super(NotAnExampleGroupDeclaration, self).__init__(self.message)
+
+class NotACallOnANameWhereFirstArgumentIsName(NodeShouldNotBeTransformed):
+    def __init__(self, node):
+        self.message = 'The node {0} is not a call on a name where the first argument is a name'.format(
+            node
+        )
+
+        super(NotACallOnANameWhereFirstArgumentIsName, self).__init__(self.message)
+
+class NotACallOnANameWithAtLeastOneArgument(NodeShouldNotBeTransformed):
+    def __init__(self, node):
+        self.message = 'The node {0} is not a call on a name with at least one argument'.format(
+            ast.dump(node)
+        )
+
+        super(NotACallOnANameWithAtLeastOneArgument, self).__init__(self.message)
+
+class NotACallOnANameWhereFirstArgumentIsAttributeLookup(NodeShouldNotBeTransformed):
+    def __init__(self, node):
+        self.message = 'The node {0} is not a call on a name where the first argument is an attribute lookup'.format(
+            ast.dump(node)
+        )
+
+        super(NotACallOnANameWhereFirstArgumentIsAttributeLookup, self).__init__(self.message)

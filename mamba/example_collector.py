@@ -7,13 +7,13 @@ import ast
 import contextlib
 
 from mamba import nodetransformers
-from mamba.infrastructure import is_python3
+
 
 class ExampleCollector(object):
 
     def __init__(self, paths):
         self.paths = paths
-        self._node_transformer = nodetransformers.MambaSyntaxToClassBasedSyntaxPython3() if is_python3() else nodetransformers.MambaSyntaxToClassBasedSyntax()
+        self._node_transformer = nodetransformers.MambaSyntaxToClassBasedSyntax()
 
     def modules(self):
         for path in self._collect_files_containing_examples():
