@@ -4,6 +4,6 @@ dependencies:
     - python setup.py develop
 test:
   override:
-    - mamba --enable-coverage
+    - coverage run mamba/cli.py
   post:
     - 'coverage report'

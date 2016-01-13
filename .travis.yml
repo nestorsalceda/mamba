@@ -7,5 +7,5 @@ python:
   - "pypy"
 install: "pip install -r requirements.txt -r requirements-dev.txt"
 before_script: python setup.py develop
-script: mamba --enable-coverage
+script: coverage run mamba/cli.py
 after_success: 'coverage report'
