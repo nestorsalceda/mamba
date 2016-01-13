@@ -12,26 +12,28 @@ class MambaIdentifiers(object):
     def PENDING_EXAMPLE_GROUP(self):
         return self._compute_pending_identifiers(self.ACTIVE_EXAMPLE_GROUP)
 
-    def _compute_pending_identifiers(self, identifiers):
+    @staticmethod
+    def _compute_pending_identifiers(identifiers):
         return tuple('_' + identifier for identifier in identifiers)
 
     @property
     def EXAMPLE_GROUP(self):
         return self.ACTIVE_EXAMPLE_GROUP + self.PENDING_EXAMPLE_GROUP
 
-    @property
-    def ACTIVE_EXAMPLE(self):
-        return ('it',)
+    class EXAMPLE(object):
+        @property
+        def ACTIVE(self):
+            return ('it',)
 
-    @property
-    def PENDING_EXAMPLE(self):
-        return self._compute_pending_identifiers(self.ACTIVE_EXAMPLE)
+        @property
+        def PENDING(self):
+            return MambaIdentifiers._compute_pending_identifiers(self.ACTIVE)
 
-    @property
-    def EXAMPLE(self):
-        return self.ACTIVE_EXAMPLE + self.PENDING_EXAMPLE
+        @property
+        def ALL(self):
+            return self.ACTIVE + self.PENDING
 
-    class HOOKS(object):
+    class HOOK(object):
         @property
         def RUN_ORDERS(self):
             return ('before', 'after')
@@ -46,7 +48,10 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
         self._number_of_examples_and_example_groups_processed = 0
         self._MAMBA_IDENTIFIERS = MambaIdentifiers()
 
-        self._hook_transformer_class = HookDeclarationToMethodDeclaration
+        self._transformer_classes = [
+            ExampleDeclarationToMethodDeclaration,
+            HookDeclarationToMethodDeclaration
+        ]
 
     def visit_With(self, node):
         self._transform_nested_nodes_of(node)
@@ -58,14 +63,13 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
 
         if name in self._MAMBA_IDENTIFIERS.EXAMPLE_GROUP:
             return self._transform_to_example_group(node, name)
-        if name in self._MAMBA_IDENTIFIERS.EXAMPLE:
-            return self._transform_to_example(node, name)
-        try:
-            transformer = self._hook_transformer_class(node)
-        except NodeShouldNotBeTransformed:
-            pass
-        else:
-            return transformer.transform()
+        for transformer_class in self._transformer_classes:
+            try:
+                transformer = transformer_class(node)
+            except NodeShouldNotBeTransformed:
+                pass
+            else:
+                return transformer.transform()
 
         return node
 
@@ -132,36 +136,11 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
 
         return description_name
 
-    def _transform_to_example(self, node, name):
-        example_name = '{0:08d}__{1} {2}'.format(self._number_of_examples_and_example_groups_processed, name, self._context_expr_for(node).args[0].s)
-        self._number_of_examples_and_example_groups_processed += 1
-        return ast.copy_location(
-            ast.FunctionDef(
-                name=example_name,
-                args=self._generate_self(),
-                body=node.body,
-                decorator_list=[]
-            ),
-            node
-        )
-
-    def _generate_self(self):
-        return ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[])
-
 
 class MambaSyntaxToClassBasedSyntaxPython3(MambaSyntaxToClassBasedSyntax):
     def _context_expr_for(self, node):
         return node.items[0].context_expr
 
-    def _generate_self(self):
-        return ast.arguments(
-            args=[ast.arg(arg='self', annotation=None)],
-            vararg=None,
-            kwonlyargs=[],
-            kw_defaults=[],
-            kwarg=None,
-            defaults=[]
-        )
 
 
 class HookDeclarationToMethodDeclaration(object):
@@ -170,11 +149,11 @@ class HookDeclarationToMethodDeclaration(object):
 
     def transform(self):
         return MethodDeclaration(
-            self._compute_name_of_method_declaration(),
+            self._compute_name_of_method(),
             self._hook_declaration.body
         ).toAst()
 
-    def _compute_name_of_method_declaration(self):
+    def _compute_name_of_method(self):
         return self._hook_declaration.run_order + '_' + self._hook_declaration.scope
 
 
@@ -198,7 +177,7 @@ class WithStatement(object):
 
 class HookDeclaration(object):
     def __init__(self, with_statement):
-        self._HOOK_IDENTIFIERS = MambaIdentifiers.HOOKS()
+        self._HOOK_IDENTIFIERS = MambaIdentifiers.HOOK()
         self._attribute_lookup = AttributeLookupOnAName(with_statement.argument)
         self._body = with_statement.body
 
@@ -283,12 +262,103 @@ class MethodDeclaration(object):
             )
 
 
+class ExampleDeclarationToMethodDeclaration(object):
+    def __init__(self, with_statement_node):
+        self._example_declaration = ExampleDeclaration(WithStatement(with_statement_node))
+
+    def transform(self):
+        return MethodDeclaration(
+            self._compute_name_of_method(),
+            self._example_declaration.body
+        ).toAst()
+
+    def _compute_name_of_method(self):
+        return '{0}__{1} {2}'.format(
+            self._compute_id_of_method(),
+            self._example_declaration.example_identifier,
+            self._example_declaration.wording
+        )
+
+    def _compute_id_of_method(self):
+        return '{0:08d}'.format(Counter.get_next())
+
+
+class ExampleDeclaration(object):
+    def __init__(self, with_statement):
+        self._EXAMPLE_IDENTIFIERS = MambaIdentifiers.EXAMPLE()
+        self._call = CallOnANameWhereFirstArgumentIsString(with_statement.argument)
+        self._body = with_statement.body
+
+        if not self._is_valid():
+            raise NotAnExampleDeclaration(with_statement.argument)
+
+    def _is_valid(self):
+        return self._call.called_name in self._EXAMPLE_IDENTIFIERS.ALL
+
+    @property
+    def example_identifier(self):
+        return self._call.called_name
+
+    @property
+    def wording(self):
+        return self._call.first_argument
+
+    @property
+    def body(self):
+        return self._body
+
+
+class CallOnANameWhereFirstArgumentIsString(object):
+    def __init__(self, node):
+        self._node = node
+
+        if not self._is_valid():
+            raise NotACallOnANameWhereFirstArgumentIsString(node)
+
+    def _is_valid(self):
+        return self._is_call_on_a_name() and self._first_argument_is_string()
+
+    def _is_call_on_a_name(self):
+        return self._is_call() and self._called_expression_is_name()
+
+    def _is_call(self):
+        return isinstance(self._node, ast.Call)
+
+    def _called_expression_is_name(self):
+        return isinstance(self._node.func, ast.Name)
+
+    def _first_argument_is_string(self):
+        return self._has_arguments() and isinstance(self._node.args[0], ast.Str)
+
+    def _has_arguments(self):
+        return len(self._node.args) > 0
+
+    @property
+    def called_name(self):
+        return self._node.func.id
+
+    @property
+    def first_argument(self):
+        return self._node.args[0].s
+
+
+class Counter(object):
+    _current_number = 0
+
+    @staticmethod
+    def get_next():
+        next_number = Counter._current_number
+        Counter._current_number += 1
+
+        return next_number
+
+
 class NodeShouldNotBeTransformed(Exception):
     pass
 
 class NotAHookDeclaration(NodeShouldNotBeTransformed):
     def __init__(self, node):
-        self.message = 'The node {0} is not a hook declaration: it doesn\'t match the  hook declaration syntax'.format(
+        self.message = 'The node {0} is not a hook declaration: it doesn\'t match the hook declaration syntax'.format(
             node
         )
 
@@ -301,3 +371,19 @@ class NotAnAttributeLookupOnAName(NodeShouldNotBeTransformed):
         )
 
         super(NotAnAttributeLookupOnAName, self).__init__(self.message)
+
+class NotAnExampleDeclaration(NodeShouldNotBeTransformed):
+    def __init__(self, node):
+        self.message = 'The node {0} is not an example declaration: it doesn\'t match the example declaration syntax'.format(
+            node
+        )
+
+        super(NotAnExampleDeclaration, self).__init__(self.message)
+
+class NotACallOnANameWhereFirstArgumentIsString(NodeShouldNotBeTransformed):
+    def __init__(self, node):
+        self.message = 'The node {0} is not a call on a name where the first argument is a string'.format(
+            node
+        )
+
+        super(NotACallOnANameWhereFirstArgumentIsString, self).__init__(self.message)
