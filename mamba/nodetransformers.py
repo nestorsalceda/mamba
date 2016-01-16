@@ -57,7 +57,7 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
 
         for transformer_class in self._transformer_classes:
             try:
-                transformer = transformer_class(node)
+                transformer = transformer_class(WithStatement(node))
             except NodeShouldNotBeTransformed:
                 pass
             else:
@@ -70,8 +70,8 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
 
 
 class HookDeclarationToMethodDeclaration(object):
-    def __init__(self, with_statement_node):
-        self._hook_declaration = HookDeclaration(WithStatement(with_statement_node))
+    def __init__(self, with_statement):
+        self._hook_declaration = HookDeclaration(with_statement)
 
     def transform(self):
         return MethodDeclaration(
@@ -194,8 +194,8 @@ class MethodDeclaration(object):
 
 
 class ExampleDeclarationToMethodDeclaration(object):
-    def __init__(self, with_statement_node):
-        self._example_declaration = ExampleDeclaration(WithStatement(with_statement_node))
+    def __init__(self, with_statement):
+        self._example_declaration = ExampleDeclaration(with_statement)
 
     def transform(self):
         return MethodDeclaration(
@@ -308,8 +308,8 @@ class ExampleGroupDeclarationToClassDeclaration(object):
 
     _NAME_OF_CLASS_VARIABLE_HOLDING_SUBJECT_CLASS = '_subject_class'
 
-    def __init__(self, with_statement_node):
-        self._example_group_declaration = ExampleGroupDeclaration(WithStatement(with_statement_node))
+    def __init__(self, with_statement):
+        self._example_group_declaration = ExampleGroupDeclaration(with_statement)
 
     def transform(self):
         return ClassDeclaration(
