@@ -233,25 +233,6 @@ class ExampleDeclaration(object):
         return self._body
 
 
-class CallOnANameWhereFirstArgumentIsString(object):
-    def __init__(self, node):
-        self._call = CallOnANameWithAtLeastOneArgument(node)
-
-        if not self._first_argument_is_string():
-            raise NotACallOnANameWhereFirstArgumentIsString(node)
-
-    def _first_argument_is_string(self):
-        return isinstance(self._call.first_argument_node, ast.Str)
-
-    @property
-    def called_name(self):
-        return self._call.called_name
-
-    @property
-    def first_argument(self):
-        return self._call.first_argument_node.s
-
-
 class CallOnANameWithAtLeastOneArgument(object):
     def __init__(self, node):
         self._node = node
@@ -281,6 +262,21 @@ class CallOnANameWithAtLeastOneArgument(object):
     @property
     def first_argument_node(self):
         return self._node.args[0]
+
+
+class CallOnANameWhereFirstArgumentIsString(CallOnANameWithAtLeastOneArgument):
+    def __init__(self, node):
+        super(CallOnANameWhereFirstArgumentIsString, self).__init__(node)
+
+        if not self._first_argument_is_string():
+            raise NotACallOnANameWhereFirstArgumentIsString(node)
+
+    def _first_argument_is_string(self):
+        return isinstance(self.first_argument_node, ast.Str)
+
+    @property
+    def first_argument(self):
+        return self.first_argument_node.s
 
 
 class Counter(object):
@@ -398,27 +394,19 @@ class ClassDeclaration(object):
         )
 
 
-class CallOnANameWhereFirstArgumentIsName(object):
+class CallOnANameWhereFirstArgumentIsName(CallOnANameWithAtLeastOneArgument):
     def __init__(self, node):
-        self._call = CallOnANameWithAtLeastOneArgument(node)
+        super(CallOnANameWhereFirstArgumentIsName, self).__init__(node)
 
         if not self._first_argument_is_name():
             raise NotACallOnANameWhereFirstArgumentIsName(node)
 
     def _first_argument_is_name(self):
-        return isinstance(self._call.first_argument_node, ast.Name)
-
-    @property
-    def called_name(self):
-        return self._call.called_name
+        return isinstance(self.first_argument_node, ast.Name)
 
     @property
     def name_passed_as_first_argument(self):
-        return self._call.first_argument_node.id
-
-    @property
-    def first_argument_node(self):
-        return self._call.first_argument_node
+        return self.first_argument_node.id
 
 
 class AssignmentOfExpressionToName(object):
@@ -438,27 +426,19 @@ class AssignmentOfExpressionToName(object):
         return ast.Name(id=self._right_hand_side, ctx=ast.Load())
 
 
-class CallOnANameWhereFirstArgumentIsAttributeLookup(object):
+class CallOnANameWhereFirstArgumentIsAttributeLookup(CallOnANameWithAtLeastOneArgument):
     def __init__(self, node):
-        self._call = CallOnANameWithAtLeastOneArgument(node)
+        super(CallOnANameWhereFirstArgumentIsAttributeLookup, self).__init__(node)
 
         if not self._first_argument_is_attribute_lookup():
             raise NotACallOnANameWhereFirstArgumentIsAttributeLookup(node)
 
     def _first_argument_is_attribute_lookup(self):
-        return isinstance(self._call.first_argument_node, ast.Attribute)
-
-    @property
-    def called_name(self):
-        return self._call.called_name
+        return isinstance(self.first_argument_node, ast.Attribute)
 
     @property
     def name_passed_as_first_argument(self):
-        return self._call.first_argument_node.attr
-
-    @property
-    def first_argument_node(self):
-        return self._call.first_argument_node
+        return self.first_argument_node.attr
 
 
 class NodeShouldNotBeTransformed(Exception):
