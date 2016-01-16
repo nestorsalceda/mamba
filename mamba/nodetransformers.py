@@ -104,11 +104,17 @@ class WithStatement(object):
 class HookDeclaration(object):
     def __init__(self, with_statement):
         self._HOOK_IDENTIFIERS = MambaIdentifiers.HOOK()
-        self._attribute_lookup = AttributeLookupOnAName(with_statement.argument)
         self._body = with_statement.body
 
+        self._create_attribute_lookup_or_raise(with_statement.argument)
         if not self._is_valid():
-            raise NotAHookDeclaration(with_statement.argument)
+            raise NotAHookDeclaration()
+
+    def _create_attribute_lookup_or_raise(self, argument_to_with_statement):
+        try:
+            self._attribute_lookup = AttributeLookupOnAName(argument_to_with_statement)
+        except NotAnAttributeLookupOnAName:
+            raise NotAHookDeclaration()
 
     def _is_valid(self):
         return self._has_valid_run_order() and self._has_valid_scope()
@@ -137,7 +143,7 @@ class AttributeLookupOnAName(object):
         self._node = node
 
         if not self._is_valid():
-            raise NotAnAttributeLookupOnAName(node)
+            raise NotAnAttributeLookupOnAName()
 
     def _is_valid(self):
         return self._is_attribute_lookup() and isinstance(self._node.value, ast.Name)
@@ -459,20 +465,10 @@ class NodeShouldNotBeTransformed(Exception):
     pass
 
 class NotAHookDeclaration(NodeShouldNotBeTransformed):
-    def __init__(self, node):
-        self.message = 'The node {0} is not a hook declaration: it doesn\'t match the hook declaration syntax'.format(
-            node
-        )
+    pass
 
-        super(NotAHookDeclaration, self).__init__(self.message)
-
-class NotAnAttributeLookupOnAName(NodeShouldNotBeTransformed):
-    def __init__(self, node):
-        self.message = 'The node {0} is not an attribute lookup on a name'.format(
-            node
-        )
-
-        super(NotAnAttributeLookupOnAName, self).__init__(self.message)
+class NotAnAttributeLookupOnAName(Exception):
+    pass
 
 class NotAnExampleDeclaration(NodeShouldNotBeTransformed):
     pass
