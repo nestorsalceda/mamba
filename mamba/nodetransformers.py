@@ -238,7 +238,7 @@ class CallOnANameWithAtLeastOneArgument(object):
         self._node = node
 
         if not self._is_valid():
-            raise NotACallOnANameWithAtLeastOneArgument(node)
+            raise UnexpectedCallStructure()
 
     def _is_valid(self):
         return self._is_call_on_a_name() and self._has_at_least_one_argument()
@@ -269,7 +269,7 @@ class CallOnANameWhereFirstArgumentIsString(CallOnANameWithAtLeastOneArgument):
         super(CallOnANameWhereFirstArgumentIsString, self).__init__(node)
 
         if not self._first_argument_is_string():
-            raise NotACallOnANameWhereFirstArgumentIsString(node)
+            raise UnexpectedCallStructure()
 
     def _first_argument_is_string(self):
         return isinstance(self.first_argument_node, ast.Str)
@@ -341,10 +341,10 @@ class ExampleGroupDeclaration(object):
 
         try:
             self._call = CallOnANameWhereFirstArgumentIsString(with_statement.argument)
-        except NotACallOnANameWhereFirstArgumentIsString:
+        except UnexpectedCallStructure:
             try:
                 self._call = CallOnANameWhereFirstArgumentIsName(with_statement.argument)
-            except NotACallOnANameWhereFirstArgumentIsName:
+            except UnexpectedCallStructure:
                 self._call = CallOnANameWhereFirstArgumentIsAttributeLookup(with_statement.argument)
 
 
@@ -399,7 +399,7 @@ class CallOnANameWhereFirstArgumentIsName(CallOnANameWithAtLeastOneArgument):
         super(CallOnANameWhereFirstArgumentIsName, self).__init__(node)
 
         if not self._first_argument_is_name():
-            raise NotACallOnANameWhereFirstArgumentIsName(node)
+            raise UnexpectedCallStructure()
 
     def _first_argument_is_name(self):
         return isinstance(self.first_argument_node, ast.Name)
@@ -431,7 +431,7 @@ class CallOnANameWhereFirstArgumentIsAttributeLookup(CallOnANameWithAtLeastOneAr
         super(CallOnANameWhereFirstArgumentIsAttributeLookup, self).__init__(node)
 
         if not self._first_argument_is_attribute_lookup():
-            raise NotACallOnANameWhereFirstArgumentIsAttributeLookup(node)
+            raise UnexpectedCallStructure()
 
     def _first_argument_is_attribute_lookup(self):
         return isinstance(self.first_argument_node, ast.Attribute)
@@ -468,14 +468,6 @@ class NotAnExampleDeclaration(NodeShouldNotBeTransformed):
 
         super(NotAnExampleDeclaration, self).__init__(self.message)
 
-class NotACallOnANameWhereFirstArgumentIsString(NodeShouldNotBeTransformed):
-    def __init__(self, node):
-        self.message = 'The node {0} is not a call on a name where the first argument is a string'.format(
-            node
-        )
-
-        super(NotACallOnANameWhereFirstArgumentIsString, self).__init__(self.message)
-
 class NotAnExampleGroupDeclaration(NodeShouldNotBeTransformed):
     def __init__(self, node):
         self.message = 'The node {0} is not an example group declaration: it doesn\'t match the example group declaration syntax'.format(
@@ -484,26 +476,5 @@ class NotAnExampleGroupDeclaration(NodeShouldNotBeTransformed):
 
         super(NotAnExampleGroupDeclaration, self).__init__(self.message)
 
-class NotACallOnANameWhereFirstArgumentIsName(NodeShouldNotBeTransformed):
-    def __init__(self, node):
-        self.message = 'The node {0} is not a call on a name where the first argument is a name'.format(
-            node
-        )
-
-        super(NotACallOnANameWhereFirstArgumentIsName, self).__init__(self.message)
-
-class NotACallOnANameWithAtLeastOneArgument(NodeShouldNotBeTransformed):
-    def __init__(self, node):
-        self.message = 'The node {0} is not a call on a name with at least one argument'.format(
-            ast.dump(node)
-        )
-
-        super(NotACallOnANameWithAtLeastOneArgument, self).__init__(self.message)
-
-class NotACallOnANameWhereFirstArgumentIsAttributeLookup(NodeShouldNotBeTransformed):
-    def __init__(self, node):
-        self.message = 'The node {0} is not a call on a name where the first argument is an attribute lookup'.format(
-            ast.dump(node)
-        )
-
-        super(NotACallOnANameWhereFirstArgumentIsAttributeLookup, self).__init__(self.message)
+class UnexpectedCallStructure(NodeShouldNotBeTransformed):
+    pass
