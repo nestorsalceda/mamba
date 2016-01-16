@@ -211,11 +211,17 @@ class ExampleDeclarationToMethodDeclaration(object):
 class ExampleDeclaration(object):
     def __init__(self, with_statement):
         self._EXAMPLE_IDENTIFIERS = MambaIdentifiers.EXAMPLE()
-        self._call = CallOnANameWhereFirstArgumentIsString(with_statement.argument)
         self._body = with_statement.body
 
+        self._create_call_or_raise(with_statement.argument)
         if not self._is_valid():
-            raise NotAnExampleDeclaration(with_statement.argument)
+            raise NotAnExampleDeclaration()
+
+    def _create_call_or_raise(self, argument_to_with_statement):
+        try:
+            self._call = CallOnANameWhereFirstArgumentIsString(argument_to_with_statement)
+        except UnexpectedCallStructure:
+            raise NotAnExampleDeclaration()
 
     def _is_valid(self):
         return self._call.called_name in self._EXAMPLE_IDENTIFIERS.ALL
@@ -337,19 +343,27 @@ class ExampleGroupDeclarationToClassDeclaration(object):
 class ExampleGroupDeclaration(object):
     def __init__(self, with_statement):
         self._EXAMPLE_GROUP_IDENTIFIERS = MambaIdentifiers.EXAMPLE_GROUP()
+        self._supported_types_of_calls = [
+            CallOnANameWhereFirstArgumentIsString,
+            CallOnANameWhereFirstArgumentIsName,
+            CallOnANameWhereFirstArgumentIsAttributeLookup
+        ]
         self._body = with_statement.body
 
-        try:
-            self._call = CallOnANameWhereFirstArgumentIsString(with_statement.argument)
-        except UnexpectedCallStructure:
-            try:
-                self._call = CallOnANameWhereFirstArgumentIsName(with_statement.argument)
-            except UnexpectedCallStructure:
-                self._call = CallOnANameWhereFirstArgumentIsAttributeLookup(with_statement.argument)
-
-
+        self._create_call_or_raise(with_statement.argument)
         if not self._is_valid():
-            raise NotAnExampleGroupDeclaration(with_statement.argument)
+            raise NotAnExampleGroupDeclaration()
+
+    def _create_call_or_raise(self, argument_to_with_statement):
+        for type_of_call in self._supported_types_of_calls:
+            try:
+                self._call = type_of_call(argument_to_with_statement)
+            except UnexpectedCallStructure:
+                pass
+            else:
+                return
+
+        raise NotAnExampleGroupDeclaration()
 
     def _is_valid(self):
         return self._call.called_name in self._EXAMPLE_GROUP_IDENTIFIERS.ALL
@@ -461,20 +475,10 @@ class NotAnAttributeLookupOnAName(NodeShouldNotBeTransformed):
         super(NotAnAttributeLookupOnAName, self).__init__(self.message)
 
 class NotAnExampleDeclaration(NodeShouldNotBeTransformed):
-    def __init__(self, node):
-        self.message = 'The node {0} is not an example declaration: it doesn\'t match the example declaration syntax'.format(
-            node
-        )
-
-        super(NotAnExampleDeclaration, self).__init__(self.message)
+    pass
 
 class NotAnExampleGroupDeclaration(NodeShouldNotBeTransformed):
-    def __init__(self, node):
-        self.message = 'The node {0} is not an example group declaration: it doesn\'t match the example group declaration syntax'.format(
-            node
-        )
+    pass
 
-        super(NotAnExampleGroupDeclaration, self).__init__(self.message)
-
-class UnexpectedCallStructure(NodeShouldNotBeTransformed):
+class UnexpectedCallStructure(Exception):
     pass
