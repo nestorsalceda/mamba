@@ -65,6 +65,13 @@ class AssignmentOfExpressionToName(object):
         )
 
     def _compute_right_hand_side(self):
-        if not isinstance(self._right_hand_side, basestring):
+        if not self._is_string(self._right_hand_side):
             return self._right_hand_side
         return ast.Name(id=self._right_hand_side, ctx=ast.Load())
+
+    if is_python3():
+        def _is_string(self, value):
+            return isinstance(value, str)
+    else:
+        def _is_string(self, value):
+            return isinstance(value, basestring)
