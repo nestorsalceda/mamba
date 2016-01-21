@@ -8,9 +8,9 @@ from .output_nodes import MethodDeclaration, ClassDeclaration, AssignmentOfExpre
 class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
     def __init__(self):
         self._transformer_classes = [
-            ExampleDeclarationToMethodDeclaration,
-            ExampleGroupDeclarationToClassDeclaration,
-            HookDeclarationToMethodDeclaration
+            ExampleToMethod,
+            ExampleGroupToClass,
+            HookToMethod
         ]
 
     def visit_With(self, node):
@@ -30,7 +30,7 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
         super(MambaSyntaxToClassBasedSyntax, self).generic_visit(node)
 
 
-class HookDeclarationToMethodDeclaration(object):
+class HookToMethod(object):
     def __init__(self, with_statement):
         self._hook_declaration = HookDeclaration(with_statement)
 
@@ -44,7 +44,7 @@ class HookDeclarationToMethodDeclaration(object):
         return self._hook_declaration.run_order + '_' + self._hook_declaration.scope
 
 
-class ExampleDeclarationToMethodDeclaration(object):
+class ExampleToMethod(object):
     def __init__(self, with_statement):
         self._example_declaration = ExampleDeclaration(with_statement)
 
@@ -76,7 +76,7 @@ class NumberOfExamplesOrExampleGroupsTransformed(object):
         return next_number
 
 
-class ExampleGroupDeclarationToClassDeclaration(object):
+class ExampleGroupToClass(object):
     _ACTIVE_EXAMPlE_GROUP_MARKER = 'description'
     _PENDING_EXAMPLE_GROUP_MARKER = 'pending__' + _ACTIVE_EXAMPlE_GROUP_MARKER
 
@@ -103,8 +103,8 @@ class ExampleGroupDeclarationToClassDeclaration(object):
 
     def _compute_marker_for_example_group(self):
         if self._example_group_declaration.is_pending:
-            return ExampleGroupDeclarationToClassDeclaration._PENDING_EXAMPLE_GROUP_MARKER
-        return ExampleGroupDeclarationToClassDeclaration._ACTIVE_EXAMPlE_GROUP_MARKER
+            return ExampleGroupToClass._PENDING_EXAMPLE_GROUP_MARKER
+        return ExampleGroupToClass._ACTIVE_EXAMPlE_GROUP_MARKER
 
     def _compute_body_of_class(self):
         declared_body = self._example_group_declaration.body
@@ -115,6 +115,6 @@ class ExampleGroupDeclarationToClassDeclaration(object):
 
     def _create_assignment_of_subject_name(self):
         return AssignmentOfExpressionToName(
-            left_hand_side_name=ExampleGroupDeclarationToClassDeclaration._NAME_OF_CLASS_VARIABLE_HOLDING_SUBJECT_CLASS,
+            left_hand_side_name=ExampleGroupToClass._NAME_OF_CLASS_VARIABLE_HOLDING_SUBJECT_CLASS,
             right_hand_side=self._example_group_declaration.subject_node
         ).toAst()
