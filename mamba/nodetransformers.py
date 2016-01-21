@@ -113,7 +113,7 @@ class HookDeclaration(object):
     def _create_attribute_lookup_or_raise(self, argument_to_with_statement):
         try:
             self._attribute_lookup = AttributeLookupOnAName(argument_to_with_statement)
-        except NotAnAttributeLookupOnAName:
+        except BadNodeStructure:
             raise NotAHookDeclaration()
 
     def _is_valid(self):
@@ -143,7 +143,7 @@ class AttributeLookupOnAName(object):
         self._node = node
 
         if not self._is_valid():
-            raise NotAnAttributeLookupOnAName()
+            raise BadNodeStructure()
 
     def _is_valid(self):
         return self._is_attribute_lookup() and isinstance(self._node.value, ast.Name)
@@ -226,7 +226,7 @@ class ExampleDeclaration(object):
     def _create_call_or_raise(self, argument_to_with_statement):
         try:
             self._call = CallOnANameWhereFirstArgumentIsString(argument_to_with_statement)
-        except UnexpectedCallStructure:
+        except BadNodeStructure:
             raise NotAnExampleDeclaration()
 
     def _is_valid(self):
@@ -250,7 +250,7 @@ class CallOnANameWithAtLeastOneArgument(object):
         self._node = node
 
         if not self._is_valid():
-            raise UnexpectedCallStructure()
+            raise BadNodeStructure()
 
     def _is_valid(self):
         return self._is_call_on_a_name() and self._has_at_least_one_argument()
@@ -281,7 +281,7 @@ class CallOnANameWhereFirstArgumentIsString(CallOnANameWithAtLeastOneArgument):
         super(CallOnANameWhereFirstArgumentIsString, self).__init__(node)
 
         if not self._first_argument_is_string():
-            raise UnexpectedCallStructure()
+            raise BadNodeStructure()
 
     def _first_argument_is_string(self):
         return isinstance(self.first_argument_node, ast.Str)
@@ -364,7 +364,7 @@ class ExampleGroupDeclaration(object):
         for type_of_call in self._supported_types_of_calls:
             try:
                 self._call = type_of_call(argument_to_with_statement)
-            except UnexpectedCallStructure:
+            except BadNodeStructure:
                 pass
             else:
                 return
@@ -419,7 +419,7 @@ class CallOnANameWhereFirstArgumentIsName(CallOnANameWithAtLeastOneArgument):
         super(CallOnANameWhereFirstArgumentIsName, self).__init__(node)
 
         if not self._first_argument_is_name():
-            raise UnexpectedCallStructure()
+            raise BadNodeStructure()
 
     def _first_argument_is_name(self):
         return isinstance(self.first_argument_node, ast.Name)
@@ -451,7 +451,7 @@ class CallOnANameWhereFirstArgumentIsAttributeLookup(CallOnANameWithAtLeastOneAr
         super(CallOnANameWhereFirstArgumentIsAttributeLookup, self).__init__(node)
 
         if not self._first_argument_is_attribute_lookup():
-            raise UnexpectedCallStructure()
+            raise BadNodeStructure()
 
     def _first_argument_is_attribute_lookup(self):
         return isinstance(self.first_argument_node, ast.Attribute)
@@ -467,7 +467,7 @@ class NodeShouldNotBeTransformed(Exception):
 class NotAHookDeclaration(NodeShouldNotBeTransformed):
     pass
 
-class NotAnAttributeLookupOnAName(Exception):
+class BadNodeStructure(Exception):
     pass
 
 class NotAnExampleDeclaration(NodeShouldNotBeTransformed):
@@ -476,5 +476,3 @@ class NotAnExampleDeclaration(NodeShouldNotBeTransformed):
 class NotAnExampleGroupDeclaration(NodeShouldNotBeTransformed):
     pass
 
-class UnexpectedCallStructure(Exception):
-    pass
