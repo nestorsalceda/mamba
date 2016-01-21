@@ -6,14 +6,14 @@ import imp
 import ast
 import contextlib
 
-from mamba import nodetransformers
+from .syntax.transformer import MambaSyntaxToClassBasedSyntax
 
 
 class ExampleCollector(object):
 
     def __init__(self, paths):
         self.paths = paths
-        self._node_transformer = nodetransformers.MambaSyntaxToClassBasedSyntax()
+        self._node_transformer = MambaSyntaxToClassBasedSyntax()
 
     def modules(self):
         for path in self._collect_files_containing_examples():

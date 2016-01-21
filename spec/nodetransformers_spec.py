@@ -5,13 +5,13 @@ import functools
 
 from expects import expect, raise_error, be_an, have_length, equal, be, match, be_none, be_true
 
-from mamba.nodetransformers import (
+from mamba.syntax.transformer import (
     WithStatement,
     HookDeclarationToMethodDeclaration,
-    NodeShouldNotBeTransformed,
     ExampleDeclarationToMethodDeclaration,
     ExampleGroupDeclarationToClassDeclaration
 )
+from mamba.syntax.declarations import NotARelevantNode
 from mamba.infrastructure import is_python3
 
 from .helpers import top_level_nodes_of_ast_of_fixture_file_at
@@ -23,7 +23,7 @@ with description('the HookDeclarationToMethodDeclaration class'):
         with it('raises an error'):
             for with_statement_but_not_a_hook_declaration in top_level_nodes_of_ast_of_fixture_file_at('with_statement_but_not_a_hook_declaration.py'):
                 expect(lambda: HookDeclarationToMethodDeclaration(WithStatement(with_statement_but_not_a_hook_declaration))).to(
-                    raise_error(NodeShouldNotBeTransformed)
+                    raise_error(NotARelevantNode)
                 )
 
     with context('transforms the `with` statement into a method definition'):
@@ -69,7 +69,7 @@ with description('the ExampleDeclarationToMethodDeclaration class'):
         with it('raises an error'):
             for with_statement_but_not_an_example_declaration in top_level_nodes_of_ast_of_fixture_file_at('with_statement_but_not_an_example_declaration.py'):
                 expect(lambda: ExampleDeclarationToMethodDeclaration(WithStatement(with_statement_but_not_an_example_declaration))).to(
-                    raise_error(NodeShouldNotBeTransformed)
+                    raise_error(NotARelevantNode)
                 )
 
     with context('transforms the `with` statement into a method definition'):
@@ -139,7 +139,7 @@ with description('the ExampleGroupDeclarationToClassDeclaration class'):
         with it('raises an error'):
             for with_statement_but_not_an_example_group_declaration in top_level_nodes_of_ast_of_fixture_file_at('with_statement_but_not_an_example_group_declaration.py'):
                 expect(lambda: ExampleGroupDeclarationToClassDeclaration(WithStatement(with_statement_but_not_an_example_group_declaration))).to(
-                    raise_error(NodeShouldNotBeTransformed)
+                    raise_error(NotARelevantNode)
                 )
 
     with context('transforms the `with` statement into a class definition'):
