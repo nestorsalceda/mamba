@@ -211,7 +211,7 @@ class ExampleDeclarationToMethodDeclaration(object):
         )
 
     def _compute_id_of_method(self):
-        return '{0:08d}'.format(Counter.get_next())
+        return '{0:08d}'.format(NumberOfExamplesOrExampleGroupsTransformed.get_next())
 
 
 class ExampleDeclaration(object):
@@ -291,13 +291,13 @@ class CallOnANameWhereFirstArgumentIsString(CallOnANameWithAtLeastOneArgument):
         return self.first_argument_node.s
 
 
-class Counter(object):
+class NumberOfExamplesOrExampleGroupsTransformed(object):
     _current_number = 0
 
     @staticmethod
     def get_next():
-        next_number = Counter._current_number
-        Counter._current_number += 1
+        next_number = NumberOfExamplesOrExampleGroupsTransformed._current_number
+        NumberOfExamplesOrExampleGroupsTransformed._current_number += 1
 
         return next_number
 
@@ -325,7 +325,7 @@ class ExampleGroupDeclarationToClassDeclaration(object):
         ])
 
     def _compute_id_of_class(self):
-        return '{0:08d}'.format(Counter.get_next())
+        return '{0:08d}'.format(NumberOfExamplesOrExampleGroupsTransformed.get_next())
 
     def _compute_marker_for_example_group(self):
         if self._example_group_declaration.is_pending:
