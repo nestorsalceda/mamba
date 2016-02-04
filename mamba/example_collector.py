@@ -10,6 +10,7 @@ from mamba import nodetransformers
 from mamba.infrastructure import is_python3
 
 class ExampleCollector(object):
+    SPEC_FILE_NAME_ENDING = '_spec.py'
 
     def __init__(self, paths_to_spec_directories_or_files):
         self.paths_to_specs = paths_to_spec_directories_or_files
@@ -52,7 +53,7 @@ class ExampleCollector(object):
         return os.path.normpath(path)
 
     def _is_name_of_spec_file(self, file_name):
-        return file_name.endswith('_spec.py')
+        return file_name.endswith(ExampleCollector.SPEC_FILE_NAME_ENDING)
 
     #TODO: What about managing locks with threads??
     #Take care with watchdog stuff!!
