@@ -7,19 +7,13 @@ class HookDeclaration(object):
     def __init__(self, with_statement):
         self._HOOK_IDENTIFIERS = MambaIdentifiers.HOOK()
         self._body = with_statement.body
+        self._attribute_lookup = AttributeLookupOnAName(with_statement.argument)
 
-        self._create_attribute_lookup_or_raise(with_statement.argument)
         if not self._is_valid():
             raise NotAHookDeclaration()
 
-    def _create_attribute_lookup_or_raise(self, argument_to_with_statement):
-        try:
-            self._attribute_lookup = AttributeLookupOnAName(argument_to_with_statement)
-        except BadNodeStructure:
-            raise NotAHookDeclaration()
-
     def _is_valid(self):
-        return self._has_valid_run_order() and self._has_valid_scope()
+        return self._attribute_lookup.is_valid() and self._has_valid_run_order() and self._has_valid_scope()
 
     def _has_valid_run_order(self):
         return self.run_order in self._HOOK_IDENTIFIERS.RUN_ORDERS
@@ -44,10 +38,7 @@ class AttributeLookupOnAName(object):
     def __init__(self, node):
         self._node = node
 
-        if not self._is_valid():
-            raise BadNodeStructure()
-
-    def _is_valid(self):
+    def is_valid(self):
         return self._is_attribute_lookup() and isinstance(self._node.value, ast.Name)
 
     def _is_attribute_lookup(self):
