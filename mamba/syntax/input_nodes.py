@@ -25,10 +25,7 @@ class AttributeLookupOnAName(object):
     def __init__(self, node):
         self._node = node
 
-        if not self._is_valid():
-            raise BadNodeStructure()
-
-    def _is_valid(self):
+    def is_valid(self):
         return self._is_attribute_lookup() and isinstance(self._node.value, ast.Name)
 
     def _is_attribute_lookup(self):
@@ -43,15 +40,11 @@ class AttributeLookupOnAName(object):
         return self._node.attr
 
 
-
 class CallOnANameWithAtLeastOneArgument(object):
     def __init__(self, node):
         self._node = node
 
-        if not self._is_valid():
-            raise BadNodeStructure()
-
-    def _is_valid(self):
+    def is_valid(self):
         return self._is_call_on_a_name() and self._has_at_least_one_argument()
 
     def _is_call_on_a_name(self):
@@ -79,8 +72,8 @@ class CallOnANameWhereFirstArgumentIsString(CallOnANameWithAtLeastOneArgument):
     def __init__(self, node):
         super(CallOnANameWhereFirstArgumentIsString, self).__init__(node)
 
-        if not self._first_argument_is_string():
-            raise BadNodeStructure()
+    def is_valid(self):
+        return super(CallOnANameWhereFirstArgumentIsString, self).is_valid() and self._first_argument_is_string()
 
     def _first_argument_is_string(self):
         return isinstance(self.first_argument_node, ast.Str)
@@ -94,8 +87,8 @@ class CallOnANameWhereFirstArgumentIsName(CallOnANameWithAtLeastOneArgument):
     def __init__(self, node):
         super(CallOnANameWhereFirstArgumentIsName, self).__init__(node)
 
-        if not self._first_argument_is_name():
-            raise BadNodeStructure()
+    def is_valid(self):
+        return super(CallOnANameWhereFirstArgumentIsName, self).is_valid() and self._first_argument_is_name()
 
     def _first_argument_is_name(self):
         return isinstance(self.first_argument_node, ast.Name)
@@ -109,8 +102,8 @@ class CallOnANameWhereFirstArgumentIsAttributeLookup(CallOnANameWithAtLeastOneAr
     def __init__(self, node):
         super(CallOnANameWhereFirstArgumentIsAttributeLookup, self).__init__(node)
 
-        if not self._first_argument_is_attribute_lookup():
-            raise BadNodeStructure()
+    def is_valid(self):
+        return super(CallOnANameWhereFirstArgumentIsAttributeLookup, self).is_valid() and self._first_argument_is_attribute_lookup()
 
     def _first_argument_is_attribute_lookup(self):
         return isinstance(self.first_argument_node, ast.Attribute)
@@ -118,7 +111,3 @@ class CallOnANameWhereFirstArgumentIsAttributeLookup(CallOnANameWithAtLeastOneAr
     @property
     def name_passed_as_first_argument(self):
         return self.first_argument_node.attr
-
-
-class BadNodeStructure(Exception):
-    pass

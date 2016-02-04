@@ -1,7 +1,7 @@
 import ast
 
 from .input_nodes import WithStatement
-from .declarations import HookDeclaration, ExampleDeclaration, ExampleGroupDeclaration, NotARelevantNode
+from .declarations import HookDeclaration, ExampleDeclaration, ExampleGroupDeclaration
 from .output_nodes import MethodDeclaration, ClassDeclaration, AssignmentOfExpressionToName
 
 
@@ -28,11 +28,9 @@ class WithStatementTransformer(ast.NodeTransformer):
         self._transform_nested_nodes_of(node)
 
         for transformer_class in self._transformer_classes:
-            try:
-                transformer = transformer_class(WithStatement(node))
-            except NotARelevantNode:
-                pass
-            else:
+            transformer = transformer_class(WithStatement(node))
+
+            if transformer.can_transform:
                 return transformer.transform()
 
         return node
@@ -44,6 +42,10 @@ class WithStatementTransformer(ast.NodeTransformer):
 class HookToMethod(object):
     def __init__(self, with_statement):
         self._hook_declaration = HookDeclaration(with_statement)
+
+    @property
+    def can_transform(self):
+        return self._hook_declaration.is_valid()
 
     def transform(self):
         return MethodDeclaration(
@@ -58,6 +60,10 @@ class HookToMethod(object):
 class ExampleToMethod(object):
     def __init__(self, with_statement):
         self._example_declaration = ExampleDeclaration(with_statement)
+
+    @property
+    def can_transform(self):
+        return self._example_declaration.is_valid()
 
     def transform(self):
         return MethodDeclaration(
@@ -95,6 +101,10 @@ class ExampleGroupToClass(object):
 
     def __init__(self, with_statement):
         self._example_group_declaration = ExampleGroupDeclaration(with_statement)
+
+    @property
+    def can_transform(self):
+        return self._example_group_declaration.is_valid()
 
     def transform(self):
         return ClassDeclaration(

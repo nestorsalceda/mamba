@@ -3,7 +3,7 @@
 import ast
 import functools
 
-from expects import expect, raise_error, be_an, have_length, equal, be, match, be_none, be_true
+from expects import expect, be_false, be_an, have_length, equal, be, match, be_none, be_true
 
 from mamba.syntax.transformer import (
     WithStatement,
@@ -11,7 +11,6 @@ from mamba.syntax.transformer import (
     ExampleToMethod,
     ExampleGroupToClass
 )
-from mamba.syntax.declarations import NotARelevantNode
 from mamba.infrastructure import is_python3
 
 from .helpers import top_level_nodes_of_ast_of_fixture_file_at
@@ -20,11 +19,11 @@ top_level_nodes_of_ast_of_fixture_file_at = functools.partial(top_level_nodes_of
 
 with description('the HookToMethod class'):
     with context('when given a `with` statement which does not match the hook declaration syntax'):
-        with it('raises an error'):
+        with it('can\'t transform it'):
             for with_statement_but_not_a_hook_declaration in top_level_nodes_of_ast_of_fixture_file_at('with_statement_but_not_a_hook_declaration.py'):
-                expect(lambda: HookToMethod(WithStatement(with_statement_but_not_a_hook_declaration))).to(
-                    raise_error(NotARelevantNode)
-                )
+                expect(
+                    HookToMethod(WithStatement(with_statement_but_not_a_hook_declaration)).can_transform
+                ).to(be_false)
 
     with context('transforms the `with` statement into a method definition'):
         with it('represents the method as a function definition node'):
@@ -68,9 +67,9 @@ with description('the ExampleToMethod class'):
     with context('when given a `with` statement which does not match the example declaration syntax'):
         with it('raises an error'):
             for with_statement_but_not_an_example_declaration in top_level_nodes_of_ast_of_fixture_file_at('with_statement_but_not_an_example_declaration.py'):
-                expect(lambda: ExampleToMethod(WithStatement(with_statement_but_not_an_example_declaration))).to(
-                    raise_error(NotARelevantNode)
-                )
+                expect(
+                    ExampleToMethod(WithStatement(with_statement_but_not_an_example_declaration)).can_transform
+                ).to(be_false)
 
     with context('transforms the `with` statement into a method definition'):
         with it('represents the method as a function definition node'):
@@ -138,9 +137,9 @@ with description('the ExampleGroupToClass class'):
     with context('when given a `with` statement which does not match the example group declaration syntax'):
         with it('raises an error'):
             for with_statement_but_not_an_example_group_declaration in top_level_nodes_of_ast_of_fixture_file_at('with_statement_but_not_an_example_group_declaration.py'):
-                expect(lambda: ExampleGroupToClass(WithStatement(with_statement_but_not_an_example_group_declaration))).to(
-                    raise_error(NotARelevantNode)
-                )
+                expect(
+                    ExampleGroupToClass(WithStatement(with_statement_but_not_an_example_group_declaration)).can_transform
+                ).to(be_false)
 
     with context('transforms the `with` statement into a class definition'):
         with it('represents the class as a class definition node'):

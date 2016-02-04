@@ -5,8 +5,7 @@ from .input_nodes import (
     AttributeLookupOnAName,
     CallOnANameWhereFirstArgumentIsString,
     CallOnANameWhereFirstArgumentIsName,
-    CallOnANameWhereFirstArgumentIsAttributeLookup,
-    BadNodeStructure
+    CallOnANameWhereFirstArgumentIsAttributeLookup
 )
 
 
@@ -14,19 +13,10 @@ class HookDeclaration(object):
     def __init__(self, with_statement):
         self._HOOK_IDENTIFIERS = MambaIdentifiers.HOOK()
         self._body = with_statement.body
+        self._attribute_lookup = AttributeLookupOnAName(with_statement.argument)
 
-        self._create_attribute_lookup_or_raise(with_statement.argument)
-        if not self._is_valid():
-            raise NotAHookDeclaration()
-
-    def _create_attribute_lookup_or_raise(self, argument_to_with_statement):
-        try:
-            self._attribute_lookup = AttributeLookupOnAName(argument_to_with_statement)
-        except BadNodeStructure:
-            raise NotAHookDeclaration()
-
-    def _is_valid(self):
-        return self._has_valid_run_order() and self._has_valid_scope()
+    def is_valid(self):
+        return self._attribute_lookup.is_valid() and self._has_valid_run_order() and self._has_valid_scope()
 
     def _has_valid_run_order(self):
         return self.run_order in self._HOOK_IDENTIFIERS.RUN_ORDERS
@@ -51,19 +41,10 @@ class ExampleDeclaration(object):
     def __init__(self, with_statement):
         self._EXAMPLE_IDENTIFIERS = MambaIdentifiers.EXAMPLE()
         self._body = with_statement.body
+        self._call = CallOnANameWhereFirstArgumentIsString(with_statement.argument)
 
-        self._create_call_or_raise(with_statement.argument)
-        if not self._is_valid():
-            raise NotAnExampleDeclaration()
-
-    def _create_call_or_raise(self, argument_to_with_statement):
-        try:
-            self._call = CallOnANameWhereFirstArgumentIsString(argument_to_with_statement)
-        except BadNodeStructure:
-            raise NotAnExampleDeclaration()
-
-    def _is_valid(self):
-        return self._call.called_name in self._EXAMPLE_IDENTIFIERS.ALL
+    def is_valid(self):
+        return self._call.is_valid() and self._call.called_name in self._EXAMPLE_IDENTIFIERS.ALL
 
     @property
     def example_identifier(self):
@@ -87,24 +68,17 @@ class ExampleGroupDeclaration(object):
             CallOnANameWhereFirstArgumentIsAttributeLookup
         ]
         self._body = with_statement.body
+        self._create_call(with_statement.argument)
 
-        self._create_call_or_raise(with_statement.argument)
-        if not self._is_valid():
-            raise NotAnExampleGroupDeclaration()
-
-    def _create_call_or_raise(self, argument_to_with_statement):
+    def _create_call(self, argument_to_with_statement):
         for type_of_call in self._supported_types_of_calls:
-            try:
-                self._call = type_of_call(argument_to_with_statement)
-            except BadNodeStructure:
-                pass
-            else:
+            self._call = type_of_call(argument_to_with_statement)
+
+            if self._call.is_valid():
                 return
 
-        raise NotAnExampleGroupDeclaration()
-
-    def _is_valid(self):
-        return self._call.called_name in self._EXAMPLE_GROUP_IDENTIFIERS.ALL
+    def is_valid(self):
+        return self._call.is_valid() and self._call.called_name in self._EXAMPLE_GROUP_IDENTIFIERS.ALL
 
     @property
     def wording(self):
@@ -127,16 +101,3 @@ class ExampleGroupDeclaration(object):
     @property
     def subject_node(self):
         return self._call.first_argument_node
-
-
-class NotARelevantNode(Exception):
-    pass
-
-class NotAHookDeclaration(NotARelevantNode):
-    pass
-
-class NotAnExampleDeclaration(NotARelevantNode):
-    pass
-
-class NotAnExampleGroupDeclaration(NotARelevantNode):
-    pass
