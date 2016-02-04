@@ -9,10 +9,7 @@ class HookDeclaration(object):
         self._body = with_statement.body
         self._attribute_lookup = AttributeLookupOnAName(with_statement.argument)
 
-        if not self._is_valid():
-            raise NotAHookDeclaration()
-
-    def _is_valid(self):
+    def is_valid(self):
         return self._attribute_lookup.is_valid() and self._has_valid_run_order() and self._has_valid_scope()
 
     def _has_valid_run_order(self):
@@ -60,10 +57,7 @@ class ExampleDeclaration(object):
         self._body = with_statement.body
         self._call = CallOnANameWhereFirstArgumentIsString(with_statement.argument)
 
-        if not self._is_valid():
-            raise NotAnExampleDeclaration()
-
-    def _is_valid(self):
+    def is_valid(self):
         return self._call.is_valid() and self._call.called_name in self._EXAMPLE_IDENTIFIERS.ALL
 
     @property
@@ -133,9 +127,6 @@ class ExampleGroupDeclaration(object):
         self._body = with_statement.body
         self._create_call(with_statement.argument)
 
-        if not self._is_valid():
-            raise NotAnExampleGroupDeclaration()
-
     def _create_call(self, argument_to_with_statement):
         for type_of_call in self._supported_types_of_calls:
             self._call = type_of_call(argument_to_with_statement)
@@ -143,7 +134,7 @@ class ExampleGroupDeclaration(object):
             if self._call.is_valid():
                 return
 
-    def _is_valid(self):
+    def is_valid(self):
         return self._call.is_valid() and self._call.called_name in self._EXAMPLE_GROUP_IDENTIFIERS.ALL
 
     @property
@@ -197,17 +188,3 @@ class CallOnANameWhereFirstArgumentIsAttributeLookup(CallOnANameWithAtLeastOneAr
     @property
     def name_passed_as_first_argument(self):
         return self.first_argument_node.attr
-
-
-class NotARelevantNode(Exception):
-    pass
-
-class NotAHookDeclaration(NotARelevantNode):
-    pass
-
-class NotAnExampleDeclaration(NotARelevantNode):
-    pass
-
-class NotAnExampleGroupDeclaration(NotARelevantNode):
-    pass
-

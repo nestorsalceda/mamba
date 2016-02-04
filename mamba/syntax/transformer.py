@@ -1,7 +1,7 @@
 import ast
 
 from .input_nodes import WithStatement
-from .declarations import HookDeclaration, ExampleDeclaration, ExampleGroupDeclaration, NotARelevantNode
+from .declarations import HookDeclaration, ExampleDeclaration, ExampleGroupDeclaration
 from .output_nodes import MethodDeclaration, ClassDeclaration, AssignmentOfExpressionToName
 
 
@@ -30,7 +30,7 @@ class WithStatementTransformer(ast.NodeTransformer):
         for transformer_class in self._transformer_classes:
             try:
                 transformer = transformer_class(WithStatement(node))
-            except NotARelevantNode:
+            except NodeShouldNotBeTransformed:
                 pass
             else:
                 return transformer.transform()
@@ -45,6 +45,9 @@ class HookToMethod(object):
     def __init__(self, with_statement):
         self._hook_declaration = HookDeclaration(with_statement)
 
+        if not self._hook_declaration.is_valid():
+            raise NodeShouldNotBeTransformed()
+
     def transform(self):
         return MethodDeclaration(
             self._compute_name_of_method(),
@@ -58,6 +61,9 @@ class HookToMethod(object):
 class ExampleToMethod(object):
     def __init__(self, with_statement):
         self._example_declaration = ExampleDeclaration(with_statement)
+
+        if not self._example_declaration.is_valid():
+            raise NodeShouldNotBeTransformed
 
     def transform(self):
         return MethodDeclaration(
@@ -96,6 +102,9 @@ class ExampleGroupToClass(object):
     def __init__(self, with_statement):
         self._example_group_declaration = ExampleGroupDeclaration(with_statement)
 
+        if not self._example_group_declaration.is_valid():
+            raise NodeShouldNotBeTransformed
+
     def transform(self):
         return ClassDeclaration(
             self._compute_name_of_class(),
@@ -129,3 +138,7 @@ class ExampleGroupToClass(object):
             left_hand_side_name=ExampleGroupToClass._NAME_OF_CLASS_VARIABLE_HOLDING_SUBJECT_CLASS,
             right_hand_side=self._example_group_declaration.subject_node
         ).toAst()
+
+
+class NodeShouldNotBeTransformed(Exception):
+    pass

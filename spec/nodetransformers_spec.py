@@ -11,7 +11,7 @@ from mamba.syntax.transformer import (
     ExampleToMethod,
     ExampleGroupToClass
 )
-from mamba.syntax.declarations import NotARelevantNode
+from mamba.syntax.transformer import NodeShouldNotBeTransformed
 from mamba.infrastructure import is_python3
 
 from .helpers import top_level_nodes_of_ast_of_fixture_file_at
@@ -23,7 +23,7 @@ with description('the HookToMethod class'):
         with it('raises an error'):
             for with_statement_but_not_a_hook_declaration in top_level_nodes_of_ast_of_fixture_file_at('with_statement_but_not_a_hook_declaration.py'):
                 expect(lambda: HookToMethod(WithStatement(with_statement_but_not_a_hook_declaration))).to(
-                    raise_error(NotARelevantNode)
+                    raise_error(NodeShouldNotBeTransformed)
                 )
 
     with context('transforms the `with` statement into a method definition'):
@@ -69,7 +69,7 @@ with description('the ExampleToMethod class'):
         with it('raises an error'):
             for with_statement_but_not_an_example_declaration in top_level_nodes_of_ast_of_fixture_file_at('with_statement_but_not_an_example_declaration.py'):
                 expect(lambda: ExampleToMethod(WithStatement(with_statement_but_not_an_example_declaration))).to(
-                    raise_error(NotARelevantNode)
+                    raise_error(NodeShouldNotBeTransformed)
                 )
 
     with context('transforms the `with` statement into a method definition'):
@@ -139,7 +139,7 @@ with description('the ExampleGroupToClass class'):
         with it('raises an error'):
             for with_statement_but_not_an_example_group_declaration in top_level_nodes_of_ast_of_fixture_file_at('with_statement_but_not_an_example_group_declaration.py'):
                 expect(lambda: ExampleGroupToClass(WithStatement(with_statement_but_not_an_example_group_declaration))).to(
-                    raise_error(NotARelevantNode)
+                    raise_error(NodeShouldNotBeTransformed)
                 )
 
     with context('transforms the `with` statement into a class definition'):
