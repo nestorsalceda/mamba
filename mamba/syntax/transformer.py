@@ -132,9 +132,9 @@ class ExampleGroupToClass(object):
         if not self._example_group_declaration.has_explicit_subject_declaration:
             return declared_body
 
-        return [self._create_assignment_of_subject_name()] + declared_body
+        return [self._create_assignment_of_subject_to_variable()] + declared_body
 
-    def _create_assignment_of_subject_name(self):
+    def _create_assignment_of_subject_to_variable(self):
         return AssignmentOfExpressionToName(
             left_hand_side_name=ExampleGroupToClass._NAME_OF_CLASS_VARIABLE_HOLDING_SUBJECT_CLASS,
             right_hand_side=self._example_group_declaration.subject_node
