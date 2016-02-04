@@ -5,7 +5,18 @@ from .declarations import HookDeclaration, ExampleDeclaration, ExampleGroupDecla
 from .output_nodes import MethodDeclaration, ClassDeclaration, AssignmentOfExpressionToName
 
 
-class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
+class MambaSyntaxToClassBasedSyntax(object):
+    def __init__(self):
+        self._with_statement_transformer = WithStatementTransformer()
+
+    def transform(self, tree):
+        transformed_ast = self._with_statement_transformer.visit(tree)
+        ast.fix_missing_locations(transformed_ast)
+
+        return transformed_ast
+
+
+class WithStatementTransformer(ast.NodeTransformer):
     def __init__(self):
         self._transformer_classes = [
             ExampleToMethod,
@@ -27,7 +38,7 @@ class MambaSyntaxToClassBasedSyntax(ast.NodeTransformer):
         return node
 
     def _transform_nested_nodes_of(self, node):
-        super(MambaSyntaxToClassBasedSyntax, self).generic_visit(node)
+        super(WithStatementTransformer, self).generic_visit(node)
 
 
 class HookToMethod(object):

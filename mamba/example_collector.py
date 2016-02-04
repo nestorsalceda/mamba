@@ -76,9 +76,8 @@ class ExampleCollector(object):
     def _parse_and_transform_ast(self, path):
         with open(path) as f:
             tree = ast.parse(f.read(), filename=path)
-            tree = self._node_transformer.visit(tree)
-            ast.fix_missing_locations(tree)
-            return tree
+
+        return self._node_transformer.transform(tree)
 
     def _prepare_path_for_local_packages(self):
         if os.getcwd().endswith('spec') or os.getcwd().endswith('specs'):
