@@ -69,9 +69,6 @@ class CallOnANameWithAtLeastOneArgument(object):
 
 
 class CallOnANameWhereFirstArgumentIsString(CallOnANameWithAtLeastOneArgument):
-    def __init__(self, node):
-        super(CallOnANameWhereFirstArgumentIsString, self).__init__(node)
-
     def is_valid(self):
         return super(CallOnANameWhereFirstArgumentIsString, self).is_valid() and self._first_argument_is_string()
 
@@ -84,9 +81,6 @@ class CallOnANameWhereFirstArgumentIsString(CallOnANameWithAtLeastOneArgument):
 
 
 class CallOnANameWhereFirstArgumentIsName(CallOnANameWithAtLeastOneArgument):
-    def __init__(self, node):
-        super(CallOnANameWhereFirstArgumentIsName, self).__init__(node)
-
     def is_valid(self):
         return super(CallOnANameWhereFirstArgumentIsName, self).is_valid() and self._first_argument_is_name()
 
@@ -99,9 +93,6 @@ class CallOnANameWhereFirstArgumentIsName(CallOnANameWithAtLeastOneArgument):
 
 
 class CallOnANameWhereFirstArgumentIsAttributeLookup(CallOnANameWithAtLeastOneArgument):
-    def __init__(self, node):
-        super(CallOnANameWhereFirstArgumentIsAttributeLookup, self).__init__(node)
-
     def is_valid(self):
         return super(CallOnANameWhereFirstArgumentIsAttributeLookup, self).is_valid() and self._first_argument_is_attribute_lookup()
 
