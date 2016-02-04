@@ -13,43 +13,43 @@ from mamba.syntax.transformer import (
 )
 from mamba.infrastructure import is_python3
 
-from .helpers import top_level_nodes_of_ast_of_fixture_file_at
-top_level_nodes_of_ast_of_fixture_file_at = functools.partial(top_level_nodes_of_ast_of_fixture_file_at, __file__)
+from .helpers import top_level_ast_nodes_of_fixture_at
+top_level_ast_nodes_of_fixture_at = functools.partial(top_level_ast_nodes_of_fixture_at, __file__)
 
 
 with description('the HookToMethod class'):
     with context('when given a `with` statement which does not match the hook declaration syntax'):
-        with it('can\'t transform it'):
-            for with_statement_but_not_a_hook_declaration in top_level_nodes_of_ast_of_fixture_file_at('with_statement_but_not_a_hook_declaration.py'):
+        with it('''can't transform it'''):
+            for node in negative_examples_of_hook_declarations():
                 expect(
-                    HookToMethod(WithStatement(with_statement_but_not_a_hook_declaration)).can_transform
+                    HookToMethod(WithStatement(node)).can_transform
                 ).to(be_false)
 
     with context('transforms the `with` statement into a method definition'):
         with it('represents the method as a function definition node'):
-            for hook_declaration in top_level_nodes_of_ast_of_fixture_file_at('supported_hook_declarations.py'):
-                method_declaration = HookToMethod(WithStatement(hook_declaration)).transform()
+            for node in supported_hook_declarations():
+                method_declaration = HookToMethod(WithStatement(node)).transform()
 
                 expect(method_declaration).to(be_an(ast.FunctionDef))
 
         with it('names the method after the hook'):
             hook_names = ['before_all', 'before_each', 'after_each', 'after_all']
 
-            for hook_name, hook_declaration in zip(hook_names, top_level_nodes_of_ast_of_fixture_file_at('supported_hook_declarations.py')):
-                method_declaration = HookToMethod(WithStatement(hook_declaration)).transform()
+            for name, node in zip(hook_names, supported_hook_declarations()):
+                method_declaration = HookToMethod(WithStatement(node)).transform()
 
-                expect(method_declaration.name).to(equal(hook_name))
+                expect(method_declaration.name).to(equal(name))
 
         with it('includes only one parameter'):
-            for hook_declaration in top_level_nodes_of_ast_of_fixture_file_at('supported_hook_declarations.py'):
-                method_declaration = HookToMethod(WithStatement(hook_declaration)).transform()
+            for node in supported_hook_declarations():
+                method_declaration = HookToMethod(WithStatement(node)).transform()
                 function_parameters = method_declaration.args.args
 
                 expect(function_parameters).to(have_length(1))
 
         with it('the first parameter is named `self`'):
-            for hook_declaration in top_level_nodes_of_ast_of_fixture_file_at('supported_hook_declarations.py'):
-                method_declaration = HookToMethod(WithStatement(hook_declaration)).transform()
+            for node in supported_hook_declarations():
+                method_declaration = HookToMethod(WithStatement(node)).transform()
                 function_parameters = method_declaration.args.args
                 first_parameter = function_parameters[0]
                 name_of_first_parameter = _retrieve_name_of_parameter(first_parameter)
@@ -57,37 +57,43 @@ with description('the HookToMethod class'):
                 expect(name_of_first_parameter).to(equal('self'))
 
         with it('uses the original body of the `with` statement'):
-            for hook_declaration in top_level_nodes_of_ast_of_fixture_file_at('supported_hook_declarations.py'):
-                method_declaration = HookToMethod(WithStatement(hook_declaration)).transform()
+            for node in supported_hook_declarations():
+                method_declaration = HookToMethod(WithStatement(node)).transform()
 
-                expect(method_declaration.body).to(be(hook_declaration.body))
+                expect(method_declaration.body).to(be(node.body))
+
+def _retrieve_name_of_parameter(function_parameter_node):
+    if is_python3():
+        return function_parameter_node.arg
+    return function_parameter_node.id
+
 
 
 with description('the ExampleToMethod class'):
     with context('when given a `with` statement which does not match the example declaration syntax'):
         with it('raises an error'):
-            for with_statement_but_not_an_example_declaration in top_level_nodes_of_ast_of_fixture_file_at('with_statement_but_not_an_example_declaration.py'):
+            for node in negative_examples_of_example_declarations():
                 expect(
-                    ExampleToMethod(WithStatement(with_statement_but_not_an_example_declaration)).can_transform
+                    ExampleToMethod(WithStatement(node)).can_transform
                 ).to(be_false)
 
     with context('transforms the `with` statement into a method definition'):
         with it('represents the method as a function definition node'):
-            for example_declaration in top_level_nodes_of_ast_of_fixture_file_at('sample_example_declarations.py'):
-                method_declaration = ExampleToMethod(WithStatement(example_declaration)).transform()
+            for node in supported_example_declarations():
+                method_declaration = ExampleToMethod(WithStatement(node)).transform()
 
                 expect(method_declaration).to(be_an(ast.FunctionDef))
 
         with it('includes only one parameter'):
-            for example_declaration in top_level_nodes_of_ast_of_fixture_file_at('sample_example_declarations.py'):
-                method_declaration = ExampleToMethod(WithStatement(example_declaration)).transform()
+            for node in supported_example_declarations():
+                method_declaration = ExampleToMethod(WithStatement(node)).transform()
                 function_parameters = method_declaration.args.args
 
                 expect(function_parameters).to(have_length(1))
 
         with it('the first parameter is named `self`'):
-            for example_declaration in top_level_nodes_of_ast_of_fixture_file_at('sample_example_declarations.py'):
-                method_declaration = ExampleToMethod(WithStatement(example_declaration)).transform()
+            for node in supported_example_declarations():
+                method_declaration = ExampleToMethod(WithStatement(node)).transform()
                 function_parameters = method_declaration.args.args
                 first_parameter = function_parameters[0]
                 name_of_first_parameter = _retrieve_name_of_parameter(first_parameter)
@@ -95,22 +101,22 @@ with description('the ExampleToMethod class'):
                 expect(name_of_first_parameter).to(equal('self'))
 
         with it('uses the original body of the `with` statement'):
-            for example_declaration in top_level_nodes_of_ast_of_fixture_file_at('sample_example_declarations.py'):
-                method_declaration = ExampleToMethod(WithStatement(example_declaration)).transform()
+            for node in supported_example_declarations():
+                method_declaration = ExampleToMethod(WithStatement(node)).transform()
 
-                expect(method_declaration.body).to(be(example_declaration.body))
+                expect(method_declaration.body).to(be(node.body))
 
         with context('with a name composed of three parts:'):
             with it('at the beginning, an 8-digit identification number representing execution order'):
-                for example_declaration in top_level_nodes_of_ast_of_fixture_file_at('sample_example_declarations.py'):
-                    method_declaration = ExampleToMethod(WithStatement(example_declaration)).transform()
+                for node in supported_example_declarations():
+                    method_declaration = ExampleToMethod(WithStatement(node)).transform()
                     first_eight_digits_of_method_name = method_declaration.name[:8]
 
                     expect(first_eight_digits_of_method_name).to(match('^[0-9]{8}$'))
 
             with it('the "it" word'):
-                for example_declaration in top_level_nodes_of_ast_of_fixture_file_at('sample_example_declarations.py'):
-                    method_declaration = ExampleToMethod(WithStatement(example_declaration)).transform()
+                for node in supported_example_declarations():
+                    method_declaration = ExampleToMethod(WithStatement(node)).transform()
 
                     expect(method_declaration.name).to(match('it'))
 
@@ -120,37 +126,30 @@ with description('the ExampleToMethod class'):
                     'does something else, but this test will be skipped'
                 ]
 
-                for example_wording, example_declaration in zip(example_wordings, top_level_nodes_of_ast_of_fixture_file_at('sample_example_declarations.py')):
-                    method_declaration = ExampleToMethod(WithStatement(example_declaration)).transform()
+                for wording, node in zip(example_wordings, supported_example_declarations()):
+                    method_declaration = ExampleToMethod(WithStatement(node)).transform()
 
-                    expect(method_declaration.name).to(match(example_wording))
-
-
-
-def _retrieve_name_of_parameter(function_parameter_node):
-    if is_python3():
-        return function_parameter_node.arg
-    return function_parameter_node.id
+                    expect(method_declaration.name).to(match(wording))
 
 
 with description('the ExampleGroupToClass class'):
     with context('when given a `with` statement which does not match the example group declaration syntax'):
         with it('raises an error'):
-            for with_statement_but_not_an_example_group_declaration in top_level_nodes_of_ast_of_fixture_file_at('with_statement_but_not_an_example_group_declaration.py'):
+            for node in negative_examples_of_example_group_declarations():
                 expect(
-                    ExampleGroupToClass(WithStatement(with_statement_but_not_an_example_group_declaration)).can_transform
+                    ExampleGroupToClass(WithStatement(node)).can_transform
                 ).to(be_false)
 
     with context('transforms the `with` statement into a class definition'):
         with it('represents the class as a class definition node'):
-            for example_group_declaration in top_level_nodes_of_ast_of_all_sample_example_group_fixture_files():
-                class_declaration = ExampleGroupToClass(WithStatement(example_group_declaration)).transform()
+            for node in supported_example_group_declarations():
+                class_declaration = ExampleGroupToClass(WithStatement(node)).transform()
 
                 expect(class_declaration).to(be_an(ast.ClassDef))
 
         with it('lists no explicit base classes, keyword parameters, or any kind of starred parameters'):
-            for example_group_declaration in top_level_nodes_of_ast_of_all_sample_example_group_fixture_files():
-                class_declaration = ExampleGroupToClass(WithStatement(example_group_declaration)).transform()
+            for node in supported_example_group_declarations():
+                class_declaration = ExampleGroupToClass(WithStatement(node)).transform()
 
                 expect(class_declaration.decorator_list).to(equal([]))
                 expect(class_declaration.bases).to(equal([]))
@@ -160,27 +159,25 @@ with description('the ExampleGroupToClass class'):
 
         with context('with a name which always includes:'):
             with it('at the beginning, an 8-digit identification number representing execution order'):
-                for example_group_declaration in top_level_nodes_of_ast_of_all_sample_example_group_fixture_files():
-                    class_declaration = ExampleGroupToClass(WithStatement(example_group_declaration)).transform()
+                for node in supported_example_group_declarations():
+                    class_declaration = ExampleGroupToClass(WithStatement(node)).transform()
                     first_eight_digits_of_class_name = class_declaration.name[:8]
 
                     expect(first_eight_digits_of_class_name).to(match('^[0-9]{8}$'))
 
             with context('for active example groups'):
                 with it('at the end, the "__description" marker'):
-                    for example_group_declaration in top_level_nodes_of_ast_of_all_sample_active_example_group_fixture_files():
-                        class_declaration = ExampleGroupToClass(WithStatement(example_group_declaration)).transform()
+                    for node in supported_active_example_group_declarations():
+                        class_declaration = ExampleGroupToClass(WithStatement(node)).transform()
 
                         expect(class_declaration.name.endswith('__description')).to(be_true)
 
             with context('for pending example groups'):
                 with it('at the end, the "__pending__description" marker'):
-                    for example_group_declaration in top_level_nodes_of_ast_of_all_sample_pending_example_group_fixture_files():
-                        class_declaration = ExampleGroupToClass(WithStatement(example_group_declaration)).transform()
+                    for node in supported_pending_example_group_declarations():
+                        class_declaration = ExampleGroupToClass(WithStatement(node)).transform()
 
                         expect(class_declaration.name.endswith('__pending__description')).to(be_true)
-
-
 
         with context('when a wording is provided in the example group declaration'):
             with it('the class name includes the wording provided'):
@@ -193,20 +190,20 @@ with description('the ExampleGroupToClass class'):
                     'my subject under test, but this whole group will be skipped'
                 ]
 
-                for example_group_wording, example_group_declaration in zip(example_group_wordings, top_level_nodes_of_ast_of_all_sample_example_groups_with_wording_fixture_files()):
-                    class_declaration = ExampleGroupToClass(WithStatement(example_group_declaration)).transform()
+                for wording, node in zip(example_group_wordings, supported_example_group_declarations_with_wording()):
+                    class_declaration = ExampleGroupToClass(WithStatement(node)).transform()
 
-                    expect(class_declaration.name).to(match(example_group_wording))
+                    expect(class_declaration.name).to(match(wording))
 
             with it('the class body is the same as the body of the with statement'):
-                for example_group_declaration in top_level_nodes_of_ast_of_all_sample_example_groups_with_wording_fixture_files():
-                    class_declaration = ExampleGroupToClass(WithStatement(example_group_declaration)).transform()
+                for node in supported_example_group_declarations_with_wording():
+                    class_declaration = ExampleGroupToClass(WithStatement(node)).transform()
 
-                    expect(class_declaration.body).to(be(example_group_declaration.body))
+                    expect(class_declaration.body).to(be(node.body))
 
         with context('when a name (a Python identifier) is provided in the example group declaration'):
-            with it('the class name includes the provided name'):
-                provided_names = [
+            with before.each:
+                self.provided_names = [
                     'MyUnitUnderTest',
                     'MyOtherUnitUnderTest',
                     'SomeClass',
@@ -215,22 +212,15 @@ with description('the ExampleGroupToClass class'):
                     'SomePendingClass'
                 ]
 
-                for name, example_group_declaration in zip(provided_names, top_level_nodes_of_ast_of_all_sample_example_groups_with_name_fixture_files()):
-                    class_declaration = ExampleGroupToClass(WithStatement(example_group_declaration)).transform()
+            with it('the class name includes the provided name'):
+                for name, node in zip(self.provided_names, supported_example_group_declarations_with_name()):
+                    class_declaration = ExampleGroupToClass(WithStatement(node)).transform()
 
                     expect(class_declaration.name).to(match(name))
 
             with it('the class body is the same as the body of the with statement, but including an assignment of a variable to the provided name'):
-                provided_names = [
-                    'MyUnitUnderTest',
-                    'MyOtherUnitUnderTest',
-                    'SomeClass',
-                    'MyPendingUnitUnderTest',
-                    'MyOtherPendingUnitUnderTest',
-                    'SomePendingClass'
-                ]
-                for name, example_group_declaration in zip(provided_names, top_level_nodes_of_ast_of_all_sample_example_groups_with_name_fixture_files()):
-                    class_declaration = ExampleGroupToClass(WithStatement(example_group_declaration)).transform()
+                for name, node in zip(self.provided_names, supported_example_group_declarations_with_name()):
+                    class_declaration = ExampleGroupToClass(WithStatement(node)).transform()
 
                     first_node = class_declaration.body[0]
                     expect(first_node).to(be_an(ast.Assign))
@@ -238,11 +228,11 @@ with description('the ExampleGroupToClass class'):
                     expect(first_node.value.id).to(equal(name))
 
                     remaining_nodes = class_declaration.body[1:]
-                    expect(remaining_nodes).to(equal(example_group_declaration.body))
+                    expect(remaining_nodes).to(equal(node.body))
 
         with context('when an attribute lookup is provided in the example group declaration'):
-            with it('the class name includes the name being looked up'):
-                looked_up_names = [
+            with before.each:
+                self.looked_up_names = [
                     'MyUnitUnderTest',
                     'MyOtherUnitUnderTest',
                     'SomeClass',
@@ -251,23 +241,15 @@ with description('the ExampleGroupToClass class'):
                     'SomePendingClass'
                 ]
 
-                for name, example_group_declaration in zip(looked_up_names, top_level_nodes_of_ast_of_all_sample_example_groups_with_attribute_lookup_fixture_files()):
-                    class_declaration = ExampleGroupToClass(WithStatement(example_group_declaration)).transform()
+            with it('the class name includes the name being looked up'):
+                for name, node in zip(self.looked_up_names, supported_example_group_declarations_with_attribute_lookup()):
+                    class_declaration = ExampleGroupToClass(WithStatement(node)).transform()
 
                     expect(class_declaration.name).to(match(name))
 
             with it('the class body is the same as the body of the with statement, but including an assignment of a variable to the provided attribute lookup'):
-                looked_up_names = [
-                    'MyUnitUnderTest',
-                    'MyOtherUnitUnderTest',
-                    'SomeClass',
-                    'MyPendingUnitUnderTest',
-                    'MyOtherPendingUnitUnderTest',
-                    'SomePendingClass'
-                ]
-
-                for name, example_group_declaration in zip(looked_up_names, top_level_nodes_of_ast_of_all_sample_example_groups_with_attribute_lookup_fixture_files()):
-                    class_declaration = ExampleGroupToClass(WithStatement(example_group_declaration)).transform()
+                for name, node in zip(self.looked_up_names, supported_example_group_declarations_with_attribute_lookup()):
+                    class_declaration = ExampleGroupToClass(WithStatement(node)).transform()
 
                     first_node = class_declaration.body[0]
                     expect(first_node).to(be_an(ast.Assign))
@@ -275,37 +257,51 @@ with description('the ExampleGroupToClass class'):
                     expect(first_node.value.attr).to(equal(name))
 
                     remaining_nodes = class_declaration.body[1:]
-                    expect(remaining_nodes).to(equal(example_group_declaration.body))
+                    expect(remaining_nodes).to(equal(node.body))
 
 
-def top_level_nodes_of_ast_of_all_sample_example_group_fixture_files():
-    return \
-        top_level_nodes_of_ast_of_all_sample_active_example_group_fixture_files() + \
-        top_level_nodes_of_ast_of_all_sample_pending_example_group_fixture_files()
-
-def top_level_nodes_of_ast_of_all_sample_active_example_group_fixture_files():
-    return \
-        top_level_nodes_of_ast_of_fixture_file_at('sample_example_group_declarations/active_with_wording.py') + \
-        top_level_nodes_of_ast_of_fixture_file_at('sample_example_group_declarations/active_with_name.py') + \
-        top_level_nodes_of_ast_of_fixture_file_at('sample_example_group_declarations/active_with_attribute_lookup.py')
 
 
-def top_level_nodes_of_ast_of_all_sample_pending_example_group_fixture_files():
-    return \
-        top_level_nodes_of_ast_of_fixture_file_at('sample_example_group_declarations/pending_with_wording.py') + \
-        top_level_nodes_of_ast_of_fixture_file_at('sample_example_group_declarations/pending_with_name.py') + \
-        top_level_nodes_of_ast_of_fixture_file_at('sample_example_group_declarations/pending_with_attribute_lookup.py')
+def supported_hook_declarations():
+    return top_level_ast_nodes_of_fixture_at('supported_hook_declarations.py')
 
-def top_level_nodes_of_ast_of_all_sample_example_groups_with_wording_fixture_files():
-    return \
-        top_level_nodes_of_ast_of_fixture_file_at('sample_example_group_declarations/active_with_wording.py') + \
-        top_level_nodes_of_ast_of_fixture_file_at('sample_example_group_declarations/pending_with_wording.py')
+def negative_examples_of_hook_declarations():
+    return top_level_ast_nodes_of_fixture_at('negative_examples/not_hook_declarations.py')
 
-def top_level_nodes_of_ast_of_all_sample_example_groups_with_name_fixture_files():
-    return \
-        top_level_nodes_of_ast_of_fixture_file_at('sample_example_group_declarations/active_with_name.py') + \
-        top_level_nodes_of_ast_of_fixture_file_at('sample_example_group_declarations/pending_with_name.py')
 
-def top_level_nodes_of_ast_of_all_sample_example_groups_with_attribute_lookup_fixture_files():
-    return top_level_nodes_of_ast_of_fixture_file_at('sample_example_group_declarations/active_with_attribute_lookup.py') + \
-           top_level_nodes_of_ast_of_fixture_file_at('sample_example_group_declarations/pending_with_attribute_lookup.py')
+def supported_example_declarations():
+    return top_level_ast_nodes_of_fixture_at('supported_example_declarations.py')
+
+def negative_examples_of_example_declarations():
+    return top_level_ast_nodes_of_fixture_at('negative_examples/not_example_declarations.py')
+
+
+def supported_example_group_declarations():
+    return supported_active_example_group_declarations() + \
+        supported_pending_example_group_declarations()
+
+def supported_active_example_group_declarations():
+    return top_level_ast_nodes_of_fixture_at('supported_example_group_declarations/active_with_wording.py') + \
+        top_level_ast_nodes_of_fixture_at('supported_example_group_declarations/active_with_name.py') + \
+        top_level_ast_nodes_of_fixture_at('supported_example_group_declarations/active_with_attribute_lookup.py')
+
+def supported_pending_example_group_declarations():
+    return top_level_ast_nodes_of_fixture_at('supported_example_group_declarations/pending_with_wording.py') + \
+        top_level_ast_nodes_of_fixture_at('supported_example_group_declarations/pending_with_name.py') + \
+        top_level_ast_nodes_of_fixture_at('supported_example_group_declarations/pending_with_attribute_lookup.py')
+
+
+def supported_example_group_declarations_with_wording():
+    return top_level_ast_nodes_of_fixture_at('supported_example_group_declarations/active_with_wording.py') + \
+        top_level_ast_nodes_of_fixture_at('supported_example_group_declarations/pending_with_wording.py')
+
+def supported_example_group_declarations_with_name():
+    return top_level_ast_nodes_of_fixture_at('supported_example_group_declarations/active_with_name.py') + \
+        top_level_ast_nodes_of_fixture_at('supported_example_group_declarations/pending_with_name.py')
+
+def supported_example_group_declarations_with_attribute_lookup():
+    return top_level_ast_nodes_of_fixture_at('supported_example_group_declarations/active_with_attribute_lookup.py') + \
+        top_level_ast_nodes_of_fixture_at('supported_example_group_declarations/pending_with_attribute_lookup.py')
+
+def negative_examples_of_example_group_declarations():
+    return top_level_ast_nodes_of_fixture_at('negative_examples/not_example_group_declarations.py')
