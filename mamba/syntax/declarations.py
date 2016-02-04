@@ -1,6 +1,13 @@
 import ast
 
 from .identifiers import MambaIdentifiers
+from .input_nodes import (
+    AttributeLookupOnAName,
+    CallOnANameWhereFirstArgumentIsString,
+    CallOnANameWhereFirstArgumentIsName,
+    CallOnANameWhereFirstArgumentIsAttributeLookup,
+    BadNodeStructure
+)
 
 
 class HookDeclaration(object):
@@ -40,29 +47,6 @@ class HookDeclaration(object):
         return self._body
 
 
-class AttributeLookupOnAName(object):
-    def __init__(self, node):
-        self._node = node
-
-        if not self._is_valid():
-            raise BadNodeStructure()
-
-    def _is_valid(self):
-        return self._is_attribute_lookup() and isinstance(self._node.value, ast.Name)
-
-    def _is_attribute_lookup(self):
-        return isinstance(self._node, ast.Attribute)
-
-    @property
-    def name(self):
-        return self._node.value.id
-
-    @property
-    def attribute(self):
-        return self._node.attr
-
-
-
 class ExampleDeclaration(object):
     def __init__(self, with_statement):
         self._EXAMPLE_IDENTIFIERS = MambaIdentifiers.EXAMPLE()
@@ -92,52 +76,6 @@ class ExampleDeclaration(object):
     @property
     def body(self):
         return self._body
-
-
-class CallOnANameWithAtLeastOneArgument(object):
-    def __init__(self, node):
-        self._node = node
-
-        if not self._is_valid():
-            raise BadNodeStructure()
-
-    def _is_valid(self):
-        return self._is_call_on_a_name() and self._has_at_least_one_argument()
-
-    def _is_call_on_a_name(self):
-        return self._is_call() and self._called_expression_is_name()
-
-    def _is_call(self):
-        return isinstance(self._node, ast.Call)
-
-    def _called_expression_is_name(self):
-        return isinstance(self._node.func, ast.Name)
-
-    def _has_at_least_one_argument(self):
-        return len(self._node.args) >= 1
-
-    @property
-    def called_name(self):
-        return self._node.func.id
-
-    @property
-    def first_argument_node(self):
-        return self._node.args[0]
-
-
-class CallOnANameWhereFirstArgumentIsString(CallOnANameWithAtLeastOneArgument):
-    def __init__(self, node):
-        super(CallOnANameWhereFirstArgumentIsString, self).__init__(node)
-
-        if not self._first_argument_is_string():
-            raise BadNodeStructure()
-
-    def _first_argument_is_string(self):
-        return isinstance(self.first_argument_node, ast.Str)
-
-    @property
-    def first_argument(self):
-        return self.first_argument_node.s
 
 
 class ExampleGroupDeclaration(object):
@@ -191,39 +129,6 @@ class ExampleGroupDeclaration(object):
         return self._call.first_argument_node
 
 
-class CallOnANameWhereFirstArgumentIsName(CallOnANameWithAtLeastOneArgument):
-    def __init__(self, node):
-        super(CallOnANameWhereFirstArgumentIsName, self).__init__(node)
-
-        if not self._first_argument_is_name():
-            raise BadNodeStructure()
-
-    def _first_argument_is_name(self):
-        return isinstance(self.first_argument_node, ast.Name)
-
-    @property
-    def name_passed_as_first_argument(self):
-        return self.first_argument_node.id
-
-
-class CallOnANameWhereFirstArgumentIsAttributeLookup(CallOnANameWithAtLeastOneArgument):
-    def __init__(self, node):
-        super(CallOnANameWhereFirstArgumentIsAttributeLookup, self).__init__(node)
-
-        if not self._first_argument_is_attribute_lookup():
-            raise BadNodeStructure()
-
-    def _first_argument_is_attribute_lookup(self):
-        return isinstance(self.first_argument_node, ast.Attribute)
-
-    @property
-    def name_passed_as_first_argument(self):
-        return self.first_argument_node.attr
-
-
-class BadNodeStructure(Exception):
-    pass
-
 class NotARelevantNode(Exception):
     pass
 
@@ -235,4 +140,3 @@ class NotAnExampleDeclaration(NotARelevantNode):
 
 class NotAnExampleGroupDeclaration(NotARelevantNode):
     pass
-
