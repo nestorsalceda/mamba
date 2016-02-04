@@ -1,6 +1,7 @@
 import ast
 
-from .identifiers import MambaIdentifiers
+
+from . import identifiers
 from .input_nodes import (
     AttributeLookupOnAName,
     CallOnANameWhereFirstArgumentIsString,
@@ -11,7 +12,7 @@ from .input_nodes import (
 
 class HookDeclaration(object):
     def __init__(self, with_statement):
-        self._HOOK_IDENTIFIERS = MambaIdentifiers.HOOK()
+        self._HOOK_IDENTIFIERS = identifiers.HOOK
         self._body = with_statement.body
         self._attribute_lookup = AttributeLookupOnAName(with_statement.argument)
 
@@ -39,7 +40,7 @@ class HookDeclaration(object):
 
 class ExampleDeclaration(object):
     def __init__(self, with_statement):
-        self._EXAMPLE_IDENTIFIERS = MambaIdentifiers.EXAMPLE()
+        self._EXAMPLE_IDENTIFIERS = identifiers.EXAMPLE
         self._body = with_statement.body
         self._call = CallOnANameWhereFirstArgumentIsString(with_statement.argument)
 
@@ -61,7 +62,7 @@ class ExampleDeclaration(object):
 
 class ExampleGroupDeclaration(object):
     def __init__(self, with_statement):
-        self._EXAMPLE_GROUP_IDENTIFIERS = MambaIdentifiers.EXAMPLE_GROUP()
+        self._EXAMPLE_GROUP_IDENTIFIERS = identifiers.EXAMPLE_GROUP
         self._supported_types_of_calls = [
             CallOnANameWhereFirstArgumentIsString,
             CallOnANameWhereFirstArgumentIsName,

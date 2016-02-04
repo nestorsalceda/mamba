@@ -1,39 +1,35 @@
-class MambaIdentifiers(object):
-    class EXAMPLE_GROUP(object):
-        @property
-        def ACTIVE(self):
-            return ('description', 'context', 'describe')
+class _HOOK(object):
+    @property
+    def RUN_ORDERS(self):
+        return ('before', 'after')
 
-        @property
-        def PENDING(self):
-            return MambaIdentifiers._compute_pending_identifiers(self.ACTIVE)
+    @property
+    def SCOPES(self):
+        return ('all', 'each')
 
-        @property
-        def ALL(self):
-            return self.ACTIVE + self.PENDING
 
-    class EXAMPLE(object):
-        @property
-        def ACTIVE(self):
-            return ('it',)
+class _PendingAndActiveIdentifiers(object):
+    @property
+    def PENDING(self):
+        return tuple('_' + identifier for identifier in self.ACTIVE)
 
-        @property
-        def PENDING(self):
-            return MambaIdentifiers._compute_pending_identifiers(self.ACTIVE)
+    @property
+    def ALL(self):
+        return self.ACTIVE + self.PENDING
 
-        @property
-        def ALL(self):
-            return self.ACTIVE + self.PENDING
 
-    class HOOK(object):
-        @property
-        def RUN_ORDERS(self):
-            return ('before', 'after')
+class _EXAMPLE(_PendingAndActiveIdentifiers):
+    @property
+    def ACTIVE(self):
+        return ('it',)
 
-        @property
-        def SCOPES(self):
-            return ('all', 'each')
 
-    @staticmethod
-    def _compute_pending_identifiers(identifiers):
-        return tuple('_' + identifier for identifier in identifiers)
+class _EXAMPLE_GROUP(_PendingAndActiveIdentifiers):
+    @property
+    def ACTIVE(self):
+        return ('description', 'context', 'describe')
+
+
+HOOK = _HOOK()
+EXAMPLE = _EXAMPLE()
+EXAMPLE_GROUP = _EXAMPLE_GROUP()
