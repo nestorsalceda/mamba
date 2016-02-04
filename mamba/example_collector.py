@@ -58,38 +58,39 @@ class ExampleCollector(object):
     #TODO: What about managing locks with threads??
     #Take care with watchdog stuff!!
     @contextlib.contextmanager
-    def _load_module_from(self, path):
-        module_name = self._dump_file_extension(path)
+    def _load_module_from(self, path_to_spec_file):
+        module_name = self._dump_file_extension(path_to_spec_file)
 
-        yield self._module_from_ast(module_name, path)
+        yield self._module_from_ast(module_name, path_to_spec_file)
 
     def _dump_file_extension(self, path_to_file):
         return os.path.splitext(path_to_file)[0]
 
-    def _module_from_ast(self, module_name, path):
-        tree = self._parse_and_transform_ast(path)
-        package = '.'.join(module_name.split('/')[:-1])
+    def _module_from_ast(self, module_name, path_to_spec_file):
+        tree = self._parse_and_transform_ast(path_to_spec_file)
+        package_name = '.'.join(module_name.split('/')[:-1])
 
         module = imp.new_module(module_name)
-        module.__file__ = path
+        module.__file__ = path_to_spec_file
 
         try:
-            __import__(package)
-            module.__package__ = package
+            __import__(package_name)
+            module.__package__ = package_name
         except (ImportError, ValueError):
             # No parent package available, so skip it
             pass
 
+
         self._prepare_path_for_local_packages()
-        code = compile(tree, path, 'exec')
+        code = compile(tree, path_to_spec_file, 'exec')
         exec(code, module.__dict__)
         self._restore_path()
 
         return module
 
-    def _parse_and_transform_ast(self, path):
-        with open(path) as f:
-            tree = ast.parse(f.read(), filename=path)
+    def _parse_and_transform_ast(self, path_to_spec_file):
+        with open(path_to_spec_file) as spec_file:
+            tree = ast.parse(spec_file.read(), filename=path_to_spec_file)
             tree = self._node_transformer.visit(tree)
             ast.fix_missing_locations(tree)
             return tree
