@@ -79,18 +79,22 @@ class ExampleToMethod(object):
         )
 
     def _compute_id_of_method(self):
-        return '{0:08d}'.format(NumberOfExamplesOrExampleGroupsTransformed.get_next())
+        return IDsForExamplesAndExampleGroups.generate()
 
 
-class NumberOfExamplesOrExampleGroupsTransformed(object):
-    _current_number = 1
+class IDsForExamplesAndExampleGroups(object):
+    _current_id = 1
 
-    @staticmethod
-    def get_next():
-        next_number = NumberOfExamplesOrExampleGroupsTransformed._current_number
-        NumberOfExamplesOrExampleGroupsTransformed._current_number += 1
+    @classmethod
+    def generate(cls):
+        return '{0:08d}'.format(cls._get_next_id_number())
 
-        return next_number
+    @classmethod
+    def _get_next_id_number(cls):
+        next_id = cls._current_id
+        cls._current_id += 1
+
+        return next_id
 
 
 class ExampleGroupToClass(object):
@@ -120,7 +124,7 @@ class ExampleGroupToClass(object):
         ])
 
     def _compute_id_of_class(self):
-        return '{0:08d}'.format(NumberOfExamplesOrExampleGroupsTransformed.get_next())
+        return IDsForExamplesAndExampleGroups.generate()
 
     def _compute_marker_for_example_group(self):
         if self._example_group_declaration.is_pending:
