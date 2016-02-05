@@ -1,6 +1,5 @@
 import ast
 
-
 from . import identifiers
 from .input_nodes import (
     AttributeLookupOnAName,
