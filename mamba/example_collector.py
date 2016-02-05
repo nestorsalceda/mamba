@@ -13,7 +13,7 @@ class ExampleCollector(object):
 
     def __init__(self, paths):
         self.paths = paths
-        self._node_transformer = MambaSyntaxToClassBasedSyntax()
+        self._ast_transformer = MambaSyntaxToClassBasedSyntax()
 
     def modules(self):
         for path in self._collect_files_containing_examples():
@@ -77,7 +77,7 @@ class ExampleCollector(object):
         with open(path) as f:
             tree = ast.parse(f.read(), filename=path)
 
-        return self._node_transformer.transform(tree)
+        return self._ast_transformer.transform(tree)
 
     def _prepare_path_for_local_packages(self):
         if os.getcwd().endswith('spec') or os.getcwd().endswith('specs'):

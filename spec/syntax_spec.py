@@ -71,7 +71,7 @@ def _retrieve_name_of_parameter(function_parameter_node):
 
 with description('the ExampleToMethod class'):
     with context('when given a `with` statement which does not match the example declaration syntax'):
-        with it('raises an error'):
+        with it('''can't transform it'''):
             for node in negative_examples_of_example_declarations():
                 expect(
                     ExampleToMethod(WithStatement(node)).can_transform
@@ -134,7 +134,7 @@ with description('the ExampleToMethod class'):
 
 with description('the ExampleGroupToClass class'):
     with context('when given a `with` statement which does not match the example group declaration syntax'):
-        with it('raises an error'):
+        with it('''can't transform it'''):
             for node in negative_examples_of_example_group_declarations():
                 expect(
                     ExampleGroupToClass(WithStatement(node)).can_transform
@@ -180,8 +180,8 @@ with description('the ExampleGroupToClass class'):
                         expect(class_declaration.name.endswith('__pending__description')).to(be_true)
 
         with context('when a wording is provided in the example group declaration'):
-            with it('the class name includes the wording provided'):
-                example_group_wordings = [
+            with it('the class name includes the provided wording'):
+                provided_wordings = [
                     'given...',
                     'when...',
                     'my subject under test',
@@ -190,7 +190,7 @@ with description('the ExampleGroupToClass class'):
                     'my subject under test, but this whole group will be skipped'
                 ]
 
-                for wording, node in zip(example_group_wordings, supported_example_group_declarations_with_wording()):
+                for wording, node in zip(provided_wordings, supported_example_group_declarations_with_wording()):
                     class_declaration = ExampleGroupToClass(WithStatement(node)).transform()
 
                     expect(class_declaration.name).to(match(wording))
