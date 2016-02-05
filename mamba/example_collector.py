@@ -37,7 +37,7 @@ class ExampleCollector(object):
 
     def _collect_paths_to_spec_files_in_directory(self, path_to_directory):
         paths_to_spec_files = []
-        for root, _, file_names in os.walk(path_to_directory):
+        for root, file_names in self._walk_directory_from_top_to_bottom(path_to_directory):
             paths_to_spec_files.extend([
                 self._assemble_path_to_spec_file(root, file_name)
                 for file_name in file_names if self._is_name_of_spec_file(file_name)
@@ -46,6 +46,10 @@ class ExampleCollector(object):
         paths_to_spec_files.sort()
 
         return paths_to_spec_files
+
+    def _walk_directory_from_top_to_bottom(self, path_to_directory):
+        for root, _, file_names in os.walk(path_to_directory):
+            yield (root, file_names)
 
     def _assemble_path_to_spec_file(self, path_to_directory, name_of_spec_file):
         return os.path.join(self._normalize_path(path_to_directory), name_of_spec_file)
