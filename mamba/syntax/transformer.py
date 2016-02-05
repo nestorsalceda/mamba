@@ -83,7 +83,7 @@ class ExampleToMethod(object):
 
 
 class NumberOfExamplesOrExampleGroupsTransformed(object):
-    _current_number = 0
+    _current_number = 1
 
     @staticmethod
     def get_next():
