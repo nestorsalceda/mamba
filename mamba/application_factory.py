@@ -14,6 +14,7 @@ class ApplicationFactory(object):
         settings_ = settings.Settings()
         settings_.slow_test_threshold = self.arguments.slow
         settings_.enable_code_coverage = self.arguments.enable_coverage
+        settings_.code_coverage_file = self.arguments.coverage_file
         settings_.format = self.arguments.format
         settings_.no_color = self.arguments.no_color
 
@@ -39,7 +40,7 @@ class ApplicationFactory(object):
         runner = runners.BaseRunner(self.create_example_collector(), loader.Loader(), self.create_reporter())
 
         if settings.enable_code_coverage:
-            runner = runners.CodeCoverageRunner(runner)
+            runner = runners.CodeCoverageRunner(runner, settings.code_coverage_file)
 
         if settings.enable_file_watcher:
             runner = runners.FileWatcherRunner(runner)

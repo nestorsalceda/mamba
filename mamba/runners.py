@@ -43,11 +43,12 @@ class BaseRunner(Runner):
 
 class CodeCoverageRunner(Runner):
 
-    def __init__(self, runner):
+    def __init__(self, runner, code_coverage_file):
         self.runner = runner
+        self.code_coverage_file = code_coverage_file
 
     def run(self):
-        with code_coverage.CodeCoverage():
+        with code_coverage.CodeCoverage(self.code_coverage_file):
             self.runner.run()
 
     @property

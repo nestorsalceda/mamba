@@ -6,6 +6,7 @@ class Settings(object):
     def __init__(self):
         self._slow_test_threshold = .075
         self._enable_code_coverage = False
+        self._code_coverage_file = '.coverage'
         self._enable_file_watcher = False
         self._format = 'documentation'
         self._no_color = False
@@ -41,6 +42,18 @@ class Settings(object):
     @enable_code_coverage.setter
     def enable_code_coverage(self, value):
         self._enable_code_coverage = value
+
+    @property
+    def code_coverage_file(self):
+        return self._code_coverage_file
+
+    @code_coverage_file.setter
+    def code_coverage_file(self, value):
+        self._code_coverage_file = value
+
+    @format.setter
+    def format(self, value):
+        self._format = value
 
     @property
     def enable_file_watcher(self):
