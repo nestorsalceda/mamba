@@ -16,6 +16,7 @@ class ExampleGroup(object):
 
     def __init__(self, subject, parent=None, execution_context=None):
         self.subject = subject
+        self._can_instantiate_subject = True
         self.examples = []
         self.parent = parent
         self._hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
@@ -37,23 +38,22 @@ class ExampleGroup(object):
         reporter.example_group_started(self)
 
     def _register_subject_creation_in_before_each_hook(self):
-        if not self._can_create_subject():
+        if not self._subject_is_class():
             return
 
         self._hooks['before_each'].insert(0, lambda execution_context: self._create_subject(execution_context))
 
-    def _can_create_subject(self):
-        return self._subject_is_class()
-
     def _subject_is_class(self):
         return inspect.isclass(self.subject)
 
-    #TODO: Being executed on every example, instead of try once
-    #      Should be optimized
     def _create_subject(self, execution_context):
+        if not self._can_instantiate_subject:
+            return
+
         try:
             execution_context.subject = self.subject()
         except Exception as exc:
+            self._can_instantiate_subject = False
             if hasattr(execution_context, 'subject'):
                 del execution_context.subject
 
