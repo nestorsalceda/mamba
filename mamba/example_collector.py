@@ -9,6 +9,7 @@ import contextlib
 from mamba import nodetransformers
 from mamba.infrastructure import is_python3
 
+
 class ExampleCollector(object):
     SPEC_FILE_NAME_ENDING = '_spec.py'
 
