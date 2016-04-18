@@ -17,6 +17,7 @@ class ApplicationFactory(object):
         settings_.code_coverage_file = self.arguments.coverage_file
         settings_.format = self.arguments.format
         settings_.no_color = self.arguments.no_color
+        settings_.match_name = self.arguments.name
 
         if not is_python3():
             settings_.enable_file_watcher = self.arguments.watch
@@ -37,7 +38,7 @@ class ApplicationFactory(object):
 
     def create_runner(self):
         settings = self.create_settings()
-        runner = runners.BaseRunner(self.create_example_collector(), loader.Loader(), self.create_reporter())
+        runner = runners.BaseRunner(self.create_example_collector(), loader.Loader(settings.match_name), self.create_reporter())
 
         if settings.enable_code_coverage:
             runner = runners.CodeCoverageRunner(runner, settings.code_coverage_file)
