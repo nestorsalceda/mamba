@@ -16,7 +16,7 @@ class ExampleGroup(object):
 
     def __init__(self, subject, parent=None, execution_context=None):
         self.subject = subject
-        self._can_create_subject = True
+        self._can_instantiate_subject = True
         self.examples = []
         self.parent = parent
         self._hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
@@ -38,22 +38,22 @@ class ExampleGroup(object):
         reporter.example_group_started(self)
 
     def _register_subject_creation_in_before_each_hook(self):
-        if not self._subject_is_class():
+        if not self._can_create_subject():
             return
 
         self._hooks['before_each'].insert(0, lambda execution_context: self._create_subject_in(execution_context))
+
+    def _can_create_subject(self):
+        return self._subject_is_class() and self._can_instantiate_subject
 
     def _subject_is_class(self):
         return inspect.isclass(self.subject)
 
     def _create_subject_in(self, execution_context):
-        if not self._can_create_subject:
-            return
-
         try:
             execution_context.subject = self.subject()
         except Exception as exc:
-            self._can_create_subject = False
+            self._can_instantiate_subject = False
             self._remove_any_existing_subject_from(execution_context)
 
     def _remove_any_existing_subject_from(self, execution_context):
