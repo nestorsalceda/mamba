@@ -17,7 +17,7 @@ from .helpers import top_level_ast_nodes_of_fixture_at
 top_level_ast_nodes_of_fixture_at = functools.partial(top_level_ast_nodes_of_fixture_at, __file__)
 
 
-with description('the HookToMethod class'):
+with description('the hook transformer'):
     with context('when given a `with` statement which does not match the hook declaration syntax'):
         with it('''can't transform it'''):
             for node in negative_examples_of_hook_declarations():
@@ -69,7 +69,7 @@ def _retrieve_name_of_parameter(function_parameter_node):
 
 
 
-with description('the ExampleToMethod class'):
+with description('the example transformer'):
     with context('when given a `with` statement which does not match the example declaration syntax'):
         with it('''can't transform it'''):
             for node in negative_examples_of_example_declarations():
@@ -132,7 +132,7 @@ with description('the ExampleToMethod class'):
                     expect(method_declaration.name).to(match(wording))
 
 
-with description('the ExampleGroupToClass class'):
+with description('the example group transformer'):
     with context('when given a `with` statement which does not match the example group declaration syntax'):
         with it('''can't transform it'''):
             for node in negative_examples_of_example_group_declarations():
