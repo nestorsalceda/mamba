@@ -34,65 +34,98 @@ with description('mamba'):
     with it('is tested with mamba itself'):
         pass
 
-    with it('supports python 3'):
+    with it('supports Python 3'):
         pass
 
-    with context('when listing features'):
-        with it('supports example groups'):
-            pass
+    with context('features'):
+        with context('defining example groups'):
+            with context('with arbitrary levels of nesting'):
+                with it('is supported'):
+                    pass
 
         with context('hooks'):
             with before.all:
-                print 'This code will be run once, before all examples'
+                print('This code will be run once, before all examples in this group')
 
             with before.each:
-                print 'This code will be run before each example'
+                print('This code will be run once before each example in this group')
 
             with after.each:
-                print 'This code will be run after each example'
+                print('This code will be run once after each example in this group')
 
             with after.all:
-                print 'This code will be run once, after all examples'
+                print('This code will be run once, after all examples in this group')
 
         with context('pending tests'):
-            with _context('when running pending contexts (marked with a underscore)'):
+            with _context('when running pending contexts (marked with an underscore)'):
                 with it('will not run any spec under a pending context'):
                     pass
 
-            with _it('will not run pending specs (marked with underscore)'):
+            with _it('will not run pending specs (marked with an underscore)'):
                 pass
 
         with it('highlights slow tests'):
-            sleep(10)
+            time.sleep(10)
 
-        with context(ASampleClass):
-            with it('has an instance in subject property'):
-                expect(self.subject).to.be.a(ASampleClass)
+        with context('when using your code from the tests'):
+            with it('supports importing installed modules'):
+                pass
+
+            with it('supports importing local, non-installed modules'):
+                pass
+
+        with context('automatic instantiation of simple objects'):
+            with context(ASampleClass):
+                with it('has an instance in the `subject` property'):
+                    expect(self.subject).to(be_an(ASampleClass))
+
+        with context('code coverage measurement'):
+            with it('is performed if you pass `--enable-coverage`'):
+                pass
+
+            with it('is performed using `coverage`'):
+                # see https://pypi.python.org/pypi/coverage/
+                pass
+
+            with it('is configured in a `.coveragerc` file at the root of your project'):
+                # see https://coverage.readthedocs.io/en/latest/config.html
+                pass
+
 
     with context('when writing assertions'):
+        with it('does not include an assertion mechanism'):
+            pass
+
+        with it('works with virtually any assertion mechanism'):
+            pass
+
+        with it('can be used with expects'):
+            expect(True).to(be_true)
+
+        with it('can be used with hamcrest'):
+            assert_that(True, is_(True))
+
+        with it('can be used with should_dsl'):
+            True |should| be(True)
+
+        with it('can be used with sure'):
+            True.should.be.true
+
         with it('can be used with plain assertions'):
             assert True
 
-        with it('can be used with hamcrest style assertions'):
-            assert_that(True, is_(True))
-
-        with it('can be used with should_dsl style assertions'):
-            True |should| be(True)
-
-        with it('can be used with sure style assertions'):
-            True.should.be.true
-
-            expect(True).to.be.true
-
-        with it('is assertion framework agnostic'):
+    with context('when using test doubles'):
+        with it('does not include a test doubles library'):
             pass
 
-    with context('when using tests doubles'):
+        with it('works with virtually any test doubles library'):
+            pass
+
         with it('can be used with mockito'):
             stub = mock()
             when(stub).is_usable_with_mockito().thenReturn(True)
 
-            expect(stub.is_usable_with_mockito()).to.be.true
+            expect(stub.is_usable_with_mockito()).to(be_true)
 
         with it('can be used with doublex'):
             with Spy() as sender:
@@ -104,23 +137,7 @@ with description('mamba'):
         with it('can be used with mock'):
             is_usable_with_mock = Mock(return_value=True)
 
-            assert mock()
-
-        with it('is test doubles framework agnostic'):
-            pass
-
-    with context('when code coverage measurement is desired'):
-        with it('collects them if you pass `--enable-coverage`'):
-            pass
-
-        with it('calls `coverage` directly in order to compute it'):
-            # see https://pypi.python.org/pypi/coverage/
-            pass
-
-        with it('is configured in a `.coveragerc` file at the root of your project'):
-            # see http://nedbatchelder.com/code/coverage/config.html
-            pass
-
+            assert is_usable_with_mock()
 ```
 
 
