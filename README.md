@@ -1,19 +1,30 @@
-#mamba: the definitive testing tool for Python
+# mamba: the definitive test runner for Python
 
 [![Build Status](https://travis-ci.org/nestorsalceda/mamba.svg)](https://travis-ci.org/nestorsalceda/mamba)
 [![Latest PyPI Version](https://img.shields.io/pypi/v/mamba.svg)](https://pypi.python.org/pypi/mamba)
 
-mamba is the definitive BDD testing framework for Python. Born under the banner of Behavior Driven Development.
 
-##Installation
+**mamba** is the definitive test runner for Python. Born under the banner of [behavior-driven development](https://en.wikipedia.org/wiki/Behavior-driven_development).
 
-To install mamba, just:
+## Installation
 
-``` sh
-pip install mamba
+To install **mamba**, just run:
+
+```sh
+$ pip install mamba
 ```
 
-##Overview
+
+## Usage
+
+```sh
+$ mamba --help
+```
+
+You can also read the [Overview](#overview) and take a look at the [spec](./spec).
+
+
+## Overview
 
 ```python
 # Importing mamba is not needed!
