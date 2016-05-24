@@ -141,6 +141,6 @@ with description('mamba'):
 ```
 
 
-##Contribute
+## Contributing
 
-If you'd like to contribute, fork [repository](http://github.com/nestorsalceda/mamba), and send a pull request.
+If you'd like to contribute, fork this [repository](http://github.com/nestorsalceda/mamba) and send a pull request.
