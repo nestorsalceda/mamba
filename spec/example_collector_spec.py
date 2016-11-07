@@ -59,6 +59,15 @@ with description(ExampleCollector) as _:
             expect(examples).to(have_length(1))
             expect([example.name for example in examples[0].examples]).to(equal(['it first example', 'it second example', 'it third example', '#inner_context']))
 
+        with it('filters by name'):
+            module = _load_module(spec_abspath('without_inner_contexts.py'))
+
+            examples = loader.Loader('third').load_examples_from(module)
+
+            expect(examples).to(have_length(1))
+            expect([example.name for example in examples[0].examples]).to(equal(['it third example']))
+
+
     with context('when a pending decorator loaded'):
         with it('mark example as pending'):
             module = _load_module(PENDING_DECORATOR_PATH)
