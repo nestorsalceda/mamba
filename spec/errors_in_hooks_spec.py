@@ -12,7 +12,7 @@ with description('Errors in hooks'):
 
     with context('when an error was raised in a before.all hook'):
         with before.each:
-            self.example_group.hooks['before_all'].append(self._error)
+            self.example_group.add_hook('before_all', self._error)
 
         with it('marks example as failed'):
             self.example = an_example()
@@ -25,7 +25,7 @@ with description('Errors in hooks'):
         with context('when example also launches an error'):
             with context('when before.each also launches an error'):
                 with it('keeps the error happened in first hook'):
-                    self.example_group.hooks['before_each'].append(self._other_error)
+                    self.example_group.add_hook('before_each', self._other_error)
                     self.example = a_failing_example()
                     self.example_group.append(self.example)
 
@@ -43,7 +43,7 @@ with description('Errors in hooks'):
 
     with context('when an error was raised in a before.each hook'):
         with before.each:
-            self.example_group.hooks['before_each'].append(self._error)
+            self.example_group.add_hook('before_each', self._error)
 
         with it('marks example as failed'):
             self.example = an_example()
@@ -64,7 +64,7 @@ with description('Errors in hooks'):
 
     with context('when an error was raised in an after.each hook'):
         with before.each:
-            self.example_group.hooks['after_each'].append(self._error)
+            self.example_group.add_hook('after_each', self._error)
 
         with it('marks example as failed'):
             self.example = an_example()
@@ -85,7 +85,7 @@ with description('Errors in hooks'):
 
     with context('when an error was raised in an after.all hook'):
         with before.each:
-            self.example_group.hooks['after_all'].append(self._error)
+            self.example_group.add_hook('after_all', self._error)
 
         with it('marks example as failed'):
             self.example = an_example()
@@ -98,7 +98,7 @@ with description('Errors in hooks'):
         with context('when example also launches an error'):
             with context('when after.each also launches an error'):
                 with it('keeps the error happened in last hook'):
-                    self.example_group.hooks['after_each'].append(self._other_error)
+                    self.example_group.add_hook('after_each', self._other_error)
                     self.example = a_failing_example()
                     self.example_group.append(self.example)
 

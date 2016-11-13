@@ -12,3 +12,9 @@ if is_python26():
 else:
     def total_seconds(timedelta):
         return timedelta.total_seconds()
+
+
+def retrieve_unbound_method_from(method):
+    if not hasattr(method, 'im_func'):
+        return method
+    return method.im_func

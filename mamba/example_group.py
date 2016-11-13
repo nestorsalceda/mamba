@@ -6,6 +6,8 @@ import inspect
 
 from mamba import error
 from mamba.example import Example, PendingExample
+from mamba.infrastructure import retrieve_unbound_method_from
+
 
 class ExecutionContext(object):
     pass
@@ -14,9 +16,10 @@ class ExampleGroup(object):
 
     def __init__(self, subject, parent=None, execution_context=None):
         self.subject = subject
+        self._can_instantiate_subject = True
         self.examples = []
         self.parent = parent
-        self.hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
+        self._hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
         self._elapsed_time = timedelta(0)
         self.execution_context = ExecutionContext() if execution_context is None else execution_context
 
@@ -35,23 +38,29 @@ class ExampleGroup(object):
         reporter.example_group_started(self)
 
     def _register_subject_creation_in_before_each_hook(self):
-        if self._can_create_subject():
-            self.hooks['before_each'].insert(0, lambda execution_context: self._create_subject(execution_context))
+        if not self._can_create_subject():
+            return
+
+        self._hooks['before_each'].insert(0, lambda execution_context: self._create_subject_in(execution_context))
 
     def _can_create_subject(self):
-        return self._subject_is_class()
+        return self._subject_is_class() and self._can_instantiate_subject
 
     def _subject_is_class(self):
         return inspect.isclass(self.subject)
 
-    #TODO: Being executed on every example, instead of try once
-    #      Should be optimized
-    def _create_subject(self, execution_context):
+    def _create_subject_in(self, execution_context):
         try:
             execution_context.subject = self.subject()
         except Exception as exc:
-            if hasattr(execution_context, 'subject'):
-                del execution_context.subject
+            self._can_instantiate_subject = False
+            self._remove_any_existing_subject_from(execution_context)
+
+    def _remove_any_existing_subject_from(self, execution_context):
+        if not hasattr(execution_context, 'subject'):
+            return
+
+        del execution_context.subject
 
     def _run_inner_examples(self, reporter):
         self.run_hook('before_all')
@@ -59,13 +68,10 @@ class ExampleGroup(object):
             example.run(reporter)
         self.run_hook('after_all')
 
-    def run_hook(self, hook):
-        for registered in self.hooks.get(hook, []):
+    def run_hook(self, name):
+        for hook in self._hooks.get(name, []):
             try:
-                if hasattr(registered, 'im_func'):
-                    registered.im_func(self.execution_context)
-                elif callable(registered):
-                    registered(self.execution_context)
+                hook(self.execution_context)
             except Exception as exception:
                 self._set_failed()
 
@@ -76,6 +82,9 @@ class ExampleGroup(object):
     def _finish(self, reporter):
         self._elapsed_time = datetime.utcnow() - self._begin
         reporter.example_group_finished(self)
+
+    def add_hook(self, name, hook_function):
+        self._hooks[name].append(retrieve_unbound_method_from(hook_function))
 
     @property
     def elapsed_time(self):

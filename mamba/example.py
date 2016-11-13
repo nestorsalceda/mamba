@@ -4,16 +4,17 @@ import sys
 from datetime import datetime, timedelta
 
 from mamba import error
+from mamba.infrastructure import retrieve_unbound_method_from
 
 
 class Example(object):
 
     def __init__(self, test, parent=None):
-        self.test = test
+        self._test = retrieve_unbound_method_from(test)
         self.parent = parent
-        self._error = None
+        self.error = None
         self._elapsed_time = timedelta(0)
-        self.was_run = False
+        self._was_run = False
 
     def run(self, reporter):
         self._start(reporter)
@@ -21,9 +22,8 @@ class Example(object):
             if not self.failed:
                 self._run_inner_test(reporter)
         except Exception as exception:
-            self.was_run = True
-            if self.error is None:
-                self._set_failed()
+            self._was_run = True
+            self._set_failed()
         finally:
             self._finish(reporter)
 
@@ -33,11 +33,8 @@ class Example(object):
 
     def _run_inner_test(self, reporter):
         self.run_hook('before_each')
-        if hasattr(self.test, 'im_func'):
-            self.test.im_func(self.parent.execution_context)
-        else:
-            self.test(self.parent.execution_context)
-        self.was_run = True
+        self._test(self.parent.execution_context)
+        self._was_run = True
         self.run_hook('after_each')
 
     def run_hook(self, hook):
@@ -45,14 +42,20 @@ class Example(object):
             parent.run_hook(hook)
 
     def _set_failed(self):
-        type_, value, traceback = sys.exc_info()
+        if self.failed:
+            return
+
+        value, traceback = self._get_value_and_traceback_of_the_exception_currently_being_handled()
         self.error = error.Error(value, traceback)
+
+    def _get_value_and_traceback_of_the_exception_currently_being_handled(self):
+        return sys.exc_info()[1:]
 
     def _finish(self, reporter):
         self._elapsed_time = datetime.utcnow() - self._begin
         if self.failed:
             reporter.example_failed(self)
-        elif self.was_run:
+        elif self._was_run:
             reporter.example_passed(self)
         else:
             reporter.example_pending(self)
@@ -61,31 +64,28 @@ class Example(object):
     def _parents(self):
         parents = []
         parent = self.parent
-        while parent:
+        while parent is not None:
             parents.append(parent)
             parent = parent.parent
 
         return reversed(parents)
 
     @property
-    def elapsed_time(self):
-        return self._elapsed_time
-
-    @property
     def name(self):
-        return self.test.__name__[10:]
+        return self._test.__name__[10:]
 
     @property
     def failed(self):
         return self.error is not None
 
     @property
-    def error(self):
-        return self._error
+    def elapsed_time(self):
+        return self._elapsed_time
 
-    @error.setter
-    def error(self, value):
-        self._error = value
+    @property
+    def was_run(self):
+        return self._was_run
+
 
 
 class PendingExample(Example):

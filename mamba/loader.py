@@ -47,7 +47,7 @@ class Loader(object):
 
     def _load_hooks(self, klass, example_group):
         for hook in self._hooks_in(klass):
-            example_group.hooks[hook.__name__].append(hook)
+            example_group.add_hook(hook.__name__, hook)
 
     def _hooks_in(self, example_group):
         return [method for name, method in self._methods_for(example_group) if self._is_hook(name)]
