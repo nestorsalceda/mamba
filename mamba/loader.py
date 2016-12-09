@@ -12,11 +12,29 @@ class Loader(object):
     def load_examples_from(self, module):
         loaded = []
         example_groups = self._example_groups_for(module)
+        normal_example_groups = []
+        pending_example_groups = []
+        ignore_rest = False
 
         for klass in example_groups:
-            example_group = self._create_example_group(klass)
-            self._add_hooks_examples_and_nested_example_groups_to(klass, example_group)
+            if '__ignore_rest' in klass.__name__:
+                pending_example_groups += normal_example_groups
+                normal_example_groups = []
+                normal_example_groups.append(klass)
+                ignore_rest = True
+            elif ('__pending' in klass.__name__) or ignore_rest:
+                pending_example_groups.append(klass)
+            else:
+                normal_example_groups.append(klass)
 
+        for klass in normal_example_groups:
+            example_group = ExampleGroup(self._subject(klass), execution_context=None)
+            self._add_hooks_examples_and_nested_example_groups_to(klass, example_group)
+            loaded.append(example_group)
+
+        for klass in pending_example_groups:
+            example_group = PendingExampleGroup(self._subject(klass), execution_context=None)
+            self._add_hooks_examples_and_nested_example_groups_to(klass, example_group)
             loaded.append(example_group)
 
         return loaded
@@ -33,7 +51,10 @@ class Loader(object):
         return ExampleGroup(self._subject(klass), execution_context=execution_context)
 
     def _subject(self, example_group):
-        subject = getattr(example_group, '_subject_class', example_group.__name__.replace('__description', '').replace('__pending', ''))
+        subject = getattr(example_group, '_subject_class', example_group.__name__
+            .replace('__description', '')
+            .replace('__pending', '')
+            .replace('__ignore_rest', ''))
         if isinstance(subject, str):
             return subject[10:]
         else:
@@ -94,14 +115,22 @@ class Loader(object):
         return isinstance(example_group, PendingExampleGroup)
 
     def _is_ignore_rest_example(self, example):
-        return example.__name__[10:].startswith('only')
+        return example.__name__[10:].startswith('only_it')
 
     def _load_nested_example_groups(self, klass, example_group):
+        ignore_rest = False
+
         for nested in self._example_groups_for(klass):
             if isinstance(example_group, PendingExampleGroup):
                 nested_example_group = PendingExampleGroup(self._subject(nested), execution_context=example_group.execution_context)
             else:
-                nested_example_group = self._create_example_group(nested, execution_context=example_group.execution_context)
+                if '__ignore_rest' in nested.__name__:
+                    nested_example_group = self._create_example_group(nested, execution_context=example_group.execution_context)
+                    ignore_rest = True
+                elif ('__pending' in klass.__name__) or ignore_rest:
+                    nested_example_group = PendingExampleGroup(self._subject(nested), execution_context=example_group.execution_context)
+                else:
+                    nested_example_group = self._create_example_group(nested, execution_context=example_group.execution_context)
 
             self._add_hooks_examples_and_nested_example_groups_to(nested, nested_example_group)
             example_group.append(nested_example_group)
