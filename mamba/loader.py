@@ -119,21 +119,32 @@ class Loader(object):
 
     def _load_nested_example_groups(self, klass, example_group):
         ignore_rest = False
+        example_groups = []
+        pending_example_groups = []
 
         for nested in self._example_groups_for(klass):
             if isinstance(example_group, PendingExampleGroup):
-                nested_example_group = PendingExampleGroup(self._subject(nested), execution_context=example_group.execution_context)
+                pending_example_groups.append(nested)
             else:
                 if '__ignore_rest' in nested.__name__:
-                    nested_example_group = self._create_example_group(nested, execution_context=example_group.execution_context)
+                    pending_example_groups += example_groups
+                    example_groups = []
+                    example_groups.append(nested)
                     ignore_rest = True
-                elif ('__pending' in klass.__name__) or ignore_rest:
-                    nested_example_group = PendingExampleGroup(self._subject(nested), execution_context=example_group.execution_context)
+                elif ('__pending' in nested.__name__) or ignore_rest:
+                    pending_example_groups.append(nested)
                 else:
-                    nested_example_group = self._create_example_group(nested, execution_context=example_group.execution_context)
+                    example_groups.append(nested)
+        
+        for nested in example_groups:
+            group = ExampleGroup(self._subject(nested), execution_context=example_group.execution_context)
+            self._add_hooks_examples_and_nested_example_groups_to(nested, group)
+            example_group.append(group)
 
-            self._add_hooks_examples_and_nested_example_groups_to(nested, nested_example_group)
-            example_group.append(nested_example_group)
+        for nested in pending_example_groups:
+            group = PendingExampleGroup(self._subject(nested), execution_context=example_group.execution_context)
+            self._add_hooks_examples_and_nested_example_groups_to(nested, group)
+            example_group.append(group)
 
     def _load_helper_methods_to_execution_context(self, klass, execution_context):
         helper_methods = [method for name, method in self._methods_for(klass) if not self._is_example(method)]

@@ -126,3 +126,4 @@ with description(ExampleCollector) as _:
             expect(examples[0].examples[0].examples[3]).to(be_a(example.PendingExample))
             expect(examples[0].examples[0].examples[4]).to(be_a(example.PendingExample))
             expect(examples[0].examples[1].examples[0]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[2].examples[0]).to(be_a(example.PendingExample))
