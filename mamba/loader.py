@@ -12,32 +12,41 @@ class Loader(object):
     def load_examples_from(self, module):
         loaded = []
         example_groups = self._example_groups_for(module)
-        normal_example_groups = []
-        pending_example_groups = []
+        example_groups_to_build = []
         ignore_rest = False
 
         for klass in example_groups:
             if '__ignore_rest' in klass.__name__:
-                pending_example_groups += normal_example_groups
-                normal_example_groups = []
-                normal_example_groups.append(klass)
+                example_groups_to_build = map(self._mark_all_as_pending, example_groups_to_build)
+                example_groups_to_build.append(self._an_item(klass))
                 ignore_rest = True
             elif ('__pending' in klass.__name__) or ignore_rest:
-                pending_example_groups.append(klass)
+                example_groups_to_build.append(self._an_item(klass, True))
             else:
-                normal_example_groups.append(klass)
+                example_groups_to_build.append(self._an_item(klass))
 
-        for klass in normal_example_groups:
-            example_group = ExampleGroup(self._subject(klass), execution_context=None)
-            self._add_hooks_examples_and_nested_example_groups_to(klass, example_group)
-            loaded.append(example_group)
-
-        for klass in pending_example_groups:
-            example_group = PendingExampleGroup(self._subject(klass), execution_context=None)
-            self._add_hooks_examples_and_nested_example_groups_to(klass, example_group)
+        for klass in example_groups_to_build:
+            if klass["pending"]:
+                example_group = PendingExampleGroup(self._subject(klass['item']), execution_context=None)
+            else:
+                example_group = ExampleGroup(self._subject(klass['item']), execution_context=None)
+            self._add_hooks_examples_and_nested_example_groups_to(klass['item'], example_group)
             loaded.append(example_group)
 
         return loaded
+
+    def _mark_all_as_pending(self, item):
+        item['pending'] = True
+        return item
+
+    def _an_item(self, item, pending=None):
+        if pending is None:
+            pending = False
+
+        return {
+            "item": item,
+            "pending": pending
+        }
 
     def _example_groups_for(self, module):
         return [klass for name, klass in inspect.getmembers(module, inspect.isclass) if self._is_example_group(name)]
@@ -78,25 +87,23 @@ class Loader(object):
 
     def _load_examples(self, klass, example_group):
         examples = []
-        pending_examples = []
         ignore_rest = False
 
         for example in self._examples_in(klass):
             if self._is_ignore_rest_example(example):
-                pending_examples += examples
-                examples = []
-                examples.append(example)
+                examples = map(self._mark_all_as_pending, examples)
+                examples.append(self._an_item(example))
                 ignore_rest = True
             elif self._is_pending_example(example) or self._is_pending_example_group(example_group) or ignore_rest:
-                pending_examples.append(example)
+                examples.append(self._an_item(example, True))
             else:
-                examples.append(example)
+                examples.append(self._an_item(example))
 
         for example in examples:
-            example_group.append(Example(example))
-
-        for pending_example in pending_examples:
-            example_group.append(PendingExample(example))
+            if example['pending']:
+                example_group.append(PendingExample(example['item']))
+            else:
+                example_group.append(Example(example['item']))
 
 
     def _examples_in(self, example_group):
@@ -118,32 +125,28 @@ class Loader(object):
         return example.__name__[10:].startswith('only_it')
 
     def _load_nested_example_groups(self, klass, example_group):
-        ignore_rest = False
         example_groups = []
-        pending_example_groups = []
+        ignore_rest = False
 
         for nested in self._example_groups_for(klass):
             if isinstance(example_group, PendingExampleGroup):
-                pending_example_groups.append(nested)
+                example_groups.append(self._an_item(nested, True))
             else:
                 if '__ignore_rest' in nested.__name__:
-                    pending_example_groups += example_groups
-                    example_groups = []
-                    example_groups.append(nested)
+                    example_groups = map(self._mark_all_as_pending, example_groups)
+                    example_groups.append(self._an_item(nested))
                     ignore_rest = True
                 elif ('__pending' in nested.__name__) or ignore_rest:
-                    pending_example_groups.append(nested)
+                    example_groups.append(self._an_item(nested, True))
                 else:
-                    example_groups.append(nested)
+                    example_groups.append(self._an_item(nested))
         
         for nested in example_groups:
-            group = ExampleGroup(self._subject(nested), execution_context=example_group.execution_context)
-            self._add_hooks_examples_and_nested_example_groups_to(nested, group)
-            example_group.append(group)
-
-        for nested in pending_example_groups:
-            group = PendingExampleGroup(self._subject(nested), execution_context=example_group.execution_context)
-            self._add_hooks_examples_and_nested_example_groups_to(nested, group)
+            if nested['pending']:
+                group = PendingExampleGroup(self._subject(nested['item']), execution_context=example_group.execution_context)
+            else:
+                group = ExampleGroup(self._subject(nested['item']), execution_context=example_group.execution_context)
+            self._add_hooks_examples_and_nested_example_groups_to(nested['item'], group)
             example_group.append(group)
 
     def _load_helper_methods_to_execution_context(self, klass, execution_context):

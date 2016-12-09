@@ -1,9 +1,9 @@
 with description('Fixture#with_ignore_rest_decorator'):
     with only_context('this context will be executed'):
-        with only_it('ignore rest spec'):
+        with it('a normal spec'):
             pass
 
-        with it('a normal spec'):
+        with only_it('this method will be executed'):
             pass
 
         with it('other normal spec'):
