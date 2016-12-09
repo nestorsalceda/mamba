@@ -56,11 +56,27 @@ class Loader(object):
         return method_name.startswith('before') or method_name.startswith('after')
 
     def _load_examples(self, klass, example_group):
+        examples = []
+        pending_examples = []
+        ignore_rest = False
+
         for example in self._examples_in(klass):
-            if self._is_pending_example(example) or self._is_pending_example_group(example_group):
-                example_group.append(PendingExample(example))
+            if self._is_ignore_rest_example(example):
+                pending_examples += examples
+                examples = []
+                examples.append(example)
+                ignore_rest = True
+            elif self._is_pending_example(example) or self._is_pending_example_group(example_group) or ignore_rest:
+                pending_examples.append(example)
             else:
-                example_group.append(Example(example))
+                examples.append(example)
+
+        for example in examples:
+            example_group.append(Example(example))
+
+        for pending_example in pending_examples:
+            example_group.append(PendingExample(example))
+
 
     def _examples_in(self, example_group):
         return [method for name, method in self._methods_for(example_group) if self._is_example(method)]
@@ -69,13 +85,16 @@ class Loader(object):
         return inspect.getmembers(klass, inspect.isfunction if is_python3() else inspect.ismethod)
 
     def _is_example(self, method):
-        return method.__name__[10:].startswith('it') or self._is_pending_example(method)
+        return method.__name__[10:].startswith('it') or self._is_pending_example(method) or self._is_ignore_rest_example(method)
 
     def _is_pending_example(self, example):
         return example.__name__[10:].startswith('_it')
 
     def _is_pending_example_group(self, example_group):
         return isinstance(example_group, PendingExampleGroup)
+
+    def _is_ignore_rest_example(self, example):
+        return example.__name__[10:].startswith('only')
 
     def _load_nested_example_groups(self, klass, example_group):
         for nested in self._example_groups_for(klass):

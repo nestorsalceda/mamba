@@ -4,7 +4,7 @@ import ast
 class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     PENDING_EXAMPLE_GROUPS = ('_description', '_context', '_describe')
     EXAMPLE_GROUPS = ('description', 'context', 'describe') + PENDING_EXAMPLE_GROUPS
-    EXAMPLES = ('it', '_it')
+    EXAMPLES = ('it', '_it', 'only')
     HOOKS = ('before', 'after')
 
     sequence = 1

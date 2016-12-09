@@ -21,6 +21,8 @@ def spec_abspath(name):
 IRRELEVANT_PATH = spec_abspath('without_inner_contexts.py')
 PENDING_DECORATOR_PATH = spec_abspath('with_pending_decorator.py')
 PENDING_DECORATOR_AS_ROOT_PATH = spec_abspath('with_pending_decorator_as_root.py')
+IGNORE_REST_DECORATOR_PATH = spec_abspath('with_ignore_rest_decorator.py')
+MULTI_IGNORE_REST_DECORATOR_PATH = spec_abspath('with_multi_ignore_rest_decorator.py')
 WITH_RELATIVE_IMPORT_PATH = spec_abspath('with_relative_import.py')
 
 
@@ -95,3 +97,30 @@ with description(ExampleCollector) as _:
             module = _load_module(WITH_RELATIVE_IMPORT_PATH)
 
             expect(module).to(have_property('HelperClass'))
+
+
+    with context('when a ignore rest decorator loaded'):
+        with it('mark rest of examples as pending'):
+            module = _load_module(IGNORE_REST_DECORATOR_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples).to(have_length(1))
+            expect(examples[0].examples[0]).to(be_a(example.Example))
+            expect(examples[0].examples[1]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[2]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[3]).to(be_a(example.PendingExample))
+
+
+    with context('when two ignore rest decorator loaded'):
+        with it('only the last ignore rest is valid'):
+            module = _load_module(MULTI_IGNORE_REST_DECORATOR_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples).to(have_length(1))
+            expect(examples[0].examples[0]).to(be_a(example.Example))
+            expect(examples[0].examples[1]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[2]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[3]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[4]).to(be_a(example.PendingExample))
