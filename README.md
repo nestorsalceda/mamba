@@ -64,6 +64,26 @@ with description('mamba'):
             with _it('will not run pending specs (marked with an underscore)'):
                 pass
 
+        with context('ignore rest of tests using the "only" method'):
+            with only('this code will be run'):
+                pass
+
+            with it('this code will be ignored'):
+                pass
+
+            with it('this code will be ignored too'):
+                pass
+
+        with context('if there are multiple "only" methods only will run the last one'):
+            with only('this code will be ignored because there are other "only" method'):
+                pass
+
+            with it('this code will be ignored too'):
+                pass
+
+            with only('this code will be executed'):
+                pass
+
         with it('highlights slow tests'):
             time.sleep(10)
 
