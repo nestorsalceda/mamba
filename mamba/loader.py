@@ -15,7 +15,7 @@ class Loader(object):
 
         for klass in self._example_groups_for(module):
             if '__ignore_rest' in klass.__name__:
-                example_groups = map(self._mark_all_as_pending, example_groups)
+                example_groups = list(map(self._mark_all_as_pending, example_groups))
                 example_groups.append(self._a_potentially_pending_klass(klass))
                 ignore_rest = True
             elif ('__pending' in klass.__name__) or ignore_rest:
@@ -65,7 +65,7 @@ class Loader(object):
 
         for example in self._examples_in(klass):
             if self._is_ignore_rest_example(example):
-                examples = map(self._mark_all_as_pending, examples)
+                examples = list(map(self._mark_all_as_pending, examples))
                 examples.append(self._a_potentially_pending_klass(example))
                 ignore_rest = True
             elif self._is_pending_example(example) or self._is_pending_example_group(example_group) or ignore_rest:
@@ -102,7 +102,7 @@ class Loader(object):
                 example_groups.append(self._a_potentially_pending_klass(nested, True))
             else:
                 if '__ignore_rest' in nested.__name__:
-                    example_groups = map(self._mark_all_as_pending, example_groups)
+                    example_groups = list(map(self._mark_all_as_pending, example_groups))
                     example_groups.append(self._a_potentially_pending_klass(nested))
                     ignore_rest = True
                 elif ('__pending' in nested.__name__) or ignore_rest:
