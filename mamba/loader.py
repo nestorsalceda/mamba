@@ -27,29 +27,11 @@ class Loader(object):
 
         return loaded
 
-    def _mark_all_as_pending(self, klass):
-        klass['pending'] = True
-        return klass
-
-    def _a_potentially_pending_klass(self, klass, pending=None):
-        if pending is None:
-            pending = False
-
-        return {
-            "klass": klass,
-            "pending": pending
-        }
-
     def _example_groups_for(self, module):
         return [klass for name, klass in inspect.getmembers(module, inspect.isclass) if self._is_example_group(name)]
 
     def _is_example_group(self, class_name):
         return class_name.endswith('__description')
-
-    def _create_example_group(self, klass, execution_context=None):
-        if klass['pending']:
-            return PendingExampleGroup(self._subject(klass['klass']), execution_context=execution_context)
-        return ExampleGroup(self._subject(klass['klass']), execution_context=execution_context)
 
     def _subject(self, example_group):
         subject = getattr(example_group, '_subject_class', example_group.__name__
@@ -91,12 +73,7 @@ class Loader(object):
             else:
                 examples.append(self._a_potentially_pending_klass(example))
 
-        for example in examples:
-            if example['pending']:
-                example_group.append(PendingExample(example['klass']))
-            else:
-                example_group.append(Example(example['klass']))
-
+        self._create_examples_from(examples, example_group)
 
     def _examples_in(self, example_group):
         return [method for name, method in self._methods_for(example_group) if self._is_example(method)]
@@ -154,4 +131,31 @@ class Loader(object):
             example_groups.append(example_group)
 
         return example_groups
+
+    def _create_example_group(self, klass, execution_context=None):
+        if klass['pending']:
+            return PendingExampleGroup(self._subject(klass['klass']), execution_context=execution_context)
+        return ExampleGroup(self._subject(klass['klass']), execution_context=execution_context)
+
+    def _create_examples_from(self, examples_model, example_group):
+        for example in examples_model:
+            example_group.append(self._create_example(example))
+
+    def _create_example(self, example_model):
+        if example_model['pending']:
+            return PendingExample(example_model['klass'])
+        return Example(example_model['klass'])
+
+    def _mark_all_as_pending(self, klass):
+        klass['pending'] = True
+        return klass
+
+    def _a_potentially_pending_klass(self, klass, pending=None):
+        if pending is None:
+            pending = False
+
+        return {
+            "klass": klass,
+            "pending": pending
+        }
 
