@@ -10,27 +10,32 @@ from mamba.infrastructure import is_python3
 
 class Loader(object):
     def load_examples_from(self, module):
-        loaded = []
-        example_groups = self._example_groups_for(module)
-        example_groups_to_build = []
+        example_groups = []
         ignore_rest = False
 
-        for klass in example_groups:
+        for klass in self._example_groups_for(module):
             if '__ignore_rest' in klass.__name__:
-                example_groups_to_build = map(self._mark_all_as_pending, example_groups_to_build)
-                example_groups_to_build.append(self._a_potentially_pending_klass(klass))
+                example_groups = map(self._mark_all_as_pending, example_groups)
+                example_groups.append(self._a_potentially_pending_klass(klass))
                 ignore_rest = True
             elif ('__pending' in klass.__name__) or ignore_rest:
-                example_groups_to_build.append(self._a_potentially_pending_klass(klass, True))
+                example_groups.append(self._a_potentially_pending_klass(klass, True))
             else:
-                example_groups_to_build.append(self._a_potentially_pending_klass(klass))
+                example_groups.append(self._a_potentially_pending_klass(klass))
 
-        for klass in example_groups_to_build:
-            example_group = self._create_example_group(klass)
-            self._add_hooks_examples_and_nested_example_groups_to(klass['klass'], example_group)
-            loaded.append(example_group)
+        loaded = self._create_example_groups_from(example_groups)
 
         return loaded
+
+    def _create_example_groups_from(self, example_groups_model_list, execution_context=None):
+        example_groups=[]
+
+        for example_group_model in example_groups_model_list:
+            example_group = self._create_example_group(example_group_model, execution_context=execution_context)
+            self._add_hooks_examples_and_nested_example_groups_to(example_group_model['klass'], example_group)
+            example_groups.append(example_group)
+
+        return example_groups
 
     def _mark_all_as_pending(self, klass):
         klass['pending'] = True
