@@ -64,8 +64,8 @@ with description('mamba'):
             with _it('will not run pending specs (marked with an underscore)'):
                 pass
 
-        with context('ignore rest of tests using the "only_it" method'):
-            with only_it('this code will be run'):
+        with context('ignore rest of tests using the "focus_it" method'):
+            with focus_it('this code will be run'):
                 pass
 
             with it('this code will be ignored'):
@@ -74,18 +74,18 @@ with description('mamba'):
             with it('this code will be ignored too'):
                 pass
 
-        with context('if there are multiple "only_it" methods only will run the last one'):
-            with only_it('this code will be ignored because there are other "only_it" method'):
+        with context('if there are multiple "focus_it" methods only will run the last one'):
+            with focus_it('this code will be ignored because there are other "focus_it" method'):
                 pass
 
             with it('this code will be ignored too'):
                 pass
 
-            with only_it('this code will be executed'):
+            with focus_it('this code will be executed'):
                 pass
 
-        with context('if there are multiple contexts and someone call the "only_context" method'):
-            with only_context('only this code will be executed'):
+        with context('if there are multiple contexts and someone call the "focus_context" method'):
+            with focus_context('only this code will be executed'):
                 with it('this code will be executed'):
                     pass
 

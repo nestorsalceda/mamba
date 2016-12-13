@@ -3,8 +3,8 @@ with description('Fixture#with_combined_ignore_rest_decorator'):
         with it('a normal spec'):
             pass
 
-    with only_context('this context will be executed'):
-        with only_it('but this method will be ignored because there are other only_it'):
+    with focus_context('this context will be executed'):
+        with focus_it('but this method will be ignored because there are other focus_it'):
             pass
 
         with it('a normal spec'):
@@ -16,7 +16,7 @@ with description('Fixture#with_combined_ignore_rest_decorator'):
         with _it('a pending spec'):
             pass
 
-        with only_it('this will be executed'):
+        with focus_it('this will be executed'):
             pass
 
         with _it('other pending spec'):

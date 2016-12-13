@@ -3,7 +3,7 @@ with description('Fixture#with_ignore_rest_context'):
         with it('a normal spec'):
             pass
 
-    with only_context('this context will be ignored because this is not the last only_context'):
+    with focus_context('this context will be ignored because this is not the last focus_context'):
         with it('a normal spec'):
             pass
 
@@ -17,6 +17,6 @@ with description('Fixture#with_ignore_rest_context'):
         with it('other normal spec'):
             pass
 
-    with only_context('this context will be executed'):
+    with focus_context('this context will be executed'):
         with it('a normal spec'):
             pass

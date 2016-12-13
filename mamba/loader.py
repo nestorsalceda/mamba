@@ -91,7 +91,7 @@ class Loader(object):
         return isinstance(example_group, PendingExampleGroup)
 
     def _is_ignore_rest_example(self, example):
-        return example.__name__[10:].startswith('only_it')
+        return example.__name__[10:].startswith('focus_it')
 
     def _load_nested_example_groups(self, klass, example_group):
         example_groups = []

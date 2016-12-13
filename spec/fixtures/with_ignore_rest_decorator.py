@@ -3,7 +3,7 @@ with description('Fixture#with_ignore_rest_decorator'):
         with it('a normal spec'):
             pass
 
-        with only_it('this method will be executed'):
+        with focus_it('this method will be executed'):
             pass
 
         with it('other normal spec'):
