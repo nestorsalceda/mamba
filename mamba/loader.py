@@ -18,33 +18,30 @@ class Loader(object):
         for klass in example_groups:
             if '__ignore_rest' in klass.__name__:
                 example_groups_to_build = map(self._mark_all_as_pending, example_groups_to_build)
-                example_groups_to_build.append(self._an_item(klass))
+                example_groups_to_build.append(self._a_potentially_pending_klass(klass))
                 ignore_rest = True
             elif ('__pending' in klass.__name__) or ignore_rest:
-                example_groups_to_build.append(self._an_item(klass, True))
+                example_groups_to_build.append(self._a_potentially_pending_klass(klass, True))
             else:
-                example_groups_to_build.append(self._an_item(klass))
+                example_groups_to_build.append(self._a_potentially_pending_klass(klass))
 
         for klass in example_groups_to_build:
-            if klass["pending"]:
-                example_group = PendingExampleGroup(self._subject(klass['item']), execution_context=None)
-            else:
-                example_group = ExampleGroup(self._subject(klass['item']), execution_context=None)
-            self._add_hooks_examples_and_nested_example_groups_to(klass['item'], example_group)
+            example_group = self._create_example_group(klass)
+            self._add_hooks_examples_and_nested_example_groups_to(klass['klass'], example_group)
             loaded.append(example_group)
 
         return loaded
 
-    def _mark_all_as_pending(self, item):
-        item['pending'] = True
-        return item
+    def _mark_all_as_pending(self, klass):
+        klass['pending'] = True
+        return klass
 
-    def _an_item(self, item, pending=None):
+    def _a_potentially_pending_klass(self, klass, pending=None):
         if pending is None:
             pending = False
 
         return {
-            "item": item,
+            "klass": klass,
             "pending": pending
         }
 
@@ -55,9 +52,9 @@ class Loader(object):
         return class_name.endswith('__description')
 
     def _create_example_group(self, klass, execution_context=None):
-        if '__pending' in klass.__name__:
-            return PendingExampleGroup(self._subject(klass), execution_context=execution_context)
-        return ExampleGroup(self._subject(klass), execution_context=execution_context)
+        if klass['pending']:
+            return PendingExampleGroup(self._subject(klass['klass']), execution_context=execution_context)
+        return ExampleGroup(self._subject(klass['klass']), execution_context=execution_context)
 
     def _subject(self, example_group):
         subject = getattr(example_group, '_subject_class', example_group.__name__
@@ -92,18 +89,18 @@ class Loader(object):
         for example in self._examples_in(klass):
             if self._is_ignore_rest_example(example):
                 examples = map(self._mark_all_as_pending, examples)
-                examples.append(self._an_item(example))
+                examples.append(self._a_potentially_pending_klass(example))
                 ignore_rest = True
             elif self._is_pending_example(example) or self._is_pending_example_group(example_group) or ignore_rest:
-                examples.append(self._an_item(example, True))
+                examples.append(self._a_potentially_pending_klass(example, True))
             else:
-                examples.append(self._an_item(example))
+                examples.append(self._a_potentially_pending_klass(example))
 
         for example in examples:
             if example['pending']:
-                example_group.append(PendingExample(example['item']))
+                example_group.append(PendingExample(example['klass']))
             else:
-                example_group.append(Example(example['item']))
+                example_group.append(Example(example['klass']))
 
 
     def _examples_in(self, example_group):
@@ -130,23 +127,20 @@ class Loader(object):
 
         for nested in self._example_groups_for(klass):
             if isinstance(example_group, PendingExampleGroup):
-                example_groups.append(self._an_item(nested, True))
+                example_groups.append(self._a_potentially_pending_klass(nested, True))
             else:
                 if '__ignore_rest' in nested.__name__:
                     example_groups = map(self._mark_all_as_pending, example_groups)
-                    example_groups.append(self._an_item(nested))
+                    example_groups.append(self._a_potentially_pending_klass(nested))
                     ignore_rest = True
                 elif ('__pending' in nested.__name__) or ignore_rest:
-                    example_groups.append(self._an_item(nested, True))
+                    example_groups.append(self._a_potentially_pending_klass(nested, True))
                 else:
-                    example_groups.append(self._an_item(nested))
+                    example_groups.append(self._a_potentially_pending_klass(nested))
         
         for nested in example_groups:
-            if nested['pending']:
-                group = PendingExampleGroup(self._subject(nested['item']), execution_context=example_group.execution_context)
-            else:
-                group = ExampleGroup(self._subject(nested['item']), execution_context=example_group.execution_context)
-            self._add_hooks_examples_and_nested_example_groups_to(nested['item'], group)
+            group = self._create_example_group(nested, example_group.execution_context)
+            self._add_hooks_examples_and_nested_example_groups_to(nested['klass'], group)
             example_group.append(group)
 
     def _load_helper_methods_to_execution_context(self, klass, execution_context):
