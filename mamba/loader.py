@@ -27,16 +27,6 @@ class Loader(object):
 
         return loaded
 
-    def _create_example_groups_from(self, example_groups_model_list, execution_context=None):
-        example_groups=[]
-
-        for example_group_model in example_groups_model_list:
-            example_group = self._create_example_group(example_group_model, execution_context=execution_context)
-            self._add_hooks_examples_and_nested_example_groups_to(example_group_model['klass'], example_group)
-            example_groups.append(example_group)
-
-        return example_groups
-
     def _mark_all_as_pending(self, klass):
         klass['pending'] = True
         return klass
@@ -143,10 +133,7 @@ class Loader(object):
                 else:
                     example_groups.append(self._a_potentially_pending_klass(nested))
         
-        for nested in example_groups:
-            group = self._create_example_group(nested, example_group.execution_context)
-            self._add_hooks_examples_and_nested_example_groups_to(nested['klass'], group)
-            example_group.append(group)
+        self._create_example_groups_from(example_groups, example_group, example_group.execution_context)
 
     def _load_helper_methods_to_execution_context(self, klass, execution_context):
         helper_methods = [method for name, method in self._methods_for(klass) if not self._is_example(method)]
@@ -156,4 +143,15 @@ class Loader(object):
                 setattr(execution_context, method.__name__, types.MethodType(method, execution_context))
             else:
                 setattr(execution_context, method.__name__, types.MethodType(method.im_func, execution_context, execution_context.__class__))
+
+    def _create_example_groups_from(self, example_groups_model_list, example_groups=None, execution_context=None):
+        if example_groups is None:
+            example_groups = []
+
+        for example_group_model in example_groups_model_list:
+            example_group = self._create_example_group(example_group_model, execution_context=execution_context)
+            self._add_hooks_examples_and_nested_example_groups_to(example_group_model['klass'], example_group)
+            example_groups.append(example_group)
+
+        return example_groups
 
