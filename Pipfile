@@ -1,0 +1,26 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[dev-packages]
+
+expects = ">=0.8.0rc2"
+doublex-expects = ">=0.7.0rc1"
+mock = ">=1.0.1"
+"e1839a8" = {path = ".", editable = true}
+
+
+[packages]
+
+clint = ">=0.3.1"
+coverage = ">=3.7.1"
+watchdog = ">=0.8.1"
+"e1839a8" = {path = ".", editable = true}
+
+
+[requires]
+
+python_version = "2.7"
