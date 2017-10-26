@@ -10,14 +10,20 @@ from mamba.infrastructure import is_python3
 
 class Loader(object):
     def load_examples_from(self, module):
-        loaded = []
-        example_groups = self._example_groups_for(module)
+        example_groups = []
+        ignore_rest = False
 
-        for klass in example_groups:
-            example_group = self._create_example_group(klass)
-            self._add_hooks_examples_and_nested_example_groups_to(klass, example_group)
+        for klass in self._example_groups_for(module):
+            if '__ignore_rest' in klass.__name__:
+                example_groups = list(map(self._mark_all_as_pending, example_groups))
+                example_groups.append(self._a_potentially_pending_klass(klass))
+                ignore_rest = True
+            elif ('__pending' in klass.__name__) or ignore_rest:
+                example_groups.append(self._a_potentially_pending_klass(klass, True))
+            else:
+                example_groups.append(self._a_potentially_pending_klass(klass))
 
-            loaded.append(example_group)
+        loaded = self._create_example_groups_from(example_groups)
 
         return loaded
 
@@ -27,13 +33,11 @@ class Loader(object):
     def _is_example_group(self, class_name):
         return class_name.endswith('__description')
 
-    def _create_example_group(self, klass, execution_context=None):
-        if '__pending' in klass.__name__:
-            return PendingExampleGroup(self._subject(klass), execution_context=execution_context)
-        return ExampleGroup(self._subject(klass), execution_context=execution_context)
-
     def _subject(self, example_group):
-        subject = getattr(example_group, '_subject_class', example_group.__name__.replace('__description', '').replace('__pending', ''))
+        subject = getattr(example_group, '_subject_class', example_group.__name__
+            .replace('__description', '')
+            .replace('__pending', '')
+            .replace('__ignore_rest', ''))
         if isinstance(subject, str):
             return subject[10:]
         else:
@@ -56,11 +60,20 @@ class Loader(object):
         return method_name.startswith('before') or method_name.startswith('after')
 
     def _load_examples(self, klass, example_group):
+        examples = []
+        ignore_rest = False
+
         for example in self._examples_in(klass):
-            if self._is_pending_example(example) or self._is_pending_example_group(example_group):
-                example_group.append(PendingExample(example))
+            if self._is_ignore_rest_example(example):
+                examples = list(map(self._mark_all_as_pending, examples))
+                examples.append(self._a_potentially_pending_klass(example))
+                ignore_rest = True
+            elif self._is_pending_example(example) or self._is_pending_example_group(example_group) or ignore_rest:
+                examples.append(self._a_potentially_pending_klass(example, True))
             else:
-                example_group.append(Example(example))
+                examples.append(self._a_potentially_pending_klass(example))
+
+        self._create_examples_from(examples, example_group)
 
     def _examples_in(self, example_group):
         return [method for name, method in self._methods_for(example_group) if self._is_example(method)]
@@ -69,7 +82,7 @@ class Loader(object):
         return inspect.getmembers(klass, inspect.isfunction if is_python3() else inspect.ismethod)
 
     def _is_example(self, method):
-        return method.__name__[10:].startswith('it') or self._is_pending_example(method)
+        return method.__name__[10:].startswith('it') or self._is_pending_example(method) or self._is_ignore_rest_example(method)
 
     def _is_pending_example(self, example):
         return example.__name__[10:].startswith('_it')
@@ -77,15 +90,27 @@ class Loader(object):
     def _is_pending_example_group(self, example_group):
         return isinstance(example_group, PendingExampleGroup)
 
+    def _is_ignore_rest_example(self, example):
+        return example.__name__[10:].startswith('focus_it')
+
     def _load_nested_example_groups(self, klass, example_group):
+        example_groups = []
+        ignore_rest = False
+
         for nested in self._example_groups_for(klass):
             if isinstance(example_group, PendingExampleGroup):
-                nested_example_group = PendingExampleGroup(self._subject(nested), execution_context=example_group.execution_context)
+                example_groups.append(self._a_potentially_pending_klass(nested, True))
             else:
-                nested_example_group = self._create_example_group(nested, execution_context=example_group.execution_context)
-
-            self._add_hooks_examples_and_nested_example_groups_to(nested, nested_example_group)
-            example_group.append(nested_example_group)
+                if '__ignore_rest' in nested.__name__:
+                    example_groups = list(map(self._mark_all_as_pending, example_groups))
+                    example_groups.append(self._a_potentially_pending_klass(nested))
+                    ignore_rest = True
+                elif ('__pending' in nested.__name__) or ignore_rest:
+                    example_groups.append(self._a_potentially_pending_klass(nested, True))
+                else:
+                    example_groups.append(self._a_potentially_pending_klass(nested))
+        
+        self._create_example_groups_from(example_groups, example_group, example_group.execution_context)
 
     def _load_helper_methods_to_execution_context(self, klass, execution_context):
         helper_methods = [method for name, method in self._methods_for(klass) if not self._is_example(method)]
@@ -95,4 +120,42 @@ class Loader(object):
                 setattr(execution_context, method.__name__, types.MethodType(method, execution_context))
             else:
                 setattr(execution_context, method.__name__, types.MethodType(method.im_func, execution_context, execution_context.__class__))
+
+    def _create_example_groups_from(self, example_groups_model_list, example_groups=None, execution_context=None):
+        if example_groups is None:
+            example_groups = []
+
+        for example_group_model in example_groups_model_list:
+            example_group = self._create_example_group(example_group_model, execution_context=execution_context)
+            self._add_hooks_examples_and_nested_example_groups_to(example_group_model['klass'], example_group)
+            example_groups.append(example_group)
+
+        return example_groups
+
+    def _create_example_group(self, klass, execution_context=None):
+        if klass['pending']:
+            return PendingExampleGroup(self._subject(klass['klass']), execution_context=execution_context)
+        return ExampleGroup(self._subject(klass['klass']), execution_context=execution_context)
+
+    def _create_examples_from(self, examples_model, example_group):
+        for example in examples_model:
+            example_group.append(self._create_example(example))
+
+    def _create_example(self, example_model):
+        if example_model['pending']:
+            return PendingExample(example_model['klass'])
+        return Example(example_model['klass'])
+
+    def _mark_all_as_pending(self, klass):
+        klass['pending'] = True
+        return klass
+
+    def _a_potentially_pending_klass(self, klass, pending=None):
+        if pending is None:
+            pending = False
+
+        return {
+            "klass": klass,
+            "pending": pending
+        }
 

@@ -64,6 +64,38 @@ with description('mamba'):
             with _it('will not run pending specs (marked with an underscore)'):
                 pass
 
+        with context('ignore rest of tests using the "focus_it" method'):
+            with focus_it('this code will be run'):
+                pass
+
+            with it('this code will be ignored'):
+                pass
+
+            with it('this code will be ignored too'):
+                pass
+
+        with context('if there are multiple "focus_it" methods only will run the last one'):
+            with focus_it('this code will be ignored because there are other "focus_it" method'):
+                pass
+
+            with it('this code will be ignored too'):
+                pass
+
+            with focus_it('this code will be executed'):
+                pass
+
+        with context('if there are multiple contexts and someone call the "focus_context" method'):
+            with focus_context('only this code will be executed'):
+                with it('this code will be executed'):
+                    pass
+
+                with it('this code will be executed too'):
+                    pass
+
+            with context('this context will be ignored'):
+                with it('this code will be ignored'):
+                    pass
+
         with it('highlights slow tests'):
             time.sleep(10)
 

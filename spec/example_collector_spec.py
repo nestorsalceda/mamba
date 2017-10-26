@@ -21,6 +21,10 @@ def spec_abspath(name):
 IRRELEVANT_PATH = spec_abspath('without_inner_contexts.py')
 PENDING_DECORATOR_PATH = spec_abspath('with_pending_decorator.py')
 PENDING_DECORATOR_AS_ROOT_PATH = spec_abspath('with_pending_decorator_as_root.py')
+IGNORE_REST_DECORATOR_PATH = spec_abspath('with_ignore_rest_decorator.py')
+MULTI_IGNORE_REST_DECORATOR_PATH = spec_abspath('with_multi_ignore_rest_decorator.py')
+MULTI_IGNORE_REST_CONTEXTS_DECORATOR_PATH = spec_abspath('with_multi_ignore_rest_contexts_decorator.py')
+COMBINED_IGNORE_REST_DECORATOR_PATH = spec_abspath('with_combined_ignore_rest_decorator.py')
 WITH_RELATIVE_IMPORT_PATH = spec_abspath('with_relative_import.py')
 
 
@@ -95,3 +99,58 @@ with description(ExampleCollector) as _:
             module = _load_module(WITH_RELATIVE_IMPORT_PATH)
 
             expect(module).to(have_property('HelperClass'))
+
+
+    with context('when a ignore rest decorator loaded'):
+        with it('ignore rest of examples like pending examples'):
+            module = _load_module(IGNORE_REST_DECORATOR_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples).to(have_length(1))
+            expect(examples[0].examples[0].examples[0]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[0].examples[1]).to(be_a(example.Example))
+            expect(examples[0].examples[0].examples[2]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[0].examples[3]).to(be_a(example.PendingExample))
+
+
+    with context('when two ignore rest decorator loaded'):
+        with it('only the last ignore rest is executed'):
+            module = _load_module(MULTI_IGNORE_REST_DECORATOR_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples).to(have_length(1))
+            expect(examples[0].examples[0].examples[0]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[0].examples[1]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[0].examples[2]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[0].examples[3]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[0].examples[4]).to(be_a(example.Example))
+
+
+    with context('when a ignore rest contexts loaded'):
+        with it('ignore rest of contexts like pending contexts'):
+            module = _load_module(MULTI_IGNORE_REST_CONTEXTS_DECORATOR_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples).to(have_length(1))
+            expect(examples[0].examples[0]).to(be_a(example_group.PendingExampleGroup))
+            expect(examples[0].examples[1]).to(be_a(example_group.ExampleGroup))
+            expect(examples[0].examples[2]).to(be_a(example_group.PendingExampleGroup))
+
+
+    with context('when there are ignore rest in various contexts and examples loaded'):
+        with it('only the last ignore rest example is executed in the last context marked as ignore rest'):
+            module = _load_module(COMBINED_IGNORE_REST_DECORATOR_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples).to(have_length(1))
+            expect(examples[0].examples[0].examples[0]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[1].examples[0]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[1].examples[1]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[1].examples[2]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[1].examples[3]).to(be_a(example.PendingExample))
+            expect(examples[0].examples[1].examples[4]).to(be_a(example.Example))
+            expect(examples[0].examples[1].examples[5]).to(be_a(example.PendingExample))

@@ -3,8 +3,9 @@ import ast
 
 class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     PENDING_EXAMPLE_GROUPS = ('_description', '_context', '_describe')
-    EXAMPLE_GROUPS = ('description', 'context', 'describe') + PENDING_EXAMPLE_GROUPS
-    EXAMPLES = ('it', '_it')
+    IGNORE_REST_GROUPS = ('focus_context',)
+    EXAMPLE_GROUPS = ('description', 'context', 'describe') + IGNORE_REST_GROUPS + PENDING_EXAMPLE_GROUPS
+    EXAMPLES = ('it', '_it', 'focus_it')
     HOOKS = ('before', 'after')
 
     sequence = 1
@@ -64,6 +65,9 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
         if name in self.PENDING_EXAMPLE_GROUPS:
             description_name += '__pending'
+
+        if name in self.IGNORE_REST_GROUPS:
+            description_name += '__ignore_rest'
 
         description_name = '{0:08d}__{1}__description'.format(self.sequence, description_name)
         self.sequence += 1
