@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .helpers import HelperClass
+from .a_helper_module import HelperClass
 
 
 with description(HelperClass):

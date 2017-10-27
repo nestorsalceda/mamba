@@ -6,14 +6,14 @@ import imp
 import ast
 import contextlib
 
-from mamba import nodetransformers
-from mamba.infrastructure import is_python3
+from .syntax.transformer import MambaSyntaxToClassBasedSyntax
+
 
 class ExampleCollector(object):
 
     def __init__(self, paths):
         self.paths = paths
-        self._node_transformer = nodetransformers.TransformToSpecsPython3NodeTransformer() if is_python3() else nodetransformers.TransformToSpecsNodeTransformer()
+        self._ast_transformer = MambaSyntaxToClassBasedSyntax()
 
     def modules(self):
         for path in self._collect_files_containing_examples():
@@ -76,9 +76,8 @@ class ExampleCollector(object):
     def _parse_and_transform_ast(self, path):
         with open(path) as f:
             tree = ast.parse(f.read(), filename=path)
-            tree = self._node_transformer.visit(tree)
-            ast.fix_missing_locations(tree)
-            return tree
+
+        return self._ast_transformer.transform(tree)
 
     def _prepare_path_for_local_packages(self):
         if os.getcwd().endswith('spec') or os.getcwd().endswith('specs'):
