@@ -1,3 +1,0 @@
-clint>=0.3.1
-coverage>=3.7.1
-watchdog>=0.8.1
