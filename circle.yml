@@ -1,9 +1,0 @@
-dependencies:
-  post:
-    - pip install -r requirements.txt -r requirements-dev.txt
-    - python setup.py develop
-test:
-  override:
-    - mamba --enable-coverage
-  post:
-    - 'coverage report'
