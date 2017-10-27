@@ -24,7 +24,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         return node
 
     def _get_name(self, node):
-        context_expr = node.context_expr
+        context_expr = self._context_expr_for(node)
 
         if isinstance(context_expr, ast.Call):
             if hasattr(context_expr.func, 'value'):
@@ -34,7 +34,12 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         if isinstance(context_expr, ast.Attribute):
             return context_expr.value.id
 
+    def _context_expr_for(self, node):
+        return node.context_expr
+
     def _transform_to_example_group(self, node, name):
+        context_expr = self._context_expr_for(node)
+
         return ast.copy_location(
             ast.ClassDef(
                 name=self._description_name(node, name),
@@ -47,7 +52,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         )
 
     def _description_name(self, node, name):
-        context_expr = node.context_expr
+        context_expr = self._context_expr_for(node)
         if isinstance(context_expr.args[0], ast.Str):
             description_name = context_expr.args[0].s
         elif isinstance(context_expr.args[0], ast.Attribute):
@@ -64,7 +69,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         return description_name
 
     def _transform_to_example(self, node, name):
-        example_name = '{0:08d}__{1} {2}'.format(self.sequence, name, node.context_expr.args[0].s)
+        example_name = '{0:08d}__{1} {2}'.format(self.sequence, name, self._context_expr_for(node).args[0].s)
         self.sequence += 1
         return ast.copy_location(
             ast.FunctionDef(
@@ -80,7 +85,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         return ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[])
 
     def _transform_to_hook(self, node, name):
-        when = node.context_expr.attr
+        when = self._context_expr_for(node).attr
         return ast.copy_location(
             ast.FunctionDef(
                 name=name + '_' + when,
