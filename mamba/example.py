@@ -20,7 +20,7 @@ class Example(object):
         try:
             if not self.failed:
                 self._run_inner_test(reporter)
-        except Exception as exception:
+        except Exception:
             self.was_run = True
             if self.error is None:
                 self._set_failed()

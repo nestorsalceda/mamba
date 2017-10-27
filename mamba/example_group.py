@@ -49,7 +49,7 @@ class ExampleGroup(object):
     def _create_subject(self, execution_context):
         try:
             execution_context.subject = self.subject()
-        except Exception as exc:
+        except Exception:
             if hasattr(execution_context, 'subject'):
                 del execution_context.subject
 
@@ -66,7 +66,7 @@ class ExampleGroup(object):
                     registered.im_func(self.execution_context)
                 elif callable(registered):
                     registered(self.execution_context)
-            except Exception as exception:
+            except Exception:
                 self._set_failed()
 
     def _set_failed(self):

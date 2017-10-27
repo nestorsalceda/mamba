@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from mamba import settings, formatters, reporter, runners, example_collector, loader
-from mamba.infrastructure import is_python3
 
 
 class ApplicationFactory(object):
@@ -34,9 +33,12 @@ class ApplicationFactory(object):
 
     def create_runner(self):
         settings = self.create_settings()
-        runner = runners.BaseRunner(self.create_example_collector(), loader.Loader(), self.create_reporter())
+        runner = runners.BaseRunner(self.create_example_collector(),
+                                    loader.Loader(),
+                                    self.create_reporter())
 
         if settings.enable_code_coverage:
-            runner = runners.CodeCoverageRunner(runner, settings.code_coverage_file)
+            runner = runners.CodeCoverageRunner(runner,
+                                                settings.code_coverage_file)
 
         return runner

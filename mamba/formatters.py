@@ -171,7 +171,7 @@ class DocumentationFormatter(Formatter):
 class ProgressFormatter(DocumentationFormatter):
 
     def example_passed(self, example):
-        puts(self._color('green' ,'.'), newline=False)
+        puts(self._color('green', '.'), newline=False)
 
     def example_failed(self, example):
         puts(self._color('red', 'F'), newline=False)
@@ -192,4 +192,3 @@ class ProgressFormatter(DocumentationFormatter):
         puts()
         puts()
         super(ProgressFormatter, self).summary(duration, example_count, failed_count, pending_count)
-

@@ -9,8 +9,8 @@ import contextlib
 from mamba import nodetransformers
 from mamba.infrastructure import is_python3
 
-class ExampleCollector(object):
 
+class ExampleCollector(object):
     def __init__(self, paths):
         self.paths = paths
         self._node_transformer = nodetransformers.TransformToSpecsPython3NodeTransformer() if is_python3() else nodetransformers.TransformToSpecsNodeTransformer()
