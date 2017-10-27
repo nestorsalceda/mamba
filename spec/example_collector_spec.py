@@ -26,10 +26,10 @@ WITH_RELATIVE_IMPORT_PATH = spec_abspath('with_relative_import.py')
 
 def _load_module(path):
     example_collector = ExampleCollector([path])
-    return list(example_collector.modules())[0]
+    return example_collector.modules()[0]
 
 
-with description(ExampleCollector) as _:
+with description(ExampleCollector):
     with context('when loading from file'):
         with it('loads module from absolute path'):
             module = _load_module(IRRELEVANT_PATH)
