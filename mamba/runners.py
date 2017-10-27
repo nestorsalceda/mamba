@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from mamba.infrastructure import code_coverage, file_watcher
+from mamba.infrastructure import code_coverage
 
 
 class Runner(object):
@@ -54,16 +54,3 @@ class CodeCoverageRunner(Runner):
     @property
     def has_failed_examples(self):
         return self.runner.has_failed_examples
-
-
-class FileWatcherRunner(Runner):
-
-    def __init__(self, runner):
-        self.file_watcher = file_watcher.FileWatcher(runner)
-
-    def run(self):
-        self.file_watcher.wait_for_events()
-
-    @property
-    def has_failed_examples(self):
-        return False

@@ -18,9 +18,6 @@ class ApplicationFactory(object):
         settings_.format = self.arguments.format
         settings_.no_color = self.arguments.no_color
 
-        if not is_python3():
-            settings_.enable_file_watcher = self.arguments.watch
-
         return settings_
 
     def create_formatter(self):
@@ -41,8 +38,5 @@ class ApplicationFactory(object):
 
         if settings.enable_code_coverage:
             runner = runners.CodeCoverageRunner(runner, settings.code_coverage_file)
-
-        if settings.enable_file_watcher:
-            runner = runners.FileWatcherRunner(runner)
 
         return runner

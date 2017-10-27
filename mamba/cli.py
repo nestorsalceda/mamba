@@ -4,7 +4,6 @@ import sys
 import argparse
 
 from mamba import application_factory, __version__
-from mamba.infrastructure import is_python3
 
 
 def main():
@@ -32,9 +31,6 @@ def _parse_arguments():
     parser.add_argument('--format', '-f', default='progress', action='store', choices=['documentation', 'progress'], help='Output format (default: %(default)s)')
     parser.add_argument('specs', default=['./spec', './specs'], nargs='*', help='Paths to specs to run or directories with specs to run (default: %(default)s)')
     parser.add_argument('--no-color', default=False, action='store_true', help='Turn off all output coloring (default: %(default)s)')
-
-    if not is_python3():
-        parser.add_argument('--watch', '-w', default=False, action='store_true', help='Enable file watching - not available with python3 (default: %(default)s)')
 
     return parser.parse_args()
 
