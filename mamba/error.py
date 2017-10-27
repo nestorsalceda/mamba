@@ -3,4 +3,3 @@
 import collections
 
 Error = collections.namedtuple('Error', ('exception', 'traceback'))
-
