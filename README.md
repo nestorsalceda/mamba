@@ -74,11 +74,6 @@ with description('mamba'):
             with it('supports importing local, non-installed modules'):
                 pass
 
-        with context('automatic instantiation of simple objects'):
-            with context(ASampleClass):
-                with it('has an instance in the `subject` property'):
-                    expect(self.subject).to(be_an(ASampleClass))
-
         with context('code coverage measurement'):
             with it('is performed if you pass `--enable-coverage`'):
                 pass

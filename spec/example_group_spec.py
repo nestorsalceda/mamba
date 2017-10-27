@@ -15,7 +15,7 @@ with description(ExampleGroup):
         self.reporter = Spy(reporter.Reporter)
 
     with it('has same name than subject'):
-        expect(self.example_group.name).to(be(IRRELEVANT_SUBJECT))
+        expect(self.example_group.name).to(be(IRRELEVANT_DESCRIPTION))
 
     with context('when run'):
 

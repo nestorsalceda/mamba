@@ -39,8 +39,6 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
     def _transform_to_example_group(self, node, name):
         context_expr = self._context_expr_for(node)
-        if self._subject_is_a_class(node):
-            node.body.insert(0, ast.Assign(targets=[ast.Name(id='_subject_class', ctx=ast.Store())], value=context_expr.args[0]))
 
         return ast.copy_location(
             ast.ClassDef(
@@ -69,9 +67,6 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         self.sequence += 1
 
         return description_name
-
-    def _subject_is_a_class(self, node):
-        return not isinstance(self._context_expr_for(node).args[0], ast.Str)
 
     def _transform_to_example(self, node, name):
         example_name = '{0:08d}__{1} {2}'.format(self.sequence, name, self._context_expr_for(node).args[0].s)

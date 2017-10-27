@@ -3,15 +3,15 @@ from functools import partial
 from mamba.example_group import ExampleGroup, PendingExampleGroup
 from mamba.example import Example, PendingExample
 
-IRRELEVANT_SUBJECT='irrelevant subject'
+IRRELEVANT_DESCRIPTION='any description'
 
 
-def an_example_group(subject=IRRELEVANT_SUBJECT):
-    return ExampleGroup(IRRELEVANT_SUBJECT)
+def an_example_group(description=IRRELEVANT_DESCRIPTION):
+    return ExampleGroup(IRRELEVANT_DESCRIPTION)
 
 
-def a_pending_example_group(subject=IRRELEVANT_SUBJECT):
-    return PendingExampleGroup(IRRELEVANT_SUBJECT)
+def a_pending_example_group(description=IRRELEVANT_DESCRIPTION):
+    return PendingExampleGroup(IRRELEVANT_DESCRIPTION)
 
 
 def an_example():
