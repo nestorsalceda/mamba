@@ -16,7 +16,7 @@ with description(PendingExample):
 
     with context('when run'):
         with before.each:
-            self.example.run(self.reporter)
+            self.example.execute(self.reporter)
 
         with it('not runs the example'):
             expect(self.example.was_run).to(be_false)

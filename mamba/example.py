@@ -102,5 +102,8 @@ class Example(runnable.Runnable):
 
 
 class PendingExample(Example):
-    def run(self, reporter):
+    def execute(self, reporter):
         reporter.example_pending(self)
+
+    def run(self, reporter):
+        self.execute(reporter)

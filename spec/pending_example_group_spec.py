@@ -13,18 +13,22 @@ with description(PendingExampleGroup):
     with before.each:
         self.example_group = a_pending_example_group()
         self.reporter = Spy(reporter.Reporter)
+        self.example = a_pending_example()
 
     with context('when run'):
         with before.each:
-            self.example_group.append(a_pending_example())
+            self.example_group.append(self.example)
 
-            self.example_group.run(self.reporter)
+            self.example_group.execute(self.reporter)
 
         with it('not runs its children'):
             expect(self.example_group.examples[0].was_run).to(be_false)
 
         with it('notifies that an example group is pending'):
             expect(self.reporter.example_group_pending).to(have_been_called_with(self.example_group))
+
+        with it('notifies that children examples are pending'):
+            expect(self.reporter.example_pending).to(have_been_called_with(self.example))
 
     with context('when adding a new examples as children'):
 

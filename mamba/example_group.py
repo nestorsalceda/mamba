@@ -102,13 +102,13 @@ class ExampleGroup(runnable.Runnable):
 
 class PendingExampleGroup(ExampleGroup):
 
-    def run(self, reporter):
+    def execute(self, reporter):
         reporter.example_group_pending(self)
-        self._run_inner_examples(reporter)
+        for example in iter(self):
+            example.execute(reporter)
 
-    def _run_inner_examples(self, reporter):
-        for example in self.examples:
-            example.run(reporter)
+    def run(self, reporter):
+        self.execute(reporter)
 
     def append(self, example):
         if not type(example) in [PendingExample, PendingExampleGroup]:
