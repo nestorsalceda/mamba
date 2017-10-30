@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from mamba import error
+from mamba import error, runnable
 from mamba.example import PendingExample
 
 
@@ -11,7 +11,7 @@ class ExecutionContext(object):
     pass
 
 
-class ExampleGroup(object):
+class ExampleGroup(runnable.Runnable):
 
     def __init__(self, description, parent=None, execution_context=None):
         self.description = description
@@ -23,7 +23,6 @@ class ExampleGroup(object):
             'before_all': [],
             'after_all': []
         }
-        self._elapsed_time = timedelta(0)
         self.execution_context = ExecutionContext() if execution_context is None else execution_context
 
     def __iter__(self):
@@ -49,7 +48,7 @@ class ExampleGroup(object):
         self.error = error.Error(value, traceback)
 
     def _finish(self, reporter):
-        self._elapsed_time = datetime.utcnow() - self._begin
+        self.elapsed_time = datetime.utcnow() - self._begin
         reporter.example_group_finished(self)
 
     def run(self, reporter):
@@ -76,10 +75,6 @@ class ExampleGroup(object):
                     registered(self.execution_context)
             except Exception:
                 self._set_failed()
-
-    @property
-    def elapsed_time(self):
-        return self._elapsed_time
 
     @property
     def name(self):

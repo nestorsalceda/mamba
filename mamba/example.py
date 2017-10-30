@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from mamba import error
+from mamba import error, runnable
 
 
-class Example(object):
+class Example(runnable.Runnable):
 
     # TODO: Remove parent parameter, it's only used for testing purposes
     def __init__(self, test, parent=None):
         self.test = test
         self.parent = parent
         self._error = None
-        self._elapsed_time = timedelta(0)
         self.was_run = False
 
     def execute(self, reporter):
@@ -42,7 +41,7 @@ class Example(object):
         self.error = error.Error(value, traceback)
 
     def _finish(self, reporter):
-        self._elapsed_time = datetime.utcnow() - self._begin
+        self.elapsed_time = datetime.utcnow() - self._begin
         if self.failed:
             reporter.example_failed(self)
         elif self.was_run:
@@ -84,10 +83,6 @@ class Example(object):
             parent = parent.parent
 
         return reversed(parents)
-
-    @property
-    def elapsed_time(self):
-        return self._elapsed_time
 
     @property
     def name(self):
