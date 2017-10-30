@@ -1,9 +1,7 @@
-from functools import partial
-
 from mamba.example_group import ExampleGroup, PendingExampleGroup
 from mamba.example import Example, PendingExample
 
-IRRELEVANT_DESCRIPTION='any description'
+IRRELEVANT_DESCRIPTION = 'any description'
 
 
 def an_example_group(description=IRRELEVANT_DESCRIPTION):
@@ -34,4 +32,3 @@ def a_failing_example():
 class _WithFailingTest(object):
     def _failing_test(self):
         raise ValueError()
-
