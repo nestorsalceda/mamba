@@ -29,6 +29,29 @@ class ExampleGroup(object):
     def __iter__(self):
         return iter(self.examples)
 
+    def execute(self, reporter):
+        self._start(reporter)
+
+        try:
+            for example in iter(self):
+                example.execute(reporter)
+        except Exception:
+            self._set_failed()
+
+        self._finish(reporter)
+
+    def _start(self, reporter):
+        self._begin = datetime.utcnow()
+        reporter.example_group_started(self)
+
+    def _set_failed(self):
+        type_, value, traceback = sys.exc_info()
+        self.error = error.Error(value, traceback)
+
+    def _finish(self, reporter):
+        self._elapsed_time = datetime.utcnow() - self._begin
+        reporter.example_group_finished(self)
+
     def run(self, reporter):
         self._start(reporter)
         try:
@@ -37,10 +60,6 @@ class ExampleGroup(object):
             self._set_failed()
         finally:
             self._finish(reporter)
-
-    def _start(self, reporter):
-        self._begin = datetime.utcnow()
-        reporter.example_group_started(self)
 
     def _run_inner_examples(self, reporter):
         self.run_hook('before_all')
@@ -57,14 +76,6 @@ class ExampleGroup(object):
                     registered(self.execution_context)
             except Exception:
                 self._set_failed()
-
-    def _set_failed(self):
-        type_, value, traceback = sys.exc_info()
-        self.error = error.Error(value, traceback)
-
-    def _finish(self, reporter):
-        self._elapsed_time = datetime.utcnow() - self._begin
-        reporter.example_group_finished(self)
 
     @property
     def elapsed_time(self):

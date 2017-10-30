@@ -18,12 +18,11 @@ with description(ExampleGroup):
         expect(self.example_group.name).to(be(IRRELEVANT_DESCRIPTION))
 
     with context('when run'):
-
         with before.each:
             self.example = an_example()
             self.example_group.append(self.example)
 
-            self.example_group.run(self.reporter)
+            self.example_group.execute(self.reporter)
 
         with it('runs the example'):
             expect(self.example.was_run).to(be_true)
@@ -42,7 +41,7 @@ with description(ExampleGroup):
         with before.each:
             self.example_group.append(a_failing_example())
 
-            self.example_group.run(self.reporter)
+            self.example_group.execute(self.reporter)
 
         with it('is marked as failed'):
             expect(self.example_group.failed).to(be_true)
