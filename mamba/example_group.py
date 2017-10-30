@@ -7,10 +7,6 @@ from mamba import error, runnable
 from mamba.example import PendingExample
 
 
-class ExecutionContext(object):
-    pass
-
-
 class ExampleGroup(runnable.Runnable):
 
     def __init__(self, description, parent=None, execution_context=None):
@@ -23,7 +19,7 @@ class ExampleGroup(runnable.Runnable):
             'before_all': [],
             'after_all': []
         }
-        self.execution_context = ExecutionContext() if execution_context is None else execution_context
+        self.execution_context = runnable.ExecutionContext() if execution_context is None else execution_context
 
     def __iter__(self):
         return iter(self.examples)

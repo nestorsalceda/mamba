@@ -32,9 +32,9 @@ class Example(runnable.Runnable):
 
     def _execute_test(self):
         if hasattr(self.test, 'im_func'):
-            self.test.im_func(None)
+            self.test.im_func(runnable.ExecutionContext())
         else:
-            self.test(None)
+            self.test(runnable.ExecutionContext())
 
     def _set_failed(self):
         type_, value, traceback = sys.exc_info()

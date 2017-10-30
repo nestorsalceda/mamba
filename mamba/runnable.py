@@ -3,6 +3,10 @@
 from datetime import timedelta
 
 
+class ExecutionContext(object):
+    pass
+
+
 class Runnable(object):
 
     def __init__(self):

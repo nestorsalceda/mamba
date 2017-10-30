@@ -1,11 +1,12 @@
 from expects import *
-from doublex_expects import have_been_called_with
+from doublex_expects import have_been_called_with, have_been_called
 from doublex import Spy
 
 from spec.object_mother import *
 
 from mamba import reporter
 from mamba.example_group import ExampleGroup
+from mamba.example import Example
 
 
 with description(ExampleGroup):
@@ -35,6 +36,19 @@ with description(ExampleGroup):
 
         with it('notifies that an example group is finished'):
             expect(self.reporter.example_group_finished).to(have_been_called_with(self.example_group))
+
+        with it('keeps execution context for examples isolated'):
+            foo = []
+            def dummy(execution_context):
+                foo.append(execution_context)
+
+            self.example_group.append(Example(dummy))
+            self.example_group.append(Example(dummy))
+
+            self.example_group.execute(self.reporter)
+
+            expect(foo[0]).not_to(equal(foo[1]))
+
 
     with context('when run failed'):
 
