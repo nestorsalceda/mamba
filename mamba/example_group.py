@@ -2,13 +2,14 @@
 
 import sys
 from datetime import datetime, timedelta
-import inspect
 
 from mamba import error
-from mamba.example import Example, PendingExample
+from mamba.example import PendingExample
+
 
 class ExecutionContext(object):
     pass
+
 
 class ExampleGroup(object):
 
@@ -16,46 +17,34 @@ class ExampleGroup(object):
         self.description = description
         self.examples = []
         self.parent = parent
-        self.hooks = {'before_each': [], 'after_each': [], 'before_all': [], 'after_all': []}
+        self.hooks = {
+            'before_each': [],
+            'after_each': [],
+            'before_all': [],
+            'after_all': []
+        }
         self._elapsed_time = timedelta(0)
         self.execution_context = ExecutionContext() if execution_context is None else execution_context
+
+    def __iter__(self):
+        return iter(self.examples)
 
     def run(self, reporter):
         self._start(reporter)
         try:
             self._run_inner_examples(reporter)
-        except Exception as exception:
+        except Exception:
             self._set_failed()
         finally:
             self._finish(reporter)
 
     def _start(self, reporter):
-        self._register_description_creation_in_before_each_hook()
         self._begin = datetime.utcnow()
         reporter.example_group_started(self)
 
-    def _register_description_creation_in_before_each_hook(self):
-        if self._can_create_description():
-            self.hooks['before_each'].insert(0, lambda execution_context: self._create_description(execution_context))
-
-    def _can_create_description(self):
-        return self._description_is_class()
-
-    def _description_is_class(self):
-        return inspect.isclass(self.description)
-
-    #TODO: Being executed on every example, instead of try once
-    #      Should be optimized
-    def _create_description(self, execution_context):
-        try:
-            execution_context.description = self.description()
-        except Exception:
-            if hasattr(execution_context, 'description'):
-                del execution_context.description
-
     def _run_inner_examples(self, reporter):
         self.run_hook('before_all')
-        for example in self.examples:
+        for example in iter(self):
             example.run(reporter)
         self.run_hook('after_all')
 
@@ -83,8 +72,6 @@ class ExampleGroup(object):
 
     @property
     def name(self):
-        if self._description_is_class():
-            return self.description.__name__
         return self.description
 
     def append(self, example):

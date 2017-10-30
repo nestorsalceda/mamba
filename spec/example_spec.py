@@ -50,4 +50,3 @@ with description(Example):
 
         with it('notifies its failure'):
             expect(self.reporter.example_failed).to(have_been_called_with(self.example))
-
