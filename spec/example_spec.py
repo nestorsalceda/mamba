@@ -14,22 +14,22 @@ with description(Example):
         self.example = an_example()
 
     with it('runs the example'):
-        self.example.run(self.reporter)
+        self.example.execute(self.reporter)
 
         expect(self.example.was_run).to(be_true)
 
     with it('calculates elapsed time'):
-        self.example.run(self.reporter)
+        self.example.execute(self.reporter)
 
         expect(self.example.elapsed_time.total_seconds()).to(be_above(0))
 
     with it('notifies when is started'):
-        self.example.run(self.reporter)
+        self.example.execute(self.reporter)
 
         expect(self.reporter.example_started).to(have_been_called_with(self.example))
 
     with it('notifies when passed'):
-        self.example.run(self.reporter)
+        self.example.execute(self.reporter)
 
         expect(self.reporter.example_passed).to(have_been_called_with(self.example))
 
@@ -37,7 +37,7 @@ with description(Example):
         with before.each:
             self.example = a_failing_example()
 
-            self.example.run(self.reporter)
+            self.example.execute(self.reporter)
 
         with it('runs the example'):
             expect(self.example.was_run).to(be_true)

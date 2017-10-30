@@ -8,6 +8,7 @@ from mamba import error
 
 class Example(object):
 
+    # TODO: Remove parent parameter, it's only used for testing purposes
     def __init__(self, test, parent=None):
         self.test = test
         self.parent = parent
@@ -15,34 +16,26 @@ class Example(object):
         self._elapsed_time = timedelta(0)
         self.was_run = False
 
-    def run(self, reporter):
+    def execute(self, reporter):
         self._start(reporter)
+
         try:
-            if not self.failed:
-                self._run_inner_test(reporter)
+            self._execute_test()
         except Exception:
-            self.was_run = True
-            if self.error is None:
-                self._set_failed()
-        finally:
-            self._finish(reporter)
+            self._set_failed()
+
+        self.was_run = True
+        self._finish(reporter)
 
     def _start(self, reporter):
         self._begin = datetime.utcnow()
         reporter.example_started(self)
 
-    def _run_inner_test(self, reporter):
-        self.run_hook('before_each')
+    def _execute_test(self):
         if hasattr(self.test, 'im_func'):
-            self.test.im_func(self.parent.execution_context)
+            self.test.im_func(None)
         else:
-            self.test(self.parent.execution_context)
-        self.was_run = True
-        self.run_hook('after_each')
-
-    def run_hook(self, hook):
-        for parent in self._parents:
-            parent.run_hook(hook)
+            self.test(None)
 
     def _set_failed(self):
         type_, value, traceback = sys.exc_info()
@@ -56,6 +49,31 @@ class Example(object):
             reporter.example_passed(self)
         else:
             reporter.example_pending(self)
+
+    def run(self, reporter):
+        self._start(reporter)
+        try:
+            if not self.failed:
+                self._run_inner_test(reporter)
+        except Exception:
+            self.was_run = True
+            if self.error is None:
+                self._set_failed()
+        finally:
+            self._finish(reporter)
+
+    def _run_inner_test(self, reporter):
+        self.run_hook('before_each')
+        if hasattr(self.test, 'im_func'):
+            self.test.im_func(self.parent.execution_context)
+        else:
+            self.test(self.parent.execution_context)
+        self.was_run = True
+        self.run_hook('after_each')
+
+    def run_hook(self, hook):
+        for parent in self._parents:
+            parent.run_hook(hook)
 
     @property
     def _parents(self):
