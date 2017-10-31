@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from mamba import runnable
 from mamba.infrastructure import code_coverage
 
 
@@ -31,7 +32,7 @@ class BaseRunner(Runner):
 
     def _run_examples_in(self, module):
         for example in self.loader.load_examples_from(module):
-            example.run(self.reporter)
+            example.execute(self.reporter, runnable.ExecutionContext())
 
             if example.failed:
                 self._has_failed_examples = True

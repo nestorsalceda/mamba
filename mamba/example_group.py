@@ -3,6 +3,7 @@
 import sys
 import copy
 from datetime import datetime
+from functools import partial
 
 from mamba import error, runnable
 from mamba.example import PendingExample
@@ -20,6 +21,7 @@ class ExampleGroup(runnable.Runnable):
             'before_all': [],
             'after_all': []
         }
+        self.helpers = {}
         self.execution_context = runnable.ExecutionContext() if execution_context is None else execution_context
 
     def __iter__(self):
@@ -27,8 +29,8 @@ class ExampleGroup(runnable.Runnable):
 
     def execute(self, reporter, execution_context):
         self._start(reporter)
-
         try:
+            self._bind_helpers_to(execution_context)
             self.execute_hook('before_all', execution_context)
 
             for example in iter(self):
@@ -44,6 +46,10 @@ class ExampleGroup(runnable.Runnable):
         self._begin = datetime.utcnow()
         reporter.example_group_started(self)
 
+    def _bind_helpers_to(self, execution_context):
+        for name, method in self.helpers.iteritems():
+            setattr(execution_context, name, partial(method, execution_context))
+
     def execute_hook(self, hook, execution_context):
         if self.parent is not None:
             self.parent.execute_hook(hook, execution_context)
@@ -56,7 +62,6 @@ class ExampleGroup(runnable.Runnable):
                     registered(execution_context)
             except Exception:
                 self._set_failed()
-
 
     def _set_failed(self):
         type_, value, traceback = sys.exc_info()
