@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys, copy
+import sys
 from datetime import datetime
 
 from mamba import error, runnable
