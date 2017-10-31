@@ -49,7 +49,6 @@ with description(ExampleGroup):
 
             expect(foo[0]).not_to(equal(foo[1]))
 
-
     with context('when run failed'):
 
         with before.each:

@@ -29,6 +29,7 @@ class ExampleGroup(runnable.Runnable):
 
         try:
             for example in iter(self):
+                self.execution_context = runnable.ExecutionContext()
                 example.execute(reporter)
         except Exception:
             self._set_failed()
@@ -63,6 +64,9 @@ class ExampleGroup(runnable.Runnable):
         self.run_hook('after_all')
 
     def run_hook(self, hook):
+        if self.parent is not None:
+            self.parent.run_hook(hook)
+
         for registered in self.hooks.get(hook, []):
             try:
                 if hasattr(registered, 'im_func'):

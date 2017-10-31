@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys
+import sys, copy
 from datetime import datetime
 
 from mamba import error, runnable
@@ -19,7 +19,9 @@ class Example(runnable.Runnable):
         self._start(reporter)
 
         try:
-            self._execute_test()
+            self.parent.run_hook('before_each')
+            self._execute_test(self.parent.execution_context)
+            self.parent.run_hook('after_each')
         except Exception:
             self._set_failed()
 
@@ -30,11 +32,11 @@ class Example(runnable.Runnable):
         self._begin = datetime.utcnow()
         reporter.example_started(self)
 
-    def _execute_test(self):
+    def _execute_test(self, execution_context):
         if hasattr(self.test, 'im_func'):
-            self.test.im_func(runnable.ExecutionContext())
+            self.test.im_func(execution_context)
         else:
-            self.test(runnable.ExecutionContext())
+            self.test(execution_context)
 
     def _set_failed(self):
         type_, value, traceback = sys.exc_info()

@@ -1,41 +1,62 @@
 from expects import *
+from doublex import Spy
+
+from mamba.reporter import Reporter
+from mamba.example import Example
+
+from spec.object_mother import *
 
 with description('Hooks'):
 
-    with before.all:
-        self.calls = []
-        self.calls.append('before_all')
-
-    with after.all:
-        self.calls.append('after_all')
-
     with before.each:
-        self.calls.append('before')
+        self.reporter = Spy(Reporter)
+        self.parent = an_example_group()
 
-    with after.each:
-        self.calls.append('after')
+    with it('executes before_each hook before executing an example'):
+        calls = []
+        self.parent.hooks['before_each'] = [lambda x: calls.append('before_each')]
+        self.parent.append(Example(lambda x: calls.append('example')))
 
-    with it('was called after before hook'):
-        expect(self.calls).to(equal(['before_all', 'before']))
-        self.calls.append('first')
+        self.parent.execute(self.reporter)
 
-    with it('was called before first test'):
-        expect(self.calls).to(equal(['before_all', 'before', 'first', 'after', 'before']))
-        self.calls.append('second')
+        expect(calls).to(equal(['before_each', 'example']))
 
-    with context('when nested context'):
-        with before.each:
-            self.calls.append('before_nested')
+    with it('executes after_each hook before executing an example'):
+        calls = []
+        self.parent.hooks['after_each'] = [lambda x: calls.append('after_each')]
+        self.parent.append(Example(lambda x: calls.append('example')))
 
-        with before.all:
-            self.calls.append('before_all_nested')
+        self.parent.execute(self.reporter)
 
-        with after.all:
-            self.calls.append('after_all_nested')
+        expect(calls).to(equal(['example', 'after_each']))
 
-        with it('was called in nested context'):
-            expect(self.calls).to(equal(['before_all', 'before', 'first', 'after', 'before', 'second', 'after', 'before', 'third', 'after', 'before_all_nested', 'before', 'before_nested']))
+    # TODO: before_all hook
 
-    with it('was called before second test'):
-        expect(self.calls).to(equal(['before_all', 'before', 'first', 'after', 'before', 'second', 'after', 'before']))
-        self.calls.append('third')
+    with it('shares execution context content among hooks and examples'):
+        def append_before_each(context):
+            context.calls = []
+            context.calls.append('before_each')
+
+        self.parent.hooks['before_each'] = [append_before_each]
+        example = Example(lambda context: context.calls.append('example'))
+        self.parent.append(example)
+
+        self.parent.execute(self.reporter)
+
+        expect(self.parent.execution_context.calls).to(equal(['before_each', 'example']))
+
+    with context('when having nested contexts'):
+        with it('executes first before_each parent and then before_each from child'):
+            calls = []
+            self.parent.hooks['before_each'] = [lambda x: calls.append('before_each_parent')]
+
+            child = an_example_group()
+            child.hooks['before_each'] = [lambda x: calls.append('before_each_child')]
+
+            child.append(Example(lambda x: calls.append('example')))
+            self.parent.append(child)
+
+            child.execute(self.reporter)
+
+            expect(calls).to(equal(['before_each_parent', 'before_each_child', 'example']))
+
