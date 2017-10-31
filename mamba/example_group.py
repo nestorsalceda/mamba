@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys
+import sys, copy
 from datetime import datetime
 
 from mamba import error, runnable
@@ -28,9 +28,12 @@ class ExampleGroup(runnable.Runnable):
         self._start(reporter)
 
         try:
+            group_execution_context = runnable.ExecutionContext()
+            self.run_hook('before_all', group_execution_context)
             for example in iter(self):
-                self.execution_context = runnable.ExecutionContext()
+                self.execution_context = copy.copy(group_execution_context)
                 example.execute(reporter)
+            self.run_hook('after_all', group_execution_context)
         except Exception:
             self._set_failed()
 
@@ -63,16 +66,19 @@ class ExampleGroup(runnable.Runnable):
             example.run(reporter)
         self.run_hook('after_all')
 
-    def run_hook(self, hook):
+    def run_hook(self, hook, execution_context=None):
+        if execution_context is None:
+            execution_context = self.execution_context
+
         if self.parent is not None:
             self.parent.run_hook(hook)
 
         for registered in self.hooks.get(hook, []):
             try:
                 if hasattr(registered, 'im_func'):
-                    registered.im_func(self.execution_context)
+                    registered.im_func(execution_context)
                 elif callable(registered):
-                    registered(self.execution_context)
+                    registered(execution_context)
             except Exception:
                 self._set_failed()
 
