@@ -4,7 +4,7 @@ from doublex import Spy
 
 from spec.object_mother import *
 
-from mamba import reporter
+from mamba import reporter, runnable
 from mamba.example_group import ExampleGroup
 from mamba.example import Example
 
@@ -23,7 +23,7 @@ with description(ExampleGroup):
             self.example = an_example()
             self.example_group.append(self.example)
 
-            self.example_group.execute(self.reporter)
+            self.example_group.execute(self.reporter, runnable.ExecutionContext())
 
         with it('runs the example'):
             expect(self.example.was_run).to(be_true)
@@ -45,18 +45,17 @@ with description(ExampleGroup):
             self.example_group.append(Example(dummy))
             self.example_group.append(Example(dummy))
 
-            self.example_group.execute(self.reporter)
+            self.example_group.execute(self.reporter, runnable.ExecutionContext())
 
             expect(foo[0]).not_to(equal(foo[1]))
 
     with context('when run failed'):
 
-        with before.each:
+        with it('is marked as failed'):
             self.example_group.append(a_failing_example())
 
-            self.example_group.execute(self.reporter)
+            self.example_group.execute(self.reporter, runnable.ExecutionContext())
 
-        with it('is marked as failed'):
             expect(self.example_group.failed).to(be_true)
 
     with context('when before all hook raises an error'):

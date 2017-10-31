@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import sys, copy
+import sys
+import copy
 from datetime import datetime
 
 from mamba import error, runnable
@@ -24,16 +25,16 @@ class ExampleGroup(runnable.Runnable):
     def __iter__(self):
         return iter(self.examples)
 
-    def execute(self, reporter):
+    def execute(self, reporter, execution_context):
         self._start(reporter)
 
         try:
-            group_execution_context = runnable.ExecutionContext()
-            self.run_hook('before_all', group_execution_context)
+            self.execute_hook('before_all', execution_context)
+
             for example in iter(self):
-                self.execution_context = copy.copy(group_execution_context)
-                example.execute(reporter)
-            self.run_hook('after_all', group_execution_context)
+                example.execute(reporter, copy.copy(execution_context))
+
+            self.execute_hook('after_all', execution_context)
         except Exception:
             self._set_failed()
 
@@ -42,6 +43,20 @@ class ExampleGroup(runnable.Runnable):
     def _start(self, reporter):
         self._begin = datetime.utcnow()
         reporter.example_group_started(self)
+
+    def execute_hook(self, hook, execution_context):
+        if self.parent is not None:
+            self.parent.execute_hook(hook, execution_context)
+
+        for registered in self.hooks.get(hook, []):
+            try:
+                if hasattr(registered, 'im_func'):
+                    registered.im_func(execution_context)
+                elif callable(registered):
+                    registered(execution_context)
+            except Exception:
+                self._set_failed()
+
 
     def _set_failed(self):
         type_, value, traceback = sys.exc_info()
@@ -66,19 +81,16 @@ class ExampleGroup(runnable.Runnable):
             example.run(reporter)
         self.run_hook('after_all')
 
-    def run_hook(self, hook, execution_context=None):
-        if execution_context is None:
-            execution_context = self.execution_context
-
+    def run_hook(self, hook):
         if self.parent is not None:
             self.parent.run_hook(hook)
 
         for registered in self.hooks.get(hook, []):
             try:
                 if hasattr(registered, 'im_func'):
-                    registered.im_func(execution_context)
+                    registered.im_func(self.execution_context)
                 elif callable(registered):
-                    registered(execution_context)
+                    registered(self.execution_context)
             except Exception:
                 self._set_failed()
 

@@ -15,13 +15,13 @@ class Example(runnable.Runnable):
         self._error = None
         self.was_run = False
 
-    def execute(self, reporter):
+    def execute(self, reporter, execution_context):
         self._start(reporter)
 
         try:
-            self.parent.run_hook('before_each')
-            self._execute_test(self.parent.execution_context)
-            self.parent.run_hook('after_each')
+            self.parent.execute_hook('before_each', execution_context)
+            self._execute_test(execution_context)
+            self.parent.execute_hook('after_each', execution_context)
         except Exception:
             self._set_failed()
 
