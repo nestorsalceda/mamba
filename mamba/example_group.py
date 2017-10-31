@@ -47,7 +47,7 @@ class ExampleGroup(runnable.Runnable):
         reporter.example_group_started(self)
 
     def _bind_helpers_to(self, execution_context):
-        for name, method in self.helpers.iteritems():
+        for name, method in self.helpers.items():
             setattr(execution_context, name, partial(method, execution_context))
 
     def execute_hook(self, hook, execution_context):
