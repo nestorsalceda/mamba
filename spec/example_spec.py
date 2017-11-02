@@ -43,7 +43,7 @@ with description(Example):
             expect(self.example.was_run).to(be_true)
 
         with it('is marked as failed'):
-            expect(self.example.failed).to(be_true)
+            expect(self.example.failed()).to(be_true)
 
         with it('keeps the error'):
             expect(self.example.error).not_to(be_none)

@@ -34,7 +34,7 @@ class BaseRunner(Runner):
         for example in self.loader.load_examples_from(module):
             example.execute(self.reporter, runnable.ExecutionContext())
 
-            if example.failed:
+            if example.failed():
                 self._has_failed_examples = True
 
     @property

@@ -48,7 +48,7 @@ class Example(runnable.Runnable):
 
     def _finish(self, reporter):
         self.elapsed_time = datetime.utcnow() - self._begin
-        if self.failed:
+        if self.failed():
             reporter.example_failed(self)
         else:
             reporter.example_passed(self)
@@ -56,10 +56,6 @@ class Example(runnable.Runnable):
     @property
     def name(self):
         return self.test.__name__[10:]
-
-    @property
-    def failed(self):
-        return self.error is not None
 
 
 class PendingExample(Example):

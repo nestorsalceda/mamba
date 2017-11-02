@@ -19,6 +19,9 @@ class Runnable(object):
     def execute(self, reporter, context):
         raise NotImplementedError
 
+    def failed(self):
+        return self.error is not None
+
     def fail(self):
         type_, value, traceback = sys.exc_info()
         self.error = error.Error(value, traceback)

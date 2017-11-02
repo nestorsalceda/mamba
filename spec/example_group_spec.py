@@ -56,4 +56,4 @@ with description(ExampleGroup):
 
             self.example_group.execute(self.reporter, runnable.ExecutionContext())
 
-            expect(self.example_group.failed).to(be_true)
+            expect(self.example_group.failed()).to(be_true)

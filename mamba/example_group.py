@@ -75,9 +75,8 @@ class ExampleGroup(runnable.Runnable):
         self.examples.append(example)
         example.parent = self
 
-    @property
     def failed(self):
-        return any(example.failed for example in self.examples)
+        return any(example.failed() for example in self.examples)
 
     def fail(self):
         super(ExampleGroup, self).fail()
