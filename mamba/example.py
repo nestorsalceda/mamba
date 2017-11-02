@@ -42,7 +42,7 @@ class Example(runnable.Runnable):
                 self.test.im_func(execution_context)
             else:
                 self.test(execution_context)
-        except Exception as ex:
+        except Exception:
             self._set_failed()
 
     def _set_failed(self):
@@ -68,8 +68,5 @@ class Example(runnable.Runnable):
 
 
 class PendingExample(Example):
-    def execute(self, reporter):
+    def execute(self, reporter, execution_context):
         reporter.example_pending(self)
-
-    def run(self, reporter):
-        self.execute(reporter)

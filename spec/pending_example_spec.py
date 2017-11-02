@@ -4,7 +4,7 @@ from doublex import Spy
 
 from spec.object_mother import *
 
-from mamba import reporter
+from mamba import reporter, runnable
 from mamba.example import PendingExample
 
 
@@ -16,7 +16,7 @@ with description(PendingExample):
 
     with context('when run'):
         with before.each:
-            self.example.execute(self.reporter)
+            self.example.execute(self.reporter, runnable.ExecutionContext())
 
         with it('not runs the example'):
             expect(self.example.was_run).to(be_false)
