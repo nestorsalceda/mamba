@@ -10,9 +10,10 @@ class Example(runnable.Runnable):
 
     # TODO: Remove parent parameter, it's only used for testing purposes
     def __init__(self, test, parent=None):
+        super(Example, self).__init__()
+
         self.test = test
         self.parent = parent
-        self.error = None
         self.was_run = False
 
     def execute(self, reporter, execution_context):
@@ -43,20 +44,14 @@ class Example(runnable.Runnable):
             else:
                 self.test(execution_context)
         except Exception:
-            self._set_failed()
-
-    def _set_failed(self):
-        type_, value, traceback = sys.exc_info()
-        self.error = error.Error(value, traceback)
+            self.fail()
 
     def _finish(self, reporter):
         self.elapsed_time = datetime.utcnow() - self._begin
         if self.failed:
             reporter.example_failed(self)
-        elif self.was_run:
-            reporter.example_passed(self)
         else:
-            reporter.example_pending(self)
+            reporter.example_passed(self)
 
     @property
     def name(self):

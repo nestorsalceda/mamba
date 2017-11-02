@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
-import sys
 import copy
 from datetime import datetime
 from functools import partial
 
-from mamba import error, runnable
+from mamba import runnable
 from mamba.example import PendingExample
 
 
 class ExampleGroup(runnable.Runnable):
 
     def __init__(self, description, parent=None):
+        super(ExampleGroup, self).__init__()
+
         self.description = description
         self.examples = []
         self.parent = parent
@@ -22,7 +23,6 @@ class ExampleGroup(runnable.Runnable):
             'after_all': []
         }
         self.helpers = {}
-        self._error = None
 
     def __iter__(self):
         return iter(self.examples)
@@ -38,7 +38,7 @@ class ExampleGroup(runnable.Runnable):
 
             self.execute_hook('after_all', execution_context)
         except Exception:
-            self._set_failed()
+            self.set_failed()
 
         self._finish(reporter)
 
@@ -61,11 +61,7 @@ class ExampleGroup(runnable.Runnable):
                 elif callable(registered):
                     registered(execution_context)
             except Exception:
-                self._set_failed()
-
-    def _set_failed(self):
-        type_, value, traceback = sys.exc_info()
-        self.error = error.Error(value, traceback)
+                self.fail()
 
     def _finish(self, reporter):
         self.elapsed_time = datetime.utcnow() - self._begin
@@ -83,16 +79,11 @@ class ExampleGroup(runnable.Runnable):
     def failed(self):
         return any(example.failed for example in self.examples)
 
-    @property
-    def error(self):
-        return self._error
-
-    @error.setter
-    def error(self, value):
-        self._error = value
+    def fail(self):
+        super(ExampleGroup, self).fail()
 
         for example in self.examples:
-            example.error = value
+            example.fail()
 
 
 class PendingExampleGroup(ExampleGroup):
