@@ -22,11 +22,11 @@ class _WithSuccessfulTest(object):
 
 
 def a_pending_example():
-    return PendingExample(_WithSuccessfulTest._successful_test)
+    return PendingExample(_WithSuccessfulTest._successful_test, parent=an_example_group())
 
 
 def a_failing_example():
-    return Example(_WithFailingTest._failing_test)
+    return Example(_WithFailingTest._failing_test, parent=an_example_group())
 
 
 class _WithFailingTest(object):

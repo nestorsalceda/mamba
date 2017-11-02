@@ -11,7 +11,7 @@ from mamba.example import PendingExample
 
 class ExampleGroup(runnable.Runnable):
 
-    def __init__(self, description, parent=None, execution_context=None):
+    def __init__(self, description, parent=None):
         self.description = description
         self.examples = []
         self.parent = parent
@@ -22,7 +22,7 @@ class ExampleGroup(runnable.Runnable):
             'after_all': []
         }
         self.helpers = {}
-        self.execution_context = runnable.ExecutionContext() if execution_context is None else execution_context
+        self._error = None
 
     def __iter__(self):
         return iter(self.examples)
@@ -70,34 +70,6 @@ class ExampleGroup(runnable.Runnable):
     def _finish(self, reporter):
         self.elapsed_time = datetime.utcnow() - self._begin
         reporter.example_group_finished(self)
-
-    def run(self, reporter):
-        self._start(reporter)
-        try:
-            self._run_inner_examples(reporter)
-        except Exception:
-            self._set_failed()
-        finally:
-            self._finish(reporter)
-
-    def _run_inner_examples(self, reporter):
-        self.run_hook('before_all')
-        for example in iter(self):
-            example.run(reporter)
-        self.run_hook('after_all')
-
-    def run_hook(self, hook):
-        if self.parent is not None:
-            self.parent.run_hook(hook)
-
-        for registered in self.hooks.get(hook, []):
-            try:
-                if hasattr(registered, 'im_func'):
-                    registered.im_func(self.execution_context)
-                elif callable(registered):
-                    registered(self.execution_context)
-            except Exception:
-                self._set_failed()
 
     @property
     def name(self):

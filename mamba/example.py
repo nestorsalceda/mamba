@@ -12,18 +12,22 @@ class Example(runnable.Runnable):
     def __init__(self, test, parent=None):
         self.test = test
         self.parent = parent
-        self._error = None
+        self.error = None
         self.was_run = False
 
     def execute(self, reporter, execution_context):
+        assert self.parent is not None
+
         self._start(reporter)
 
-        try:
+        if self.error is None:
             self.parent.execute_hook('before_each', execution_context)
+
+        if self.error is None:
             self._execute_test(execution_context)
+
+        if self.error is None:
             self.parent.execute_hook('after_each', execution_context)
-        except Exception:
-            self._set_failed()
 
         self.was_run = True
         self._finish(reporter)
@@ -33,10 +37,13 @@ class Example(runnable.Runnable):
         reporter.example_started(self)
 
     def _execute_test(self, execution_context):
-        if hasattr(self.test, 'im_func'):
-            self.test.im_func(execution_context)
-        else:
-            self.test(execution_context)
+        try:
+            if hasattr(self.test, 'im_func'):
+                self.test.im_func(execution_context)
+            else:
+                self.test(execution_context)
+        except Exception as ex:
+            self._set_failed()
 
     def _set_failed(self):
         type_, value, traceback = sys.exc_info()
@@ -51,41 +58,6 @@ class Example(runnable.Runnable):
         else:
             reporter.example_pending(self)
 
-    def run(self, reporter):
-        self._start(reporter)
-        try:
-            if not self.failed:
-                self._run_inner_test(reporter)
-        except Exception:
-            self.was_run = True
-            if self.error is None:
-                self._set_failed()
-        finally:
-            self._finish(reporter)
-
-    def _run_inner_test(self, reporter):
-        self.run_hook('before_each')
-        if hasattr(self.test, 'im_func'):
-            self.test.im_func(self.parent.execution_context)
-        else:
-            self.test(self.parent.execution_context)
-        self.was_run = True
-        self.run_hook('after_each')
-
-    def run_hook(self, hook):
-        for parent in self._parents:
-            parent.run_hook(hook)
-
-    @property
-    def _parents(self):
-        parents = []
-        parent = self.parent
-        while parent:
-            parents.append(parent)
-            parent = parent.parent
-
-        return reversed(parents)
-
     @property
     def name(self):
         return self.test.__name__[10:]
@@ -93,14 +65,6 @@ class Example(runnable.Runnable):
     @property
     def failed(self):
         return self.error is not None
-
-    @property
-    def error(self):
-        return self._error
-
-    @error.setter
-    def error(self, value):
-        self._error = value
 
 
 class PendingExample(Example):

@@ -26,10 +26,10 @@ class Loader(object):
     def _is_example_group(self, class_name):
         return class_name.endswith('__description')
 
-    def _create_example_group(self, klass, execution_context=None):
+    def _create_example_group(self, klass):
         if '__pending' in klass.__name__:
-            return PendingExampleGroup(self._description(klass), execution_context=execution_context)
-        return ExampleGroup(self._description(klass), execution_context=execution_context)
+            return PendingExampleGroup(self._description(klass))
+        return ExampleGroup(self._description(klass))
 
     def _description(self, example_group):
         return example_group.__name__.replace('__description', '').replace('__pending', '')[10:]
@@ -75,9 +75,9 @@ class Loader(object):
     def _load_nested_example_groups(self, klass, example_group):
         for nested in self._example_groups_for(klass):
             if isinstance(example_group, PendingExampleGroup):
-                nested_example_group = PendingExampleGroup(self._description(nested), execution_context=example_group.execution_context)
+                nested_example_group = PendingExampleGroup(self._description(nested))
             else:
-                nested_example_group = self._create_example_group(nested, execution_context=example_group.execution_context)
+                nested_example_group = self._create_example_group(nested)
 
             self._add_hooks_examples_and_nested_example_groups_to(nested, nested_example_group)
             example_group.append(nested_example_group)
