@@ -18,10 +18,7 @@ class Runnable(object):
         self.tags = tags or []
 
     def execute(self, reporter, context, tags=None):
-        if not self.included_in_execution(tags):
-            return
-
-        self._do_execute(reporter, context, tags)
+        raise NotImplementedError()
 
     def included_in_execution(self, tags):
         return tags is None or any(tag in self.tags for tag in tags)

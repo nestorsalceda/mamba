@@ -15,8 +15,11 @@ class Example(runnable.Runnable):
         self.parent = parent
         self.was_run = False
 
-    def _do_execute(self, reporter, execution_context, tags=None):
+    def execute(self, reporter, execution_context, tags=None):
         assert self.parent is not None
+        if not self.included_in_execution(tags):
+            return
+
         self._start(reporter)
 
         if self.error is None:

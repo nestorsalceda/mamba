@@ -27,7 +27,7 @@ class ExampleGroup(runnable.Runnable):
     def __iter__(self):
         return iter(self.examples)
 
-    def _do_execute(self, reporter, execution_context, tags=None):
+    def execute(self, reporter, execution_context, tags=None):
         self._start(reporter)
         try:
             self._bind_helpers_to(execution_context)
