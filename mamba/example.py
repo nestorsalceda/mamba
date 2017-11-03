@@ -9,18 +9,14 @@ class Example(runnable.Runnable):
 
     # TODO: Remove parent parameter, it's only used for testing purposes
     def __init__(self, test, parent=None, tags=None):
-        super(Example, self).__init__()
+        super(Example, self).__init__(tags=tags)
 
         self.test = test
         self.parent = parent
         self.was_run = False
-        self.tags = tags or []
 
-    def execute(self, reporter, execution_context, tags=None):
+    def _do_execute(self, reporter, execution_context, tags=None):
         assert self.parent is not None
-        if not(tags is None or self._included_in_execution(tags)):
-            return
-
         self._start(reporter)
 
         if self.error is None:
@@ -35,8 +31,9 @@ class Example(runnable.Runnable):
         self.was_run = True
         self._finish(reporter)
 
-    def _included_in_execution(self, tags):
-        return any(tag in self.tags for tag in tags)
+    def included_in_execution(self, tags):
+        return self.parent.included_in_execution(tags) \
+            or super(Example, self).included_in_execution(tags)
 
     def _start(self, reporter):
         self._begin = datetime.utcnow()

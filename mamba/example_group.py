@@ -10,8 +10,8 @@ from mamba.example import PendingExample
 
 class ExampleGroup(runnable.Runnable):
 
-    def __init__(self, description, parent=None):
-        super(ExampleGroup, self).__init__()
+    def __init__(self, description, parent=None, tags=None):
+        super(ExampleGroup, self).__init__(tags=tags)
 
         self.description = description
         self.examples = []
@@ -27,14 +27,16 @@ class ExampleGroup(runnable.Runnable):
     def __iter__(self):
         return iter(self.examples)
 
-    def execute(self, reporter, execution_context):
+    def _do_execute(self, reporter, execution_context, tags=None):
         self._start(reporter)
         try:
             self._bind_helpers_to(execution_context)
             self.execute_hook('before_all', execution_context)
 
             for example in iter(self):
-                example.execute(reporter, copy.copy(execution_context))
+                example.execute(reporter,
+                                copy.copy(execution_context),
+                                tags=tags)
 
             self.execute_hook('after_all', execution_context)
         except Exception:
