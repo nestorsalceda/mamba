@@ -1,5 +1,5 @@
 from expects import *
-from doublex_expects import have_been_called_with, have_been_called
+from doublex_expects import have_been_called_with
 from doublex import Spy
 
 from spec.object_mother import *
