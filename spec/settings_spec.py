@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from expects import *
+from expects import expect, have_property, equal, be_false, be_none
+
+from mamba import description, it, context, before
 
 from mamba.settings import Settings
 
@@ -9,7 +11,7 @@ IRRELEVANT_ENABLE_CODE_COVERAGE = 'irrelevant enable code coverage'
 IRRELEVANT_NO_COLOR = 'irrelevant no color'
 
 
-with description(Settings):
+with description(Settings) as self:
     with before.each:
         self.settings = Settings()
 
@@ -22,6 +24,9 @@ with description(Settings):
 
         with it('has no color disabled by default'):
             expect(self.settings).to(have_property('no_color', be_false))
+
+        with it('has no tags included by default'):
+            expect(self.settings).to(have_property('tags', be_none))
 
     with context('when setting custom values'):
         with it('sets slow test threshold'):

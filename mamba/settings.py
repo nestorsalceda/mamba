@@ -8,3 +8,4 @@ class Settings(object):
         self.code_coverage_file = '.coverage'
         self.format = 'documentation'
         self.no_color = False
+        self.tags = None
