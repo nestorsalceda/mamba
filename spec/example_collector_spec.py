@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
 import inspect
 
 from mamba import example, example_group, loader
 from mamba.example_collector import ExampleCollector
 
-from expects import *
+from mamba import description, context, it
+from expects import expect, be_true, have_length, equal, be_a, have_property, be_none
 
 
 def spec_relpath(name):
@@ -22,6 +22,7 @@ IRRELEVANT_PATH = spec_abspath('without_inner_contexts.py')
 PENDING_DECORATOR_PATH = spec_abspath('with_pending_decorator.py')
 PENDING_DECORATOR_AS_ROOT_PATH = spec_abspath('with_pending_decorator_as_root.py')
 WITH_RELATIVE_IMPORT_PATH = spec_abspath('with_relative_import.py')
+WITH_TAGS_PATH = spec_abspath('with_tags.py')
 
 
 def _load_module(path):
@@ -58,6 +59,16 @@ with description(ExampleCollector) as _:
 
             expect(examples).to(have_length(1))
             expect([example.name for example in examples[0].examples]).to(equal(['it first example', 'it second example', 'it third example', '#inner_context']))
+
+    with context('when reading tags'):
+        with it('reads tags from spec parameters'):
+            module = _load_module(WITH_TAGS_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+            spec = iter(examples[0]).next()
+
+            expect(spec).not_to(be_none)
+            expect(spec.tags).to(equal(['unit']))
 
     with context('when a pending decorator loaded'):
         with it('mark example as pending'):

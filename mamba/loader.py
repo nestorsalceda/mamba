@@ -52,13 +52,20 @@ class Loader(object):
 
     def _load_examples(self, klass, example_group):
         for example in self._examples_in(klass):
+            tags = self._tags_for(example)
             if self._is_pending_example(example) or self._is_pending_example_group(example_group):
-                example_group.append(PendingExample(example))
+                example_group.append(PendingExample(example, tags=tags))
             else:
-                example_group.append(Example(example))
+                example_group.append(Example(example, tags=tags))
 
     def _examples_in(self, example_group):
         return [method for name, method in self._methods_for(example_group) if self._is_example(method)]
+
+    def _tags_for(self, example):
+        tags = example.__name__.split('--')[1]
+        if not tags:
+            return None
+        return tags.split(',')
 
     def _methods_for(self, klass):
         return inspect.getmembers(klass, inspect.isfunction if is_python3() else inspect.ismethod)

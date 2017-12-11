@@ -38,8 +38,6 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         return node.context_expr
 
     def _transform_to_example_group(self, node, name):
-        context_expr = self._context_expr_for(node)
-
         return ast.copy_location(
             ast.ClassDef(
                 name=self._description_name(node, name),
@@ -69,8 +67,13 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         return description_name
 
     def _transform_to_example(self, node, name):
-        example_name = '{0:08d}__{1} {2}'.format(self.sequence, name, self._context_expr_for(node).args[0].s)
+        tags = ''
+        if len(node.context_expr.args) > 1:
+            tags = ','.join([arg.s for arg in node.context_expr.args[1:]])
+
+        example_name = '{0:08d}__{1} {2}--{3}'.format(self.sequence, name, self._context_expr_for(node).args[0].s, tags)
         self.sequence += 1
+
         return ast.copy_location(
             ast.FunctionDef(
                 name=example_name,

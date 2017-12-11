@@ -60,7 +60,7 @@ class Example(runnable.Runnable):
 
     @property
     def name(self):
-        return self.test.__name__[10:]
+        return self.test.__name__[10:].replace('--', '')
 
 
 class PendingExample(Example):
