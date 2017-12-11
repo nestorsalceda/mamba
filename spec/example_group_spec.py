@@ -1,4 +1,5 @@
-from expects import *
+from mamba import description, before, it, context
+from expects import expect, be_above, equal, be_true
 from doublex_expects import have_been_called_with
 from doublex import Spy
 
@@ -9,14 +10,14 @@ from mamba.example_group import ExampleGroup
 from mamba.example import Example
 
 
-with description(ExampleGroup):
+with description(ExampleGroup) as self:
 
     with before.each:
         self.example_group = an_example_group()
         self.reporter = Spy(reporter.Reporter)
 
     with it('has same name than subject'):
-        expect(self.example_group.name).to(be(IRRELEVANT_DESCRIPTION))
+        expect(self.example_group.name).to(equal(IRRELEVANT_DESCRIPTION))
 
     with context('when run'):
         with before.each:
