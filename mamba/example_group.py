@@ -27,12 +27,15 @@ class ExampleGroup(runnable.Runnable):
         return iter(self.examples)
 
     def execute(self, reporter, execution_context, tags=None):
+        if not self._children_included_in_execution(tags):
+            return
+
         self._start(reporter)
         try:
             self._bind_helpers_to(execution_context)
             self.execute_hook('before_all', execution_context)
 
-            for example in iter(self):
+            for example in self:
                 example.execute(reporter,
                                 copy.copy(execution_context),
                                 tags=tags)
@@ -42,6 +45,9 @@ class ExampleGroup(runnable.Runnable):
             self.set_failed()
 
         self._finish(reporter)
+
+    def _children_included_in_execution(self, tags):
+        return any(example.included_in_execution(tags) for example in self)
 
     def _start(self, reporter):
         self._begin = datetime.utcnow()
@@ -91,7 +97,7 @@ class PendingExampleGroup(ExampleGroup):
     def execute(self, reporter, execution_context):
         reporter.example_group_pending(self)
 
-        for example in iter(self):
+        for example in self:
             example.execute(reporter, copy.copy(execution_context))
 
     def append(self, example):

@@ -17,17 +17,19 @@ class Runnable(object):
         self.error = None
         self.parent = parent
         self.tags = tags or []
+        self._included_in_execution = None
 
     def execute(self, reporter, context, tags=None):
         raise NotImplementedError()
 
     def included_in_execution(self, tags):
-        should_execute = tags is None or any(tag in self.tags for tag in tags)
+        if self._included_in_execution is None:
+            self._included_in_execution = tags is None or any(tag in self.tags for tag in tags)
 
-        if self.parent is None:
-            return should_execute
-        else:
-            return self.parent.included_in_execution(tags) or should_execute
+            if self.parent is not None:
+                self._included_in_execution = self.parent.included_in_execution(tags) or self._included_in_execution
+
+        return self._included_in_execution
 
     def _do_execute(self, context, tags=None):
         raise NotImplementedError()

@@ -2,6 +2,7 @@ from mamba import description, before, context, it
 
 from doublex import Spy
 from expects import expect, be_true, be_false
+from doublex_expects import have_been_called, have_been_called_with
 
 from mamba import reporter, runnable
 from mamba.example import Example
@@ -68,3 +69,28 @@ with description('Example execution using tags') as self:
 
             expect(self.example.was_run).to(be_true)
             expect(self.other_example.was_run).to(be_true)
+
+    with context('when example group does not have tags and silbing one does'):
+        with it('skips example group without tags'):
+            self.parent = ExampleGroup('any example_group')
+
+            self.child = ExampleGroup('child example_group', tags=TAGS)
+            self.example = Example(lambda x: x)
+            self.child.append(self.example)
+
+            self.silbing = ExampleGroup('silbing example_group')
+            self.silbing.append(Example(lambda x: x))
+
+            self.parent.append(self.child)
+            self.parent.append(self.silbing)
+
+            self.parent.execute(self.reporter,
+                                runnable.ExecutionContext(),
+                                tags=TAGS)
+
+            expect(self.reporter.example_group_started).\
+                to(have_been_called.twice)
+            expect(self.reporter.example_group_started).\
+                to(have_been_called_with(self.parent))
+            expect(self.reporter.example_group_started).\
+                to(have_been_called_with(self.child))
