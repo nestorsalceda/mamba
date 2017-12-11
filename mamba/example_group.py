@@ -11,11 +11,10 @@ from mamba.example import PendingExample
 class ExampleGroup(runnable.Runnable):
 
     def __init__(self, description, parent=None, tags=None):
-        super(ExampleGroup, self).__init__(tags=tags)
+        super(ExampleGroup, self).__init__(parent=parent, tags=tags)
 
         self.description = description
         self.examples = []
-        self.parent = parent
         self.hooks = {
             'before_each': [],
             'after_each': [],

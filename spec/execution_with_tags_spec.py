@@ -37,13 +37,30 @@ with description('Example execution using tags') as self:
             expect(self.other_example.was_run).to(be_false)
 
     with context('when tag is included in example_group tags'):
-        with it('executes children'):
+        with before.each:
             self.example_group = ExampleGroup('any example_group', tags=TAGS)
+
             self.example = Example(lambda x: x)
             self.other_example = Example(lambda x: x)
 
+        with it('executes children'):
             self.example_group.append(self.example)
             self.example_group.append(self.other_example)
+
+            self.example_group.execute(self.reporter,
+                                       runnable.ExecutionContext(),
+                                       tags=TAGS)
+
+            expect(self.example.was_run).to(be_true)
+            expect(self.other_example.was_run).to(be_true)
+
+        with it('executes example group too'):
+            self.other_example_group = ExampleGroup('any example_group')
+
+            self.other_example_group.append(self.example)
+            self.other_example_group.append(self.other_example)
+
+            self.example_group.append(self.other_example_group)
 
             self.example_group.execute(self.reporter,
                                        runnable.ExecutionContext(),

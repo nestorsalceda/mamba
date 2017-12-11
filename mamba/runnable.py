@@ -12,16 +12,22 @@ class ExecutionContext(object):
 
 class Runnable(object):
 
-    def __init__(self, tags=None):
+    def __init__(self, parent=None, tags=None):
         self.elapsed_time = timedelta(0)
         self.error = None
+        self.parent = parent
         self.tags = tags or []
 
     def execute(self, reporter, context, tags=None):
         raise NotImplementedError()
 
     def included_in_execution(self, tags):
-        return tags is None or any(tag in self.tags for tag in tags)
+        should_execute = tags is None or any(tag in self.tags for tag in tags)
+
+        if self.parent is None:
+            return should_execute
+        else:
+            return self.parent.included_in_execution(tags) or should_execute
 
     def _do_execute(self, context, tags=None):
         raise NotImplementedError()
