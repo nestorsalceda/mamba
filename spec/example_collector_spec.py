@@ -73,7 +73,7 @@ with description(ExampleCollector) as _:
             module = _load_module(WITH_TAGS_PATH)
 
             examples = loader.Loader().load_examples_from(module)
-            spec = iter(examples[0]).next()
+            spec = next(iter(examples[0]))
 
             expect(spec).not_to(be_none)
             expect(spec.tags).to(equal(['unit']))
