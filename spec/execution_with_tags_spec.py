@@ -15,17 +15,18 @@ with description('Example execution using tags') as self:
     with before.each:
         self.reporter = Spy(reporter.Reporter)
         self.example_group = an_example_group()
-        self.example = Example(lambda x: x, parent=self.example_group,
-                               tags=TAGS)
+        self.example_with_tags = Example(lambda x: x,
+                                         parent=self.example_group,
+                                         tags=TAGS)
         self.other_example = Example(lambda x: x, parent=self.example_group)
 
     with context('when tag is included in example tags'):
         with it('executes example'):
-            self.example.execute(self.reporter,
-                                 runnable.ExecutionContext(),
-                                 tags=TAGS)
+            self.example_with_tags.execute(self.reporter,
+                                           runnable.ExecutionContext(),
+                                           tags=TAGS)
 
-            expect(self.example.was_run).to(be_true)
+            expect(self.example_with_tags.was_run).to(be_true)
 
     with context('when tag is not included in example tags'):
         with it('does not execute example'):
