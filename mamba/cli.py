@@ -31,6 +31,7 @@ def _parse_arguments():
     parser.add_argument('--format', '-f', default='progress', action='store', choices=['documentation', 'progress'], help='Output format (default: %(default)s)')
     parser.add_argument('specs', default=['./spec', './specs'], nargs='*', help='Paths to specs to run or directories with specs to run (default: %(default)s)')
     parser.add_argument('--no-color', default=False, action='store_true', help='Turn off all output coloring (default: %(default)s)')
+    parser.add_argument('--tags', '-t', default=None, type=lambda x: [tag.strip() for tag in x.split(',')], action='store')
 
     return parser.parse_args()
 

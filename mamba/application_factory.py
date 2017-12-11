@@ -16,6 +16,7 @@ class ApplicationFactory(object):
         settings_.code_coverage_file = self.arguments.coverage_file
         settings_.format = self.arguments.format
         settings_.no_color = self.arguments.no_color
+        settings_.tags = self.arguments.tags
 
         return settings_
 
