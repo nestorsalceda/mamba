@@ -36,7 +36,8 @@ class ApplicationFactory(object):
         settings = self.create_settings()
         runner = runners.BaseRunner(self.create_example_collector(),
                                     loader.Loader(),
-                                    self.create_reporter())
+                                    self.create_reporter(),
+                                    settings.tags)
 
         if settings.enable_code_coverage:
             runner = runners.CodeCoverageRunner(runner,

@@ -16,11 +16,12 @@ class Runner(object):
 
 class BaseRunner(Runner):
 
-    def __init__(self, example_collector, loader, reporter):
+    def __init__(self, example_collector, loader, reporter, tags):
         self.example_collector = example_collector
         self.loader = loader
         self.reporter = reporter
         self._has_failed_examples = False
+        self.tags = tags
 
     def run(self):
         self.reporter.start()
@@ -32,7 +33,9 @@ class BaseRunner(Runner):
 
     def _run_examples_in(self, module):
         for example in self.loader.load_examples_from(module):
-            example.execute(self.reporter, runnable.ExecutionContext())
+            example.execute(self.reporter,
+                            runnable.ExecutionContext(),
+                            tags=self.tags)
 
             if example.failed():
                 self._has_failed_examples = True
