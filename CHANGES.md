@@ -1,5 +1,9 @@
 # ChangeLog
 
+## Version 0.9.1
+
+* Just a little fix for pypi installation :)
+
 ## Version 0.9
 
 * Add filtering support using tags

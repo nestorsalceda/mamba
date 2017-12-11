@@ -25,6 +25,8 @@ setup(name='mamba',
       packages=find_packages(exclude=['ez_setup', 'examples', 'spec', 'spec.*']),
       include_package_data=True,
       zip_safe=False,
+      install_requires=['clint', 'coverage'],
+      test_require=['expect', 'doublex', 'doublex-expects', 'mock'],
       entry_points={
           'console_scripts': [
               'mamba = mamba.cli:main'
