@@ -1,4 +1,5 @@
-from expects import *
+from mamba import description, before, it, context
+from expects import expect, be_true, be_above, be_none
 from doublex_expects import have_been_called_with
 from doublex import Spy
 
@@ -7,7 +8,7 @@ from spec.object_mother import *
 from mamba import reporter, infrastructure, runnable
 
 
-with description(Example):
+with description(Example) as self:
 
     with before.each:
         self.reporter = Spy(reporter.Reporter)

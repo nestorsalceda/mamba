@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
+from mamba import description, context, it
+from expects import expect, be_true, have_length, equal, be_a, have_property, be_none
 
 import os
 import inspect
 
 from mamba import example, example_group, loader
 from mamba.example_collector import ExampleCollector
-
-from mamba import description, context, it
-from expects import expect, be_true, have_length, equal, be_a, have_property, be_none
 
 
 def spec_relpath(name):
@@ -30,7 +29,7 @@ def _load_module(path):
     return list(example_collector.modules())[0]
 
 
-with description(ExampleCollector) as _:
+with description(ExampleCollector):
     with context('when loading from file'):
         with it('loads module from absolute path'):
             module = _load_module(IRRELEVANT_PATH)

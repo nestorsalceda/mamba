@@ -1,9 +1,10 @@
+from mamba import description, context, it
 try:
     from unittest.mock import patch
 except ImportError:
     from mock import patch
 
-from expects import *
+from expects import expect, be
 
 
 class ExampleClass(object):
@@ -18,5 +19,3 @@ with description('Testing with unittest.mock'):
         with it('returns mocked value'):
             with patch.object(ExampleClass, 'hello', return_value='World!') as mock_method:
                 expect(mock_method()).to(be('World!'))
-
-

@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from expects import expect, have_property, equal, be_false, be_none
-
 from mamba import description, it, context, before
+from expects import expect, have_property, equal, be_false, be_none
 
 from mamba.settings import Settings
 
 IRRELEVANT_SLOW_TEST_THRESHOLD = 'irrelevant slow test threeshold'
 IRRELEVANT_ENABLE_CODE_COVERAGE = 'irrelevant enable code coverage'
 IRRELEVANT_NO_COLOR = 'irrelevant no color'
-
 
 with description(Settings) as self:
     with before.each:

@@ -1,11 +1,12 @@
-from expects import *
-from doublex import *
+from mamba import description, before, it, context
+from expects import expect, be_none, be_a, be_true
+from doublex import Spy
 
 from mamba import reporter, runnable
 
 from spec.object_mother import *
 
-with description('Errors in hooks'):
+with description('Errors in hooks') as self:
     with before.each:
         self.reporter = Spy(reporter.Reporter)
         self.example_group = an_example_group()

@@ -1,4 +1,5 @@
-from expects import *
+from mamba import description, before, it, context
+from expects import expect, equal
 from doublex import Spy
 
 from mamba import runnable
@@ -7,7 +8,7 @@ from mamba.example import Example
 
 from spec.object_mother import *
 
-with description('Hooks'):
+with description('Hooks') as self:
 
     with before.each:
         self.reporter = Spy(Reporter)

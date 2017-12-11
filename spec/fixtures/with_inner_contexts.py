@@ -1,3 +1,5 @@
+from mamba import description, it, context
+
 with description('Fixture#with_inner_contexts'):
     with it('first example'):
         pass

@@ -1,3 +1,5 @@
+from mamba import _description, it, context
+
 with _description('Fixture#with_pending_decorator_as_root'):
 
     with it('pending spec'):

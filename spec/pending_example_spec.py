@@ -1,4 +1,5 @@
-from expects import *
+from mamba import description, before, context, it
+from expects import expect, be_false
 from doublex_expects import have_been_called_with
 from doublex import Spy
 
@@ -8,7 +9,7 @@ from mamba import reporter, runnable
 from mamba.example import PendingExample
 
 
-with description(PendingExample):
+with description(PendingExample) as self:
 
     with before.each:
         self.example = a_pending_example()

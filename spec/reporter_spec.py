@@ -1,4 +1,5 @@
-from expects import *
+from mamba import description, context, before, it
+from expects import expect, equal, contain
 from doublex_expects import have_been_called_with
 from doublex import Spy
 
@@ -7,7 +8,7 @@ from spec.object_mother import *
 from mamba import reporter, formatters, example_group
 
 
-with description(reporter.Reporter):
+with description(reporter.Reporter) as self:
 
     with before.each:
         self.example = an_example()
@@ -88,9 +89,7 @@ with description(reporter.Reporter):
                 self.reporter.failed_count,
                 self.reporter.pending_count))
 
-
         with it('notifies failed examples to listeners'):
             self.reporter.finish()
 
             expect(self.formatter.failures).to(have_been_called_with(self.reporter.failed_examples))
-
