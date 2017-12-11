@@ -70,7 +70,7 @@ class ExampleGroup(runnable.Runnable):
 
     @property
     def name(self):
-        return self.description.replace('--', '')
+        return self.description.split('--')[0]
 
     def append(self, example):
         self.examples.append(example)
