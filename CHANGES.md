@@ -1,5 +1,15 @@
 # ChangeLog
 
+## Version 0.9
+
+* Add filtering support using tags
+* Use new execution context for every example. Properties on self are never shared
+* Changed execution model
+* Added functions for description, it, context, before, after for making mamba more friendly to PEP8 checkers
+* Removed subject autoinstantiation
+* Removed filewatch feature, use entr or other similar utility
+* Dropped Python 2.6 support
+
 ## Version 0.8.6
 
 * Check for python 3.5
