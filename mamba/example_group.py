@@ -71,7 +71,7 @@ class ExampleGroup(runnable.Runnable):
 
     @property
     def name(self):
-        return self.description
+        return self.description.replace('--', '')
 
     def append(self, example):
         self.examples.append(example)

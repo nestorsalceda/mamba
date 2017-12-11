@@ -61,6 +61,14 @@ with description(ExampleCollector) as _:
             expect([example.name for example in examples[0].examples]).to(equal(['it first example', 'it second example', 'it third example', '#inner_context']))
 
     with context('when reading tags'):
+        with it('reads tags from description parameters'):
+            module = _load_module(WITH_TAGS_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples).to(have_length(1))
+            expect(examples[0].tags).to(equal(['integration']))
+
         with it('reads tags from spec parameters'):
             module = _load_module(WITH_TAGS_PATH)
 

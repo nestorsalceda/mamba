@@ -27,9 +27,12 @@ class Loader(object):
         return class_name.endswith('__description')
 
     def _create_example_group(self, klass):
+        name = self._description(klass)
+        tags = self._tags_for(name)
+
         if '__pending' in klass.__name__:
-            return PendingExampleGroup(self._description(klass))
-        return ExampleGroup(self._description(klass))
+            return PendingExampleGroup(name, tags=tags)
+        return ExampleGroup(name, tags=tags)
 
     def _description(self, example_group):
         return example_group.__name__.replace('__description', '').replace('__pending', '')[10:]
@@ -52,7 +55,7 @@ class Loader(object):
 
     def _load_examples(self, klass, example_group):
         for example in self._examples_in(klass):
-            tags = self._tags_for(example)
+            tags = self._tags_for(example.__name__)
             if self._is_pending_example(example) or self._is_pending_example_group(example_group):
                 example_group.append(PendingExample(example, tags=tags))
             else:
@@ -61,8 +64,8 @@ class Loader(object):
     def _examples_in(self, example_group):
         return [method for name, method in self._methods_for(example_group) if self._is_example(method)]
 
-    def _tags_for(self, example):
-        tags = example.__name__.split('--')[1]
+    def _tags_for(self, name):
+        tags = name.split('--')[1]
         if not tags:
             return None
         return tags.split(',')
