@@ -29,13 +29,7 @@ class Runnable(object):
         return tag in self.tags or self.parent.has_tag(tag)
 
     def included_in_execution(self, tags):
-        if self._included_in_execution is None:
-            self._included_in_execution = tags is None or any(tag in self.tags for tag in tags)
-
-            if self.parent is not None:
-                self._included_in_execution = self.parent.included_in_execution(tags) or self._included_in_execution
-
-        return self._included_in_execution
+        return tags is None or any(self.has_tag(tag) for tag in tags)
 
     def failed(self):
         return self.error is not None

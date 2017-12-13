@@ -126,3 +126,25 @@ with description('Example execution using tags') as self:
                 parent.append(example)
 
                 expect(example.has_tag(TAG)).to(be_false)
+
+    with context('when checking if is included in execution with tags'):
+        with context('and has the tag'):
+            with it('returns true'):
+                parent = ExampleGroup('any example_group', tags=TAGS)
+
+                expect(parent.included_in_execution(TAGS)).to(be_true)
+
+        with context('and does not has the tag'):
+            with it('returns false'):
+                parent = ExampleGroup('any example_group')
+
+                expect(parent.included_in_execution(TAGS)).to(be_false)
+
+        with context('and children has the tag'):
+            with it('return true'):
+                parent = ExampleGroup('any example_group')
+                example = Example(lambda x: x, tags=TAGS)
+
+                parent.append(example)
+
+                expect(parent.included_in_execution(TAGS)).to(be_true)

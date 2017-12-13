@@ -27,7 +27,7 @@ class ExampleGroup(runnable.Runnable):
         return iter(self.examples)
 
     def execute(self, reporter, execution_context, tags=None):
-        if not self._children_included_in_execution(tags):
+        if not self.included_in_execution(tags):
             return
 
         self._start(reporter)
@@ -46,8 +46,11 @@ class ExampleGroup(runnable.Runnable):
 
         self._finish(reporter)
 
-    def _children_included_in_execution(self, tags):
-        return any(example.included_in_execution(tags) for example in self)
+    def included_in_execution(self, tags):
+        if any(example.included_in_execution(tags) for example in self):
+            return True
+
+        return super(ExampleGroup, self).included_in_execution(tags)
 
     def _start(self, reporter):
         self._begin = datetime.utcnow()
