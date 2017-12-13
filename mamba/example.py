@@ -59,5 +59,5 @@ class Example(runnable.Runnable):
 
 
 class PendingExample(Example):
-    def execute(self, reporter, execution_context):
+    def execute(self, reporter, execution_context, tags=None):
         reporter.example_pending(self)

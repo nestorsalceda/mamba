@@ -94,7 +94,7 @@ class ExampleGroup(runnable.Runnable):
 
 class PendingExampleGroup(ExampleGroup):
 
-    def execute(self, reporter, execution_context):
+    def execute(self, reporter, execution_context, tags=None):
         reporter.example_group_pending(self)
 
         for example in self:
