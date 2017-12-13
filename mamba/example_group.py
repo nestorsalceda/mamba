@@ -41,8 +41,8 @@ class ExampleGroup(runnable.Runnable):
                                 tags=tags)
 
             self.execute_hook('after_all', execution_context)
-        except Exception:
-            self.set_failed()
+        except Exception :
+            self.failed()
 
         self._finish(reporter)
 
