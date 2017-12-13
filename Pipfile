@@ -18,8 +18,3 @@ mock = ">=2.0.0"
 clint = ">=0.5.1"
 coverage = ">=4.4.1"
 "e1839a8" = {path = ".", editable = true}
-
-
-[requires]
-
-python_version = "2.7"
