@@ -12,10 +12,25 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
     sequence = 1
 
+    def visit_Module(self, node):
+        self.has_focused_examples = False
+
+        super(TransformToSpecsNodeTransformer, self).generic_visit(node)
+
+        node.body.append(ast.Assign(
+            targets=[ast.Name(id='__mamba_has_focused_examples', ctx=ast.Store())],
+            value=ast.Name(id=str(self.has_focused_examples), ctx=ast.Load())),
+        )
+
+        return node
+
     def visit_With(self, node):
         super(TransformToSpecsNodeTransformer, self).generic_visit(node)
 
         name = self._get_name(node)
+
+        if name in self.FOCUSED:
+            self.has_focused_examples = True
 
         if name in self.EXAMPLE_GROUPS:
             return self._transform_to_example_group(node, name)

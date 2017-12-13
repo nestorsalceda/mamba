@@ -26,10 +26,18 @@ class BaseRunner(Runner):
     def run(self):
         self.reporter.start()
 
-        for module in self.example_collector.modules():
+        modules = self.example_collector.modules()
+
+        if self._any_module_has_focused_examples(modules):
+            self.tags = ['focus']
+
+        for module in modules:
             self._run_examples_in(module)
 
         self.reporter.finish()
+
+    def _any_module_has_focused_examples(self, modules):
+        return any(getattr(module, '__mamba_has_focused_examples') for module in modules)
 
     def _run_examples_in(self, module):
         for example in self.loader.load_examples_from(module):

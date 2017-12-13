@@ -20,9 +20,12 @@ class ExampleCollector(object):
             self._node_transformer = nodetransformers.TransformToSpecsNodeTransformer()
 
     def modules(self):
+        modules = []
         for path in self._collect_files_containing_examples():
             with self._load_module_from(path) as module:
-                yield module
+                modules.append(module)
+
+        return modules
 
     def _collect_files_containing_examples(self):
         collected = []
