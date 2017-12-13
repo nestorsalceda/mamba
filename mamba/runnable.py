@@ -22,6 +22,12 @@ class Runnable(object):
     def execute(self, reporter, context, tags=None):
         raise NotImplementedError()
 
+    def has_tag(self, tag):
+        if self.parent is None:
+            return tag in self.tags
+
+        return tag in self.tags or self.parent.has_tag(tag)
+
     def included_in_execution(self, tags):
         if self._included_in_execution is None:
             self._included_in_execution = tags is None or any(tag in self.tags for tag in tags)

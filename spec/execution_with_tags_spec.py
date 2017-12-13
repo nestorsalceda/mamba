@@ -10,7 +10,8 @@ from mamba.example_group import ExampleGroup
 
 from spec.object_mother import an_example_group
 
-TAGS = ['any_tag']
+TAG = 'any_tag'
+TAGS = [TAG]
 
 with description('Example execution using tags') as self:
     with before.each:
@@ -94,3 +95,34 @@ with description('Example execution using tags') as self:
                 to(have_been_called_with(self.parent))
             expect(self.reporter.example_group_started).\
                 to(have_been_called_with(self.child))
+
+    with context('when checking if an example has a tag'):
+        with context('and example has the tag'):
+            with it('returns true'):
+                example = Example(lambda x: x, tags=TAGS)
+
+                expect(example.has_tag(TAG)).to(be_true)
+
+        with context('and does not contains the tag'):
+            with it('returns false'):
+                example = Example(lambda x: x)
+
+                expect(example.has_tag(TAG)).to(be_false)
+
+        with context('and parent example has the tag'):
+            with it('returns true'):
+                parent = ExampleGroup('any example_group', tags=TAGS)
+                example = Example(lambda x: x)
+
+                parent.append(example)
+
+                expect(example.has_tag(TAG)).to(be_true)
+
+        with context('and parent example has not the tag'):
+            with it('returns false'):
+                parent = ExampleGroup('any example_group')
+                example = Example(lambda x: x)
+
+                parent.append(example)
+
+                expect(example.has_tag(TAG)).to(be_false)
