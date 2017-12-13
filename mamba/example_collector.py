@@ -13,7 +13,11 @@ from mamba.infrastructure import is_python3
 class ExampleCollector(object):
     def __init__(self, paths):
         self.paths = paths
-        self._node_transformer = nodetransformers.TransformToSpecsPython3NodeTransformer() if is_python3() else nodetransformers.TransformToSpecsNodeTransformer()
+
+        if is_python3():
+            self._node_transformer = nodetransformers.TransformToSpecsPython3NodeTransformer()
+        else:
+            self._node_transformer = nodetransformers.TransformToSpecsNodeTransformer()
 
     def modules(self):
         for path in self._collect_files_containing_examples():
@@ -32,20 +36,17 @@ class ExampleCollector(object):
                 collected.append(path)
         return collected
 
-
     def _collect_files_in_directory(self, directory):
         collected = []
         for root, dirs, files in os.walk(directory):
             collected.extend([os.path.join(self._normalize_path(root), file_)
-                    for file_ in files if file_.endswith('_spec.py')])
-        collected.sort()
+                              for file_ in files if file_.endswith('_spec.py')])
+            collected.sort()
         return collected
 
     def _normalize_path(self, path):
         return os.path.normpath(path)
 
-    #TODO: What about managing locks with threads??
-    #Take care with watchdog stuff!!
     @contextlib.contextmanager
     def _load_module_from(self, path):
         name = path.replace('.py', '')

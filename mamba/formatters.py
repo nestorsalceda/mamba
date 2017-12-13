@@ -126,7 +126,6 @@ class DocumentationFormatter(Formatter):
                     puts(self._color('red', self._format_traceback(failed)))
                     puts()
 
-
     def _format_full_example_name(self, example):
         result = [self._format_example_name(example)]
 
