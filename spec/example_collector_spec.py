@@ -22,6 +22,7 @@ PENDING_DECORATOR_PATH = spec_abspath('with_pending_decorator.py')
 PENDING_DECORATOR_AS_ROOT_PATH = spec_abspath('with_pending_decorator_as_root.py')
 WITH_RELATIVE_IMPORT_PATH = spec_abspath('with_relative_import.py')
 WITH_TAGS_PATH = spec_abspath('with_tags.py')
+WITH_FOCUS_PATH = spec_abspath('with_focus.py')
 
 
 def _load_module(path):
@@ -76,6 +77,24 @@ with description(ExampleCollector):
 
             expect(spec).not_to(be_none)
             expect(spec.tags).to(equal(['unit']))
+
+    with context('when reading focus'):
+        with it('adds focus tag to spec'):
+            module = _load_module(WITH_FOCUS_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+            spec = next(iter(examples[0]))
+
+            expect(spec).not_to(be_none)
+            expect(spec.tags).to(equal(['focus', 'unit']))
+
+        with it('adds focus to context'):
+            module = _load_module(WITH_FOCUS_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples).to(have_length(2))
+            expect(examples[1].tags).to(equal(['focus', 'integration']))
 
     with context('when a pending decorator loaded'):
         with it('mark example as pending'):

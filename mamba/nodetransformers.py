@@ -3,8 +3,11 @@ import ast
 
 class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     PENDING_EXAMPLE_GROUPS = ('_description', '_context', '_describe')
-    EXAMPLE_GROUPS = ('description', 'context', 'describe') + PENDING_EXAMPLE_GROUPS
-    EXAMPLES = ('it', '_it')
+    FOCUSED_EXAMPLE_GROUPS = ('fdescription', 'fcontext', 'fdescribe')
+    EXAMPLE_GROUPS = ('description', 'context', 'describe') + PENDING_EXAMPLE_GROUPS + FOCUSED_EXAMPLE_GROUPS
+    FOCUSED_EXAMPLE = ('fit', )
+    EXAMPLES = ('it', '_it') + FOCUSED_EXAMPLE
+    FOCUSED = FOCUSED_EXAMPLE_GROUPS + FOCUSED_EXAMPLE
     HOOKS = ('before', 'after')
 
     sequence = 1
@@ -64,18 +67,21 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         description_name = '{0:08d}__{1}--{2}__description'.format(
             self.sequence,
             description_name,
-            self._tags_from(context_expr)
+            self._tags_from(context_expr, name)
         )
 
         self.sequence += 1
 
         return description_name
 
-    def _tags_from(self, context_expr):
-        tags = ''
+    def _tags_from(self, context_expr, method_name):
+        tags = []
+        if method_name in self.FOCUSED:
+            tags.append('focus')
         if len(context_expr.args) > 1:
-            tags = ','.join([arg.s for arg in context_expr.args[1:]])
-        return tags
+            tags.extend([arg.s for arg in context_expr.args[1:]])
+
+        return ','.join(tags)
 
     def _transform_to_example(self, node, name):
         context_expr = self._context_expr_for(node)
@@ -84,7 +90,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
             self.sequence,
             name,
             context_expr.args[0].s,
-            self._tags_from(context_expr)
+            self._tags_from(context_expr, name)
         )
         self.sequence += 1
 
