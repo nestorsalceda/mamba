@@ -55,7 +55,7 @@ class Example(runnable.Runnable):
 
     @property
     def name(self):
-        return self.test.__name__[10:].replace('--', '')
+        return self.test.__name__[10:].replace('--', '').replace('fit', 'it')
 
 class PendingExample(Example):
     def execute(self, reporter, execution_context, tags=None):
