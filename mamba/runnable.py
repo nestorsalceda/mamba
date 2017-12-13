@@ -31,9 +31,6 @@ class Runnable(object):
 
         return self._included_in_execution
 
-    def _do_execute(self, context, tags=None):
-        raise NotImplementedError()
-
     def failed(self):
         return self.error is not None
 
