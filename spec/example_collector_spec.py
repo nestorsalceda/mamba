@@ -67,7 +67,7 @@ with description(ExampleCollector):
             examples = loader.Loader().load_examples_from(module)
 
             expect(examples).to(have_length(1))
-            expect(examples[0].tags).to(equal(['integration']))
+            expect(examples[0].has_tag('integration')).to(be_true)
 
         with it('reads tags from spec parameters'):
             module = _load_module(WITH_TAGS_PATH)
@@ -76,7 +76,7 @@ with description(ExampleCollector):
             spec = next(iter(examples[0]))
 
             expect(spec).not_to(be_none)
-            expect(spec.tags).to(equal(['unit']))
+            expect(spec.has_tag('unit')).to(be_true)
 
     with context('when reading focus'):
         with it('adds focus tag to spec'):
@@ -86,7 +86,8 @@ with description(ExampleCollector):
             spec = next(iter(examples[0]))
 
             expect(spec).not_to(be_none)
-            expect(spec.tags).to(equal(['focus', 'unit']))
+            expect(spec.has_tag('focus')).to(be_true)
+            expect(spec.has_tag('unit')).to(be_true)
 
         with it('adds focus to context'):
             module = _load_module(WITH_FOCUS_PATH)
@@ -94,7 +95,8 @@ with description(ExampleCollector):
             examples = loader.Loader().load_examples_from(module)
 
             expect(examples).to(have_length(2))
-            expect(examples[1].tags).to(equal(['focus', 'integration']))
+            expect(examples[1].has_tag('focus')).to(be_true)
+            expect(examples[1].has_tag('integration')).to(be_true)
 
     with context('when a pending decorator loaded'):
         with it('mark example as pending'):

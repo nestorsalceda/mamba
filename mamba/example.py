@@ -57,7 +57,6 @@ class Example(runnable.Runnable):
     def name(self):
         return self.test.__name__[10:].replace('--', '')
 
-
 class PendingExample(Example):
     def execute(self, reporter, execution_context, tags=None):
         reporter.example_pending(self)

@@ -16,7 +16,7 @@ class Runnable(object):
         self.elapsed_time = timedelta(0)
         self.error = None
         self.parent = parent
-        self.tags = tags or []
+        self._tags = tags or []
         self._included_in_execution = None
 
     def execute(self, reporter, context, tags=None):
@@ -24,9 +24,9 @@ class Runnable(object):
 
     def has_tag(self, tag):
         if self.parent is None:
-            return tag in self.tags
+            return tag in self._tags
 
-        return tag in self.tags or self.parent.has_tag(tag)
+        return tag in self._tags or self.parent.has_tag(tag)
 
     def included_in_execution(self, tags):
         return tags is None or any(self.has_tag(tag) for tag in tags)
