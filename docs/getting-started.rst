@@ -25,8 +25,8 @@ But you also can use pip:
   $ pip install mamba
 
 
-Getting Started
----------------
+Your first example
+------------------
 
 Write a very simple example that describes your code behaviour:
 
