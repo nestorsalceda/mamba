@@ -31,7 +31,7 @@ A more realistic example would be:
 
 .. code-block:: python
 
-  from mamba import description, before, after, it
+  from mamba import description, before, it
 
   class Stuff(object):
 
