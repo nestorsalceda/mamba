@@ -1,5 +1,10 @@
 # ChangeLog
 
+## Version 0.9.2
+
+* Fix error with set_failed call
+* Add focus feature
+
 ## Version 0.9.1
 
 * Just a little fix for pypi installation :)
