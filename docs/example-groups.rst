@@ -46,3 +46,51 @@ For supporting a nice experience writting examples, mamba allows defining heper 
         return 'hello, %s'.format(world)
 
 You can define a helper method using Python language structures. And these helpers are exposed to example in the same group and in nested groups within that group, but not on parents or sibling groups.
+
+Pending examples
+----------------
+
+Sometimes I've found myself keeping a small ToDo record about what should test next. Or perhaps we need to disable an specific test.
+
+Mamba supports these cases using pending examples:
+
+.. code-block:: python
+
+  from mamba import description, _it
+
+  with description('Pending Examples') as self:
+      with _it('will not run any pending example (marked with an underscore)'):
+        assert False
+
+
+When running this spec, we get the following output:
+
+::
+
+  *
+
+  0 examples ran (1 pending) in 0.0003 seconds
+
+
+And this also works with example groups:
+
+.. code-block:: python
+
+  from mamba import description, _context, it
+
+  with description('Pending Examples') as self:
+      with _context('when running a pending context (marked with an underscore)'):
+        with it('will not run any example under a pending context'):
+          assert False
+
+        with it('will not be run either'):
+          assert False
+
+
+And when executing this spec:
+
+::
+
+  **
+
+  0 examples ran (2 pending) in 0.0005 seconds
