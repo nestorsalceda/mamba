@@ -15,4 +15,5 @@ Contents
 
    getting-started
    example-groups
+   hooks
    integration
