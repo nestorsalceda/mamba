@@ -10,6 +10,8 @@ name = "pypi"
 expects = ">=0.8.0"
 doublex-expects = ">=0.7.0rc2"
 mock = ">=2.0.0"
+sphinx = ">=1.6.5"
+sphinx-autobuild = ">=0.7.1"
 "e1839a8" = {path = ".", editable = true}
 
 
