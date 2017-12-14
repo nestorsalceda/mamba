@@ -16,11 +16,3 @@ Contents
    getting-started
    example-groups
    integration
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
