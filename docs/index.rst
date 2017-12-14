@@ -14,6 +14,7 @@ Contents
    :maxdepth: 2
 
    getting-started
+   example-groups
 
 
 Indices and tables
