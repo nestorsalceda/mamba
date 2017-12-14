@@ -15,6 +15,7 @@ Contents
 
    getting-started
    example-groups
+   integration
 
 
 Indices and tables
