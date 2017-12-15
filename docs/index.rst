@@ -16,4 +16,5 @@ Contents
    getting-started
    example-groups
    hooks
+   filtering
    integration
