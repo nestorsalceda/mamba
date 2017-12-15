@@ -14,8 +14,13 @@ setup(name='mamba',
           'License :: OSI Approved :: MIT License',
           'Operating System :: OS Independent',
           'Topic :: Software Development :: Quality Assurance',
-          'Topic :: Software Development :: Testing'
-
+          'Topic :: Software Development :: Testing',
+          'Programming Language :: Python',
+          'Programming Language :: Python::2.7',
+          'Programming Language :: Python::3.6',
+          'Programming Language :: Python :: Implementation',
+          'Programming Language :: Python :: Implementation :: CPython',
+          'Programming Language :: Python :: Implementation :: PyPy'
       ],
       keywords='',
       author=u'Néstor Salceda',
