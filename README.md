@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/nestorsalceda/mamba.svg)](https://travis-ci.org/nestorsalceda/mamba)
 [![Latest PyPI Version](https://img.shields.io/pypi/v/mamba.svg)](https://pypi.python.org/pypi/mamba)
-[![Read The Docs Status](https://readthedocs.org/projects/pip/badge/)](https://readthedocs.org/projects/pip/badge/)
+[![Read The Docs Status](https://readthedocs.org/projects/pip/badge/)](https://mamba-bdd.readthedocs.io/en/latest/)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/mamba.svg)](https://pypi.python.org/pypi/mamba/)
 
 
