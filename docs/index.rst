@@ -19,3 +19,4 @@ Contents
    filtering
    formatters
    integration
+   other-features
