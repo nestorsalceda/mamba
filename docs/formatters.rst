@@ -1,0 +1,33 @@
+Formatters
+==========
+
+Mamba bundles with two formatters.
+
+Progress Formatter
+------------------
+
+This is the default formatter. It displays a point for every example executed:
+
+* Green point: It means that example has passed
+* Yellow point: It means that example has been skipped
+* Red point: It means that example has failed
+
+Documentation Formatter
+-----------------------
+
+This is an extra formatter that allows you to read in a tree way. It uses same color scheme than previous formatter.
+
+Is useful when you have a few tests and want to check that examples are written in human language.
+
+For enabling it:
+
+::
+
+  $ pipenv run mamba --format=documentation
+
+Custom Formatters
+-----------------
+
+Several people had requested formatters for PyCharm, HTML or xUnit.
+
+In a future, you will be able to write your own and use it.

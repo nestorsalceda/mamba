@@ -17,4 +17,5 @@ Contents
    example-groups
    hooks
    filtering
+   formatters
    integration
