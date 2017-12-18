@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from importlib import import_module
+
 from mamba import settings, formatters, reporter, runners, example_collector, loader
 
 
@@ -22,9 +24,20 @@ class ApplicationFactory(object):
 
     def create_formatter(self):
         settings = self.create_settings()
+
+        if settings.format == 'progress':
+            return formatters.ProgressFormatter(settings)
         if settings.format == 'documentation':
             return formatters.DocumentationFormatter(settings)
-        return formatters.ProgressFormatter(settings)
+
+        return self._create_custom_formatter(settings)
+
+    def _create_custom_formatter(self, settings):
+        splitted = settings.format.split('.')
+        module = import_module('.'.join(splitted[0:-1]), splitted[-1])
+        formatter = getattr(module, splitted[-1])
+
+        return formatter(settings)
 
     def create_example_collector(self):
         return example_collector.ExampleCollector(self.arguments.specs)
