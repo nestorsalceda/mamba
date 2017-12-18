@@ -10,8 +10,9 @@ class ApplicationFactory(object):
     def __init__(self, arguments):
         self._instances = {}
         self.arguments = arguments
+        self.settings = self._settings(self.arguments)
 
-    def create_settings(self):
+    def _settings(self, arguments):
         settings_ = settings.Settings()
         settings_.slow_test_threshold = self.arguments.slow
         settings_.enable_code_coverage = self.arguments.enable_coverage
@@ -22,38 +23,38 @@ class ApplicationFactory(object):
 
         return settings_
 
-    def create_formatter(self):
-        settings = self.create_settings()
+    def runner(self):
+        runner = runners.BaseRunner(self._example_collector(),
+                                    self._loader(),
+                                    self._reporter(),
+                                    self.settings.tags)
 
-        if settings.format == 'progress':
-            return formatters.ProgressFormatter(settings)
-        if settings.format == 'documentation':
-            return formatters.DocumentationFormatter(settings)
+        if self.settings.enable_code_coverage:
+            runner = runners.CodeCoverageRunner(runner,
+                                                self.settings.code_coverage_file)
 
-        return self._create_custom_formatter(settings)
+        return runner
 
-    def _create_custom_formatter(self, settings):
-        splitted = settings.format.split('.')
+    def _example_collector(self):
+        return example_collector.ExampleCollector(self.arguments.specs)
+
+    def _loader(self):
+        return loader.Loader()
+
+    def _reporter(self):
+        return reporter.Reporter(self._formatter())
+
+    def _formatter(self):
+        if self.settings.format == 'progress':
+            return formatters.ProgressFormatter(self.settings)
+        if self.settings.format == 'documentation':
+            return formatters.DocumentationFormatter(self.settings)
+
+        return self._custom_formatter()
+
+    def _custom_formatter(self):
+        splitted = self.settings.format.split('.')
         module = import_module('.'.join(splitted[0:-1]), splitted[-1])
         formatter = getattr(module, splitted[-1])
 
-        return formatter(settings)
-
-    def create_example_collector(self):
-        return example_collector.ExampleCollector(self.arguments.specs)
-
-    def create_reporter(self):
-        return reporter.Reporter(self.create_formatter())
-
-    def create_runner(self):
-        settings = self.create_settings()
-        runner = runners.BaseRunner(self.create_example_collector(),
-                                    loader.Loader(),
-                                    self.create_reporter(),
-                                    settings.tags)
-
-        if settings.enable_code_coverage:
-            runner = runners.CodeCoverageRunner(runner,
-                                                settings.code_coverage_file)
-
-        return runner
+        return formatter(self.settings)

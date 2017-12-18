@@ -13,7 +13,7 @@ def main():
         return
 
     factory = application_factory.ApplicationFactory(arguments)
-    runner = factory.create_runner()
+    runner = factory.runner()
 
     runner.run()
 
