@@ -28,6 +28,14 @@ For enabling it:
 Custom Formatters
 -----------------
 
-Several people had requested formatters for PyCharm, HTML or xUnit.
+Mamba supports third party formatters. Imagine there is a new IDE or some specific needs for your Continuous Integration tool, so:
 
-In a future, you will be able to write your own and use it.
+::
+
+  $ pipenv run maba --format=wondertech.MyCustomFormatter
+
+
+And mamba tries to instantiate the *wondertech.MyCustomFormatter* class.  But there are 2 conditions that should be met:
+
+* A settings object is passed to object constuctor
+* Inherit from mamba.formatter.Formatter for overriding methods
