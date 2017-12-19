@@ -42,7 +42,7 @@ class ExampleGroup(runnable.Runnable):
 
             self.execute_hook('after_all', execution_context)
         except Exception:
-            self.failed()
+            self.fail()
 
         self._finish(reporter)
 
