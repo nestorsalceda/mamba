@@ -45,7 +45,11 @@ class Reporter(object):
 
     def finish(self):
         self.stop()
-        self.notify('summary', self.duration, self.example_count, self.failed_count, self.pending_count)
+        self.notify('summary',
+                    self.duration,
+                    self.example_count,
+                    self.failed_count,
+                    self.pending_count)
         self.notify('failures', self.failed_examples)
 
     def stop(self):

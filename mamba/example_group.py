@@ -58,7 +58,9 @@ class ExampleGroup(runnable.Runnable):
 
     def _bind_helpers_to(self, execution_context):
         for name, method in self.helpers.items():
-            setattr(execution_context, name, partial(method, execution_context))
+            setattr(execution_context,
+                    name,
+                    partial(method, execution_context))
 
     def execute_hook(self, hook, execution_context):
         if self.parent is not None:
