@@ -27,8 +27,7 @@ class Example(runnable.Runnable):
         if self.error is None:
             self._execute_test(execution_context)
 
-        if self.error is None:
-            self.parent.execute_hook('after_each', execution_context)
+        self.parent.execute_hook('after_each', execution_context)
 
         self.was_run = True
         self._finish(reporter)
