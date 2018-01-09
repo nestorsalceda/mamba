@@ -16,7 +16,6 @@ By example:
 
 ```
   $ pipenv install mamba
-
 ```
 
 But you also can use pip:
@@ -31,7 +30,6 @@ But you also can use pip:
 Write a very simple example that describes your code behaviour:
 
 ```python
-
   # tennis_spec.py
 
   from mamba import description, context, it
@@ -50,7 +48,6 @@ Write a very simple example that describes your code behaviour:
 Run the example, and don't forget to watch it fail!
 
 ```
-
   $ pipenv run mamba tennis_spec.py
 
   F
@@ -65,13 +62,11 @@ Run the example, and don't forget to watch it fail!
 
       File "tennis_spec.py", line 8, in 00000001__it starts with 0 - 0 score--
           game = Game(rafa_nadal, roger_federer)
-
 ```
 
 Now write as little code for making it pass.
 
 ```python
-
   # tennis_spec.py
 
   from mamba import description, context, it
@@ -89,7 +84,6 @@ Now write as little code for making it pass.
 ```
 
 ```python
-
   # tennis.py
 
   class Game(object):
@@ -103,7 +97,6 @@ Now write as little code for making it pass.
 Run the spec file and enjoy that all tests are green!
 
 ```
-
   $ pipenv run mamba tennis_spec.py
 
   .
