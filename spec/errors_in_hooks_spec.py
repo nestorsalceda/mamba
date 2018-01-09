@@ -52,7 +52,7 @@ with description('Errors in hooks') as self:
 
             self.example_group.execute(self.reporter, runnable.ExecutionContext())
 
-            expect(self.example.error).not_to(be_none)
+            expect(self.example.error.exception).to(be_a(NotImplementedError))
 
         with it('does not executes the example'):
             self.example = a_failing_example()
@@ -60,7 +60,7 @@ with description('Errors in hooks') as self:
 
             self.example_group.execute(self.reporter, runnable.ExecutionContext())
 
-            expect(self.example.error.exception).to(be_a(NotImplementedError))
+            expect(self.example.was_run).to(be_false)
 
     with context('when an error was raised in an after.each hook'):
         with before.each:

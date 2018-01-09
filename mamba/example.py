@@ -29,7 +29,6 @@ class Example(runnable.Runnable):
 
         self.parent.execute_hook('after_each', execution_context)
 
-        self.was_run = True
         self._finish(reporter)
 
     def _start(self, reporter):
@@ -44,6 +43,8 @@ class Example(runnable.Runnable):
                 self.test(execution_context)
         except Exception:
             self.fail()
+        finally:
+            self.was_run = True
 
     def _finish(self, reporter):
         self.elapsed_time = datetime.utcnow() - self._begin
