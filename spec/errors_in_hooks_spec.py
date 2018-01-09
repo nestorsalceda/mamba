@@ -1,5 +1,5 @@
 from mamba import description, before, it, context
-from expects import expect, be_none, be_a, be_true
+from expects import expect, be_none, be_a, be_true, be_false
 from doublex import Spy
 
 from mamba import reporter, runnable
@@ -75,13 +75,13 @@ with description('Errors in hooks') as self:
             expect(self.example.error).not_to(be_none)
 
         with context('when an error happened in the example'):
-            with it('does not execute after_each hook'):
+            with it('still executes after_each hook'):
                 self.example = a_failing_example()
                 self.example_group.append(self.example)
 
                 self.example_group.execute(self.reporter, runnable.ExecutionContext())
 
-                expect(isinstance(self.example.error.exception, ValueError)).to(be_true)
+                expect(isinstance(self.example.error.exception, ValueError)).to(be_false)
 
     with context('when an error was raised in an after.all hook'):
         with before.each:
