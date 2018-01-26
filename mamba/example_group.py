@@ -22,6 +22,7 @@ class ExampleGroup(runnable.Runnable):
             'after_all': []
         }
         self.helpers = {}
+        self._before_all_executed = False
 
     def __iter__(self):
         return iter(self.examples)
@@ -63,6 +64,12 @@ class ExampleGroup(runnable.Runnable):
                     partial(method, execution_context))
 
     def execute_hook(self, hook, execution_context):
+        if hook == 'before_all':
+            if self._before_all_executed:
+                return
+            else:
+                self._before_all_executed = True
+
         if self.parent is not None:
             self.parent.execute_hook(hook, execution_context)
 
