@@ -64,11 +64,8 @@ class ExampleGroup(runnable.Runnable):
                     partial(method, execution_context))
 
     def execute_hook(self, hook, execution_context):
-        if hook == 'before_all':
-            if self._before_all_executed:
-                return
-            else:
-                self._before_all_executed = True
+        if hook.endswith('_all') and not self.hooks.get(hook):
+            return
 
         if self.parent is not None:
             self.parent.execute_hook(hook, execution_context)
