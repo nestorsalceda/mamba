@@ -32,7 +32,7 @@ Mamba supports third party formatters. Imagine there is a new IDE or some specif
 
 ::
 
-  $ pipenv run maba --format=wondertech.MyCustomFormatter
+  $ pipenv run mamba --format=wondertech.MyCustomFormatter
 
 
 And mamba tries to instantiate the *wondertech.MyCustomFormatter* class.  But there are 2 conditions that should be met:
