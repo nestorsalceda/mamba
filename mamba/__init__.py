@@ -13,6 +13,18 @@ def fdescription(message):
     pass
 
 
+def describe(message):
+    pass
+
+
+def _describe(message):
+    pass
+
+
+def fdescribe(message):
+    pass
+
+
 def it(message):
     pass
 
