@@ -1,5 +1,10 @@
 # ChangeLog
 
+## Version 0.9.3
+
+* Improve documentation
+* Fix *_all hooks execution
+
 ## Version 0.9.2
 
 * Fix error with set_failed call
