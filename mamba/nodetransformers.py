@@ -25,7 +25,11 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
         super(TransformToSpecsNodeTransformer, self).generic_visit(node)
 
-        node.body.insert(0, ast.ImportFrom(module='mamba.nodetransformers', names=[ast.alias(name='add_attribute_decorator')]))
+        node.body.insert(0, ast.ImportFrom(
+            module='mamba.nodetransformers',
+            names=[ast.alias(name='add_attribute_decorator')],
+            level=0
+        ))
         node.body.append(ast.Assign(
             targets=[ast.Name(id='__mamba_has_focused_examples', ctx=ast.Store())],
             value=ast.Name(id=str(self.has_focused_examples), ctx=ast.Load())),
