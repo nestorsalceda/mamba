@@ -23,6 +23,7 @@ PENDING_DECORATOR_AS_ROOT_PATH = spec_abspath('with_pending_decorator_as_root.py
 WITH_RELATIVE_IMPORT_PATH = spec_abspath('with_relative_import.py')
 WITH_TAGS_PATH = spec_abspath('with_tags.py')
 WITH_FOCUS_PATH = spec_abspath('with_focus.py')
+SHARED_CONTEXT_PATH = spec_abspath('with_shared_context.py')
 
 
 def _load_module(path):
@@ -128,6 +129,15 @@ with description(ExampleCollector):
             expect(examples_in_root[0]).to(be_a(example.PendingExample))
             expect(examples_in_root[1]).to(be_a(example_group.PendingExampleGroup))
             expect(examples_in_root[1].examples[0]).to(be_a(example.PendingExample))
+
+    with context('when a shared context is loaded'):
+        with it('mark context as shared'):
+            module = _load_module(SHARED_CONTEXT_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples).to(have_length(1))
+            expect(examples[0]).to(be_a(example_group.SharedExampleGroup))
 
     with context('when loading with relative import'):
         with it('loads module and perform relative import'):
