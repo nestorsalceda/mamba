@@ -145,9 +145,14 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         )
 
     def _set_attribute(self, attr, value):
+        if isinstance(value, bool):
+            val = ast.NameConstant(value=value is True)
+        else:
+            val = ast.Str(str(value))
+
         return ast.Call(
             func=ast.Name(id='add_attribute_decorator', ctx=ast.Load()),
-            args=[ast.Str(attr), ast.Str(value)],
+            args=[ast.Str(attr), val],
             keywords=[]
         )
 
