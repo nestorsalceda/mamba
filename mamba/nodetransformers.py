@@ -153,7 +153,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
     def _convert_value(self, value):
         if isinstance(value, bool):
-            return ast.Str(str(value) if value else '') 
+            return ast.Str(str(value) if value else '')
         elif isinstance(value, list):
             return ast.List(elts=list(map(self._convert_value, value)), ctx=ast.Load())
         else:
