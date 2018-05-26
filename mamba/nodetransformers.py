@@ -1,6 +1,13 @@
 import ast
 
 
+def add_attribute_decorator(attr, value):
+    def wrapper(function_or_class):
+        setattr(function_or_class, attr, value)
+        return function_or_class
+    return wrapper
+
+
 class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     PENDING_EXAMPLE_GROUPS = ('_description', '_context', '_describe')
     FOCUSED_EXAMPLE_GROUPS = ('fdescription', 'fcontext', 'fdescribe')
@@ -17,6 +24,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
         super(TransformToSpecsNodeTransformer, self).generic_visit(node)
 
+        node.body.insert(0, ast.ImportFrom(module='mamba.nodetransformers', names=[ast.alias(name='add_attribute_decorator')]))
         node.body.append(ast.Assign(
             targets=[ast.Name(id='__mamba_has_focused_examples', ctx=ast.Store())],
             value=ast.Name(id=str(self.has_focused_examples), ctx=ast.Load())),
@@ -133,6 +141,14 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
             ),
             node
         )
+
+    def _set_attribute(self, attr, value):
+        return ast.Call(
+            func=ast.Name(id='add_attribute_decorator', ctx=ast.Load()),
+            args=[ast.Str(attr), ast.Str(value)],
+            keywords=[]
+        )
+
 
 
 class TransformToSpecsPython3NodeTransformer(TransformToSpecsNodeTransformer):
