@@ -70,7 +70,9 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                 bases=[],
                 keywords=[],
                 body=node.body,
-                decorator_list=[]
+                decorator_list=[
+                    self._set_attribute('_tags', self._tags_from(self._context_expr_for(node), name))
+                ]
             ),
             node
         )
@@ -87,10 +89,9 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         if name in self.PENDING_EXAMPLE_GROUPS:
             description_name += '__pending'
 
-        description_name = '{0:08d}__{1}--{2}__description'.format(
+        description_name = '{0:08d}__{1}__description'.format(
             self.sequence,
             description_name,
-            self._tags_from(context_expr, name)
         )
 
         self.sequence += 1
@@ -109,11 +110,10 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     def _transform_to_example(self, node, name):
         context_expr = self._context_expr_for(node)
 
-        example_name = '{0:08d}__{1} {2}--{3}'.format(
+        example_name = '{0:08d}__{1} {2}'.format(
             self.sequence,
             name,
-            context_expr.args[0].s,
-            self._tags_from(context_expr, name)
+            context_expr.args[0].s
         )
         self.sequence += 1
 
@@ -122,7 +122,9 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                 name=example_name,
                 args=self._generate_argument('self'),
                 body=node.body,
-                decorator_list=[]
+                decorator_list=[
+                    self._set_attribute('_tags', self._tags_from(context_expr, name))
+                ]
             ),
             node
         )
