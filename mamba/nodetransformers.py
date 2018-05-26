@@ -72,6 +72,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                 keywords=[],
                 body=node.body,
                 decorator_list=[
+                    self._set_attribute('_example_group', True),
                     self._set_attribute('_tags', self._tags_from(self._context_expr_for(node), name)),
                     self._set_attribute('_pending', name in self.PENDING_EXAMPLE_GROUPS)
                 ]
@@ -88,7 +89,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         else:
             description_name = context_expr.args[0].id
 
-        description_name = '{0:08d}__{1}__description'.format(
+        description_name = '{0:08d}__{1}'.format(
             self.sequence,
             description_name,
         )

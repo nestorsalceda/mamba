@@ -21,10 +21,10 @@ class Loader(object):
         return loaded
 
     def _example_groups_for(self, module):
-        return [klass for name, klass in inspect.getmembers(module, inspect.isclass) if self._is_example_group(name)]
+        return [klass for name, klass in inspect.getmembers(module, inspect.isclass) if self._is_example_group(klass)]
 
-    def _is_example_group(self, class_name):
-        return class_name.endswith('__description')
+    def _is_example_group(self, klass):
+        return getattr(klass, '_example_group', False)
 
     def _create_example_group(self, klass):
         name = self._description(klass)
@@ -35,7 +35,7 @@ class Loader(object):
         return ExampleGroup(name, tags=tags)
 
     def _description(self, example_group):
-        return example_group.__name__.replace('__description', '')[10:]
+        return example_group.__name__[10:]
 
     def _add_hooks_examples_and_nested_example_groups_to(self, klass, example_group):
         self._load_hooks(klass, example_group)
