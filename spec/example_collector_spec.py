@@ -24,6 +24,7 @@ WITH_RELATIVE_IMPORT_PATH = spec_abspath('with_relative_import.py')
 WITH_TAGS_PATH = spec_abspath('with_tags.py')
 WITH_FOCUS_PATH = spec_abspath('with_focus.py')
 SHARED_CONTEXT_PATH = spec_abspath('with_shared_context.py')
+INCLUDED_CONTEXT_PATH = spec_abspath('with_included_context.py')
 
 
 def _load_module(path):
@@ -138,6 +139,15 @@ with description(ExampleCollector):
 
             expect(examples).to(have_length(1))
             expect(examples[0]).to(be_a(example_group.SharedExampleGroup))
+
+    with context('when a included context is loaded'):
+        with it('insert a normal example group instead'):
+            module = _load_module(INCLUDED_CONTEXT_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples[1]).to(have_length(1))
+            expect(examples[1].examples[0]).to(be_a(example_group.ExampleGroup))
 
     with context('when loading with relative import'):
         with it('loads module and perform relative import'):
