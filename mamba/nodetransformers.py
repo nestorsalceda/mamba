@@ -105,7 +105,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         if len(context_expr.args) > 1:
             tags.extend([arg.s for arg in context_expr.args[1:]])
 
-        return ','.join(tags)
+        return tags
 
     def _transform_to_example(self, node, name):
         context_expr = self._context_expr_for(node)
@@ -147,16 +147,19 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         )
 
     def _set_attribute(self, attr, value):
-        if isinstance(value, bool):
-            val = ast.NameConstant(value=value is True)
-        else:
-            val = ast.Str(str(value))
-
         return ast.Call(
             func=ast.Name(id='add_attribute_decorator', ctx=ast.Load()),
-            args=[ast.Str(attr), val],
+            args=[ast.Str(attr), self._convert_value(value)],
             keywords=[]
         )
+
+    def _convert_value(self, value):
+        if isinstance(value, bool):
+            return ast.NameConstant(value=value is True)
+        elif isinstance(value, list):
+            return ast.List(elts=list(map(self._convert_value, value)), ctx=ast.Load())
+        else:
+            return ast.Str(str(value))
 
 
 
