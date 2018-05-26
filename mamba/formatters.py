@@ -63,13 +63,7 @@ class DocumentationFormatter(Formatter):
         self._format_example(self._color('yellow', '✗'), example)
 
     def _format_example(self, symbol, example):
-        puts('  ' * self._depth(example) + symbol + ' ' + self._format_example_name(example) + self._format_slow_test(example))
-
-    def _format_example_name(self, example):
-        name = example.name
-        if name[8:10] == '__' and name[:8].isdigit():
-            name = name[10:]
-        return name.replace('_', ' ')
+        puts('  ' * self._depth(example) + symbol + ' ' + example.name + self._format_slow_test(example))
 
     def _format_slow_test(self, example):
         seconds = example.elapsed_time.total_seconds()
@@ -127,11 +121,11 @@ class DocumentationFormatter(Formatter):
                     puts()
 
     def _format_full_example_name(self, example):
-        result = [self._format_example_name(example)]
+        result = [example.name]
 
         current = example
         while current.parent:
-            result.append(self._format_example_name(current.parent))
+            result.append(current.parent.name)
             current = current.parent
 
         result.reverse()

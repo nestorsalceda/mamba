@@ -65,38 +65,31 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         return node.context_expr
 
     def _transform_to_example_group(self, node, name):
+        context_expr = self._context_expr_for(node)
+        example_name = self._human_readable_context_expr(context_expr)
         return ast.copy_location(
             ast.ClassDef(
-                name=self._description_name(node, name),
+                name=self._prefix_with_sequence(example_name),
                 bases=[],
                 keywords=[],
                 body=node.body,
                 decorator_list=[
                     self._set_attribute('_example_group', True),
-                    self._set_attribute('_tags', self._tags_from(self._context_expr_for(node), name)),
+                    self._set_attribute('_example_name', example_name),
+                    self._set_attribute('_tags', self._tags_from(context_expr, name)),
                     self._set_attribute('_pending', name in self.PENDING_EXAMPLE_GROUPS)
                 ]
             ),
             node
         )
 
-    def _description_name(self, node, name):
-        context_expr = self._context_expr_for(node)
+    def _human_readable_context_expr(self, context_expr):
         if isinstance(context_expr.args[0], ast.Str):
-            description_name = context_expr.args[0].s
+            return context_expr.args[0].s
         elif isinstance(context_expr.args[0], ast.Attribute):
-            description_name = context_expr.args[0].attr
+            return context_expr.args[0].attr
         else:
-            description_name = context_expr.args[0].id
-
-        description_name = '{0:08d}__{1}'.format(
-            self.sequence,
-            description_name,
-        )
-
-        self.sequence += 1
-
-        return description_name
+            return context_expr.args[0].id
 
     def _tags_from(self, context_expr, method_name):
         tags = []
@@ -110,26 +103,27 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     def _transform_to_example(self, node, name):
         context_expr = self._context_expr_for(node)
 
-        example_name = '{0:08d}__{1} {2}'.format(
-            self.sequence,
-            name,
-            context_expr.args[0].s
-        )
-        self.sequence += 1
+        example_name = '{0} {1}'.format(name, context_expr.args[0].s)
 
         return ast.copy_location(
             ast.FunctionDef(
-                name=example_name,
+                name=self._prefix_with_sequence(example_name),
                 args=self._generate_argument('self'),
                 body=node.body,
                 decorator_list=[
                     self._set_attribute('_example', True),
+                    self._set_attribute('_example_name', example_name),
                     self._set_attribute('_tags', self._tags_from(context_expr, name)),
                     self._set_attribute('_pending', name in self.PENDING_EXAMPLE)
                 ]
             ),
             node
         )
+
+    def _prefix_with_sequence(self, name):
+        result = '{0:08d}__{1}'.format(self.sequence, name)
+        self.sequence += 1
+        return result
 
     def _generate_argument(self, name):
         return ast.arguments(args=[ast.Name(id=name, ctx=ast.Param())], vararg=None, kwarg=None, defaults=[])

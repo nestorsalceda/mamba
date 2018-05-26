@@ -27,15 +27,12 @@ class Loader(object):
         return getattr(klass, '_example_group', False)
 
     def _create_example_group(self, klass):
-        name = self._description(klass)
+        name = klass._example_name
         tags = klass._tags
 
         if klass._pending:
             return PendingExampleGroup(name, tags=tags)
         return ExampleGroup(name, tags=tags)
-
-    def _description(self, example_group):
-        return example_group.__name__[10:]
 
     def _add_hooks_examples_and_nested_example_groups_to(self, klass, example_group):
         self._load_hooks(klass, example_group)
@@ -82,7 +79,7 @@ class Loader(object):
     def _load_nested_example_groups(self, klass, example_group):
         for nested in self._example_groups_for(klass):
             if isinstance(example_group, PendingExampleGroup):
-                nested_example_group = PendingExampleGroup(self._description(nested))
+                nested_example_group = PendingExampleGroup(nested._example_name)
             else:
                 nested_example_group = self._create_example_group(nested)
 
