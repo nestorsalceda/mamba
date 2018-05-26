@@ -71,7 +71,7 @@ class Loader(object):
         return getattr(method, '_example', False)
 
     def _is_focused_example(self, example):
-        return example.__name__[10:].startswith('fit')
+        return 'focus' in example._tags
 
     def _is_pending_example(self, example):
         return example._pending
