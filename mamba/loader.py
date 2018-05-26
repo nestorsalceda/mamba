@@ -30,12 +30,12 @@ class Loader(object):
         name = self._description(klass)
         tags = self._tags_for(klass)
 
-        if '__pending' in klass.__name__:
+        if klass._pending:
             return PendingExampleGroup(name, tags=tags)
         return ExampleGroup(name, tags=tags)
 
     def _description(self, example_group):
-        return example_group.__name__.replace('__description', '').replace('__pending', '')[10:]
+        return example_group.__name__.replace('__description', '')[10:]
 
     def _add_hooks_examples_and_nested_example_groups_to(self, klass, example_group):
         self._load_hooks(klass, example_group)
@@ -80,7 +80,7 @@ class Loader(object):
         return example.__name__[10:].startswith('fit')
 
     def _is_pending_example(self, example):
-        return example.__name__[10:].startswith('_it')
+        return example._pending
 
     def _is_pending_example_group(self, example_group):
         return isinstance(example_group, PendingExampleGroup)

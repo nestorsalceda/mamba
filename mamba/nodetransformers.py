@@ -13,7 +13,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     FOCUSED_EXAMPLE_GROUPS = ('fdescription', 'fcontext', 'fdescribe')
     EXAMPLE_GROUPS = ('description', 'context', 'describe') + PENDING_EXAMPLE_GROUPS + FOCUSED_EXAMPLE_GROUPS
     FOCUSED_EXAMPLE = ('fit', )
-    EXAMPLES = ('it', '_it') + FOCUSED_EXAMPLE
+    PENDING_EXAMPLE = ('_it', )
+    EXAMPLES = ('it',) + PENDING_EXAMPLE + FOCUSED_EXAMPLE
     FOCUSED = FOCUSED_EXAMPLE_GROUPS + FOCUSED_EXAMPLE
     HOOKS = ('before', 'after')
 
@@ -71,7 +72,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                 keywords=[],
                 body=node.body,
                 decorator_list=[
-                    self._set_attribute('_tags', self._tags_from(self._context_expr_for(node), name))
+                    self._set_attribute('_tags', self._tags_from(self._context_expr_for(node), name)),
+                    self._set_attribute('_pending', name in self.PENDING_EXAMPLE_GROUPS)
                 ]
             ),
             node
@@ -85,9 +87,6 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
             description_name = context_expr.args[0].attr
         else:
             description_name = context_expr.args[0].id
-
-        if name in self.PENDING_EXAMPLE_GROUPS:
-            description_name += '__pending'
 
         description_name = '{0:08d}__{1}__description'.format(
             self.sequence,
@@ -124,7 +123,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                 body=node.body,
                 decorator_list=[
                     self._set_attribute('_example', True),
-                    self._set_attribute('_tags', self._tags_from(context_expr, name))
+                    self._set_attribute('_tags', self._tags_from(context_expr, name)),
+                    self._set_attribute('_pending', name in self.PENDING_EXAMPLE)
                 ]
             ),
             node
