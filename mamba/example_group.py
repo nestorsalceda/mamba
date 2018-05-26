@@ -117,4 +117,5 @@ class PendingExampleGroup(ExampleGroup):
 
 
 class SharedExampleGroup(ExampleGroup):
-    pass
+    def execute(self, reporter, execution_context, tags=None):
+        pass
