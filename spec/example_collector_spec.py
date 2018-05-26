@@ -153,6 +153,15 @@ with description(ExampleCollector):
             expect(examples[1]).to(have_length(1))
             expect(examples[1].examples[0]).to(be_a(example_group.ExampleGroup))
 
+        with it('inserts the examples of the shared context'):
+            module = _load_module(INCLUDED_CONTEXT_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples[1]).to(have_length(1))
+            included_context = examples[1].examples[0]
+            expect(example_names(included_context.examples)).to(equal(['it shared example', 'it added example']))
+
     with context('when loading with relative import'):
         with it('loads module and perform relative import'):
             module = _load_module(WITH_RELATIVE_IMPORT_PATH)
