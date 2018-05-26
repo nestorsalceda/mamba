@@ -112,22 +112,22 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         return ast.copy_location(
             ast.FunctionDef(
                 name=example_name,
-                args=self._generate_self(),
+                args=self._generate_argument('self'),
                 body=node.body,
                 decorator_list=[]
             ),
             node
         )
 
-    def _generate_self(self):
-        return ast.arguments(args=[ast.Name(id='self', ctx=ast.Param())], vararg=None, kwarg=None, defaults=[])
+    def _generate_argument(self, name):
+        return ast.arguments(args=[ast.Name(id=name, ctx=ast.Param())], vararg=None, kwarg=None, defaults=[])
 
     def _transform_to_hook(self, node, name):
         when = self._context_expr_for(node).attr
         return ast.copy_location(
             ast.FunctionDef(
                 name=name + '_' + when,
-                args=self._generate_self(),
+                args=self._generate_argument('self'),
                 body=node.body,
                 decorator_list=[]
             ),
@@ -140,13 +140,12 @@ class TransformToSpecsPython3NodeTransformer(TransformToSpecsNodeTransformer):
     def _context_expr_for(self, node):
         return node.items[0].context_expr
 
-    def _generate_self(self):
+    def _generate_argument(self, name):
         return ast.arguments(
-            args=[ast.arg(arg='self', annotation=None)],
+            args=[ast.arg(arg=name, annotation=None)],
             vararg=None,
             kwonlyargs=[],
             kw_defaults=[],
             kwarg=None,
             defaults=[]
         )
-
