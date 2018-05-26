@@ -123,6 +123,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                 args=self._generate_argument('self'),
                 body=node.body,
                 decorator_list=[
+                    self._set_attribute('_example', True),
                     self._set_attribute('_tags', self._tags_from(context_expr, name))
                 ]
             ),

@@ -74,9 +74,7 @@ class Loader(object):
         return inspect.getmembers(klass, inspect.isfunction if is_python3() else inspect.ismethod)
 
     def _is_example(self, method):
-        return method.__name__[10:].startswith('it') \
-            or self._is_focused_example(method) \
-            or self._is_pending_example(method)
+        return getattr(method, '_example', False)
 
     def _is_focused_example(self, example):
         return example.__name__[10:].startswith('fit')
