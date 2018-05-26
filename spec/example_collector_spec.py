@@ -17,6 +17,10 @@ def spec_abspath(name):
     return os.path.join(os.path.dirname(__file__), 'fixtures', name)
 
 
+def example_names(examples):
+    return [example.name for example in examples]
+
+
 IRRELEVANT_PATH = spec_abspath('without_inner_contexts.py')
 PENDING_DECORATOR_PATH = spec_abspath('with_pending_decorator.py')
 PENDING_DECORATOR_AS_ROOT_PATH = spec_abspath('with_pending_decorator_as_root.py')
@@ -52,7 +56,7 @@ with description(ExampleCollector):
             examples = loader.Loader().load_examples_from(module)
 
             expect(examples).to(have_length(1))
-            expect([example.name for example in examples[0].examples]).to(equal(['it first example', 'it second example', 'it third example']))
+            expect(example_names(examples[0].examples)).to(equal(['it first example', 'it second example', 'it third example']))
 
         with it('places examples together and groups at the end'):
             module = _load_module(spec_abspath('with_inner_contexts.py'))
@@ -60,7 +64,7 @@ with description(ExampleCollector):
             examples = loader.Loader().load_examples_from(module)
 
             expect(examples).to(have_length(1))
-            expect([example.name for example in examples[0].examples]).to(equal(['it first example', 'it second example', 'it third example', '#inner_context']))
+            expect(example_names(examples[0].examples)).to(equal(['it first example', 'it second example', 'it third example', '#inner_context']))
 
     with context('when reading tags'):
         with it('reads tags from description parameters'):
