@@ -53,6 +53,10 @@ def shared_context(message):
     pass
 
 
+def included_context(message):
+    pass
+
+
 def before():
     pass
 
