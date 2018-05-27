@@ -2,7 +2,7 @@
 
 import inspect
 
-from mamba.example_group import ExampleGroup, PendingExampleGroup
+from mamba.example_group import ExampleGroup, PendingExampleGroup, SharedExampleGroup
 from mamba.example import Example, PendingExample
 from mamba.infrastructure import is_python3
 
@@ -32,6 +32,8 @@ class Loader(object):
 
         if klass._pending:
             return PendingExampleGroup(name, tags=tags)
+        elif klass._shared:
+            return SharedExampleGroup(name, tags=tags)
         return ExampleGroup(name, tags=tags)
 
     def _add_hooks_examples_and_nested_example_groups_to(self, klass, example_group):

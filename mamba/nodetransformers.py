@@ -11,7 +11,8 @@ def add_attribute_decorator(attr, value):
 class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     PENDING_EXAMPLE_GROUPS = ('_description', '_context', '_describe')
     FOCUSED_EXAMPLE_GROUPS = ('fdescription', 'fcontext', 'fdescribe')
-    EXAMPLE_GROUPS = ('description', 'context', 'describe') + PENDING_EXAMPLE_GROUPS + FOCUSED_EXAMPLE_GROUPS
+    SHARED_EXAMPLE_GROUPS = ('shared_context', )
+    EXAMPLE_GROUPS = ('description', 'context', 'describe') + PENDING_EXAMPLE_GROUPS + FOCUSED_EXAMPLE_GROUPS + SHARED_EXAMPLE_GROUPS
     FOCUSED_EXAMPLE = ('fit', )
     PENDING_EXAMPLE = ('_it', )
     EXAMPLES = ('it',) + PENDING_EXAMPLE + FOCUSED_EXAMPLE
@@ -81,7 +82,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                     self._set_attribute('_example_group', True),
                     self._set_attribute('_example_name', example_name),
                     self._set_attribute('_tags', self._tags_from(context_expr, name)),
-                    self._set_attribute('_pending', name in self.PENDING_EXAMPLE_GROUPS)
+                    self._set_attribute('_pending', name in self.PENDING_EXAMPLE_GROUPS),
+                    self._set_attribute('_shared', name in self.SHARED_EXAMPLE_GROUPS)
                 ]
             ),
             node
