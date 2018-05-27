@@ -24,6 +24,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
     def visit_Module(self, node):
         self.has_focused_examples = False
+        self.shared_contexts = {}
 
         super(TransformToSpecsNodeTransformer, self).generic_visit(node)
 
@@ -75,6 +76,10 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     def _transform_to_example_group(self, node, name):
         context_expr = self._context_expr_for(node)
         example_name = self._human_readable_context_expr(context_expr)
+
+        if name in self.SHARED_EXAMPLE_GROUPS:
+            self.shared_contexts[example_name] = node.body
+
         return ast.copy_location(
             ast.ClassDef(
                 name=self._prefix_with_sequence(example_name),
@@ -158,7 +163,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                 name=self._prefix_with_sequence(example_name),
                 bases=[],
                 keywords=[],
-                body=node.body,
+                body=self.shared_contexts[example_name] + node.body,
                 decorator_list=[
                     self._set_attribute('_example_group', True),
                     self._set_attribute('_example_name', example_name),
