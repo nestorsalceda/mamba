@@ -21,21 +21,18 @@ class Loader(object):
         return loaded
 
     def _example_groups_for(self, module):
-        return [klass for name, klass in inspect.getmembers(module, inspect.isclass) if self._is_example_group(name)]
+        return [klass for name, klass in inspect.getmembers(module, inspect.isclass) if self._is_example_group(klass)]
 
-    def _is_example_group(self, class_name):
-        return class_name.endswith('__description')
+    def _is_example_group(self, klass):
+        return getattr(klass, '_example_group', False)
 
     def _create_example_group(self, klass):
-        name = self._description(klass)
-        tags = self._tags_for(name)
+        name = klass._example_name
+        tags = klass._tags
 
-        if '__pending' in klass.__name__:
+        if klass._pending:
             return PendingExampleGroup(name, tags=tags)
         return ExampleGroup(name, tags=tags)
-
-    def _description(self, example_group):
-        return example_group.__name__.replace('__description', '').replace('__pending', '')[10:]
 
     def _add_hooks_examples_and_nested_example_groups_to(self, klass, example_group):
         self._load_hooks(klass, example_group)
@@ -55,7 +52,7 @@ class Loader(object):
 
     def _load_examples(self, klass, example_group):
         for example in self._examples_in(klass):
-            tags = self._tags_for(example.__name__)
+            tags = example._tags
             if self._is_pending_example(example) or self._is_pending_example_group(example_group):
                 example_group.append(PendingExample(example, tags=tags))
             else:
@@ -64,25 +61,17 @@ class Loader(object):
     def _examples_in(self, example_group):
         return [method for name, method in self._methods_for(example_group) if self._is_example(method)]
 
-    def _tags_for(self, name):
-        tags = name.split('--')[1]
-        if not tags:
-            return None
-        return tags.split(',')
-
     def _methods_for(self, klass):
         return inspect.getmembers(klass, inspect.isfunction if is_python3() else inspect.ismethod)
 
     def _is_example(self, method):
-        return method.__name__[10:].startswith('it') \
-            or self._is_focused_example(method) \
-            or self._is_pending_example(method)
+        return getattr(method, '_example', False)
 
     def _is_focused_example(self, example):
-        return example.__name__[10:].startswith('fit')
+        return 'focus' in example._tags
 
     def _is_pending_example(self, example):
-        return example.__name__[10:].startswith('_it')
+        return example._pending
 
     def _is_pending_example_group(self, example_group):
         return isinstance(example_group, PendingExampleGroup)
@@ -90,7 +79,7 @@ class Loader(object):
     def _load_nested_example_groups(self, klass, example_group):
         for nested in self._example_groups_for(klass):
             if isinstance(example_group, PendingExampleGroup):
-                nested_example_group = PendingExampleGroup(self._description(nested))
+                nested_example_group = PendingExampleGroup(nested._example_name)
             else:
                 nested_example_group = self._create_example_group(nested)
 
