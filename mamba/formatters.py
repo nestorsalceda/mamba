@@ -185,3 +185,33 @@ class ProgressFormatter(DocumentationFormatter):
         puts()
         puts()
         super(ProgressFormatter, self).summary(duration, example_count, failed_count, pending_count)
+
+
+class PendingFormatter(DocumentationFormatter):
+
+    def example_passed(self, example):
+        pass
+
+    def example_failed(self, example):
+        pass
+
+    def example_group_started(self, example_group):
+        if example_group.parent is None:
+            puts()
+        self._format_example_group(example_group, 'white')
+
+    def example_group_pending(self, example_group):
+        self._format_example_group(example_group, 'yellow')
+
+    def example_group_finished(self, example_group):
+        pass
+
+    def summary(self, duration, example_count, failed_count, pending_count):
+        duration = self._format_duration(duration)
+        if failed_count != 0:
+            puts(self._color('red', "%d examples failed of %d ran in %s" % (failed_count, example_count, duration)))
+        elif pending_count != 0:
+            puts()
+            puts(self._color('yellow', "%d examples ran (%d pending) in %s" % (example_count, pending_count, duration)))
+        else:
+            puts(self._color('green', "%d examples ran in %s" % (example_count, duration)))
