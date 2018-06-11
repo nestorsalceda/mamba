@@ -18,12 +18,14 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     PENDING_EXAMPLE = ('_it', )
     EXAMPLES = ('it',) + PENDING_EXAMPLE + FOCUSED_EXAMPLE
     FOCUSED = FOCUSED_EXAMPLE_GROUPS + FOCUSED_EXAMPLE
+    PENDING = PENDING_EXAMPLE_GROUPS + PENDING_EXAMPLE
     HOOKS = ('before', 'after')
 
     sequence = 1
 
     def visit_Module(self, node):
         self.has_focused_examples = False
+        self.has_pending_examples = False
         self.shared_contexts = {}
 
         super(TransformToSpecsNodeTransformer, self).generic_visit(node)
@@ -33,6 +35,10 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
             names=[ast.alias(name='add_attribute_decorator')],
             level=0
         ))
+        node.body.append(ast.Assign(
+            targets=[ast.Name(id='__mamba_has_pending_examples', ctx=ast.Store())],
+            value=ast.Name(id=str(self.has_pending_examples), ctx=ast.Load())),
+        )
         node.body.append(ast.Assign(
             targets=[ast.Name(id='__mamba_has_focused_examples', ctx=ast.Store())],
             value=ast.Name(id=str(self.has_focused_examples), ctx=ast.Load())),
@@ -45,7 +51,9 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
         name = self._get_name(node)
 
-        if name in self.FOCUSED:
+        if name in self.PENDING:
+            self.has_pending_examples = True
+        if name in self.FOCUSED and not self.has_pending_examples:
             self.has_focused_examples = True
 
         if name in self.INCLUDED_EXAMPLE_GROUPS:
@@ -109,6 +117,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         tags = []
         if method_name in self.FOCUSED:
             tags.append('focus')
+        if method_name in self.PENDING:
+            tags.append('pending')
         if len(context_expr.args) > 1:
             tags.extend([arg.s for arg in context_expr.args[1:]])
 
