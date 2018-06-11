@@ -49,6 +49,14 @@ def fcontext(message):
     pass
 
 
+def shared_context(message):
+    pass
+
+
+def included_context(message):
+    pass
+
+
 def before():
     pass
 

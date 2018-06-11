@@ -1,4 +1,4 @@
-from mamba.example_group import ExampleGroup, PendingExampleGroup
+from mamba.example_group import ExampleGroup, PendingExampleGroup, SharedExampleGroup
 from mamba.example import Example, PendingExample
 
 IRRELEVANT_DESCRIPTION = 'any description'
@@ -10,6 +10,10 @@ def an_example_group(description=IRRELEVANT_DESCRIPTION):
 
 def a_pending_example_group(description=IRRELEVANT_DESCRIPTION):
     return PendingExampleGroup(IRRELEVANT_DESCRIPTION)
+
+
+def a_shared_example_group(description=IRRELEVANT_DESCRIPTION):
+    return SharedExampleGroup(IRRELEVANT_DESCRIPTION)
 
 
 def an_example():

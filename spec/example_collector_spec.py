@@ -17,12 +17,18 @@ def spec_abspath(name):
     return os.path.join(os.path.dirname(__file__), 'fixtures', name)
 
 
+def example_names(examples):
+    return [example.name for example in examples]
+
+
 IRRELEVANT_PATH = spec_abspath('without_inner_contexts.py')
 PENDING_DECORATOR_PATH = spec_abspath('with_pending_decorator.py')
 PENDING_DECORATOR_AS_ROOT_PATH = spec_abspath('with_pending_decorator_as_root.py')
 WITH_RELATIVE_IMPORT_PATH = spec_abspath('with_relative_import.py')
 WITH_TAGS_PATH = spec_abspath('with_tags.py')
 WITH_FOCUS_PATH = spec_abspath('with_focus.py')
+SHARED_CONTEXT_PATH = spec_abspath('with_shared_context.py')
+INCLUDED_CONTEXT_PATH = spec_abspath('with_included_context.py')
 
 
 def _load_module(path):
@@ -50,7 +56,7 @@ with description(ExampleCollector):
             examples = loader.Loader().load_examples_from(module)
 
             expect(examples).to(have_length(1))
-            expect([example.name for example in examples[0].examples]).to(equal(['it first example', 'it second example', 'it third example']))
+            expect(example_names(examples[0].examples)).to(equal(['it first example', 'it second example', 'it third example']))
 
         with it('places examples together and groups at the end'):
             module = _load_module(spec_abspath('with_inner_contexts.py'))
@@ -58,7 +64,7 @@ with description(ExampleCollector):
             examples = loader.Loader().load_examples_from(module)
 
             expect(examples).to(have_length(1))
-            expect([example.name for example in examples[0].examples]).to(equal(['it first example', 'it second example', 'it third example', '#inner_context']))
+            expect(example_names(examples[0].examples)).to(equal(['it first example', 'it second example', 'it third example', '#inner_context']))
 
     with context('when reading tags'):
         with it('reads tags from description parameters'):
@@ -128,6 +134,33 @@ with description(ExampleCollector):
             expect(examples_in_root[0]).to(be_a(example.PendingExample))
             expect(examples_in_root[1]).to(be_a(example_group.PendingExampleGroup))
             expect(examples_in_root[1].examples[0]).to(be_a(example.PendingExample))
+
+    with context('when a shared context is loaded'):
+        with it('mark context as shared'):
+            module = _load_module(SHARED_CONTEXT_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples).to(have_length(1))
+            expect(examples[0]).to(be_a(example_group.SharedExampleGroup))
+
+    with context('when a included context is loaded'):
+        with it('insert a normal example group instead'):
+            module = _load_module(INCLUDED_CONTEXT_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples[1]).to(have_length(1))
+            expect(examples[1].examples[0]).to(be_a(example_group.ExampleGroup))
+
+        with it('inserts the examples of the shared context'):
+            module = _load_module(INCLUDED_CONTEXT_PATH)
+
+            examples = loader.Loader().load_examples_from(module)
+
+            expect(examples[1]).to(have_length(1))
+            included_context = examples[1].examples[0]
+            expect(example_names(included_context.examples)).to(equal(['it shared example', 'it added example']))
 
     with context('when loading with relative import'):
         with it('loads module and perform relative import'):

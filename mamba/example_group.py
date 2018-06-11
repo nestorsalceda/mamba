@@ -114,3 +114,8 @@ class PendingExampleGroup(ExampleGroup):
             raise TypeError('A pending example or example group expected')
 
         super(PendingExampleGroup, self).append(example)
+
+
+class SharedExampleGroup(ExampleGroup):
+    def execute(self, reporter, execution_context, tags=None):
+        pass

@@ -11,7 +11,9 @@ def add_attribute_decorator(attr, value):
 class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     PENDING_EXAMPLE_GROUPS = ('_description', '_context', '_describe')
     FOCUSED_EXAMPLE_GROUPS = ('fdescription', 'fcontext', 'fdescribe')
-    EXAMPLE_GROUPS = ('description', 'context', 'describe') + PENDING_EXAMPLE_GROUPS + FOCUSED_EXAMPLE_GROUPS
+    SHARED_EXAMPLE_GROUPS = ('shared_context', )
+    INCLUDED_EXAMPLE_GROUPS = ('included_context', )
+    EXAMPLE_GROUPS = ('description', 'context', 'describe') + PENDING_EXAMPLE_GROUPS + FOCUSED_EXAMPLE_GROUPS + SHARED_EXAMPLE_GROUPS
     FOCUSED_EXAMPLE = ('fit', )
     PENDING_EXAMPLE = ('_it', )
     EXAMPLES = ('it',) + PENDING_EXAMPLE + FOCUSED_EXAMPLE
@@ -22,6 +24,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
     def visit_Module(self, node):
         self.has_focused_examples = False
+        self.shared_contexts = {}
 
         super(TransformToSpecsNodeTransformer, self).generic_visit(node)
 
@@ -45,6 +48,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         if name in self.FOCUSED:
             self.has_focused_examples = True
 
+        if name in self.INCLUDED_EXAMPLE_GROUPS:
+            return self._get_shared_example_group(node)
         if name in self.EXAMPLE_GROUPS:
             return self._transform_to_example_group(node, name)
         if name in self.EXAMPLES:
@@ -71,6 +76,10 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     def _transform_to_example_group(self, node, name):
         context_expr = self._context_expr_for(node)
         example_name = self._human_readable_context_expr(context_expr)
+
+        if name in self.SHARED_EXAMPLE_GROUPS:
+            self.shared_contexts[example_name] = node.body
+
         return ast.copy_location(
             ast.ClassDef(
                 name=self._prefix_with_sequence(example_name),
@@ -81,7 +90,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                     self._set_attribute('_example_group', True),
                     self._set_attribute('_example_name', example_name),
                     self._set_attribute('_tags', self._tags_from(context_expr, name)),
-                    self._set_attribute('_pending', name in self.PENDING_EXAMPLE_GROUPS)
+                    self._set_attribute('_pending', name in self.PENDING_EXAMPLE_GROUPS),
+                    self._set_attribute('_shared', name in self.SHARED_EXAMPLE_GROUPS)
                 ]
             ),
             node
@@ -140,6 +150,27 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                 args=self._generate_argument('self'),
                 body=node.body,
                 decorator_list=[]
+            ),
+            node
+        )
+
+    def _get_shared_example_group(self, node):
+        context_expr = self._context_expr_for(node)
+        example_name = self._human_readable_context_expr(context_expr)
+
+        return ast.copy_location(
+            ast.ClassDef(
+                name=self._prefix_with_sequence(example_name),
+                bases=[],
+                keywords=[],
+                body=self.shared_contexts[example_name] + node.body,
+                decorator_list=[
+                    self._set_attribute('_example_group', True),
+                    self._set_attribute('_example_name', example_name),
+                    self._set_attribute('_tags', self._tags_from(context_expr, 'context')),
+                    self._set_attribute('_pending', False),
+                    self._set_attribute('_shared', False)
+                ]
             ),
             node
         )
