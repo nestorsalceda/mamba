@@ -33,12 +33,13 @@ class ExampleGroup(runnable.Runnable):
 
         self._start(reporter)
         try:
-            self._bind_helpers_to(execution_context)
             self.execute_hook('before_all', execution_context)
 
             for example in self:
+                example_execution_context = copy.copy(execution_context)
+                self._bind_helpers_to(example_execution_context)
                 example.execute(reporter,
-                                copy.copy(execution_context),
+                                example_execution_context,
                                 tags=tags)
 
             self.execute_hook('after_all', execution_context)
