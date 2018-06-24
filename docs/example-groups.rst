@@ -32,7 +32,7 @@ Internally, mamba parses this code using the Python ast module, and generates a 
 Helper methods
 --------------
 
-For supporting a nice experience writting examples, mamba allows defining heper methods.
+For supporting a nice experience writing examples, mamba allows defining helper methods.
 
 .. code-block:: python
 
