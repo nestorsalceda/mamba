@@ -32,7 +32,7 @@ Internally, mamba parses this code using the Python ast module, and generates a 
 Helper methods
 --------------
 
-For supporting a nice experience writting examples, mamba allows defining heper methods.
+For supporting a nice experience writing examples, mamba allows defining helper methods.
 
 .. code-block:: python
 
@@ -94,3 +94,51 @@ And when executing this spec:
   **
 
   0 examples ran (2 pending) in 0.0005 seconds
+
+Shared contexts
+---------------
+
+In order to `DRY <https://en.wikipedia.org/wiki/Don%27t_repeat_yourself>`_ up your specs it is possible to define shared contexts.
+
+.. code-block:: python
+
+  from mamba import shared_context, it
+
+  with shared_context('Shared store examples'):
+      with it('can retrieve stored items'):
+          item = {'name': 'Bob'}
+          self.store.add(id=1, item=item)
+
+          assert self.store.get(id=1) == item
+
+The examples in a shared context are not executed. You need to include the context by using the `included_context` context manager with the exact same description as the defined shared context.
+
+.. code-block:: python
+
+  from mamba import shared_context, included_context, it, before, describe
+
+  from app.store import InMemoryStore, SQLStore
+
+  with shared_context('Shared store examples'):
+      with it('can retrieve stored items'):
+          item = {'name': 'Bob'}
+          self.store.add(id=1, item=item)
+
+          assert self.store.get(id=1) == item
+
+  with describe(InMemoryStore):
+      with before.each:
+          self.store = InMemoryStore()
+
+      with included_context('Shared store examples'):
+          pass
+
+  with describe(SQLStore):
+      with before.each:
+          self.store = SQLStore(host='localhost')
+
+       with included_context('Shared store examples'):
+          pass
+
+Any examples and example groups defined inside the `included_context` block are **added** to the ones of the previously defined context.
+Any hooks defined inside the `included_context` **overwrite** those defined in the `shared_context`.
