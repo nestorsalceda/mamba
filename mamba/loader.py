@@ -39,8 +39,8 @@ class Loader(object):
     def _add_hooks_examples_and_nested_example_groups_to(self, klass, example_group):
         self._load_hooks(klass, example_group)
         self._load_examples(klass, example_group)
-        self._load_nested_example_groups(klass, example_group)
         self._load_helper_methods(klass, example_group)
+        self._load_nested_example_groups(klass, example_group)
 
     def _load_hooks(self, klass, example_group):
         for hook in self._hooks_in(klass):
@@ -85,6 +85,7 @@ class Loader(object):
             else:
                 nested_example_group = self._create_example_group(nested)
 
+            nested_example_group.helpers = dict(example_group.helpers)
             self._add_hooks_examples_and_nested_example_groups_to(nested, nested_example_group)
             example_group.append(nested_example_group)
 

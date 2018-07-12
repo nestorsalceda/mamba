@@ -2,7 +2,6 @@
 
 import copy
 from datetime import datetime
-from functools import partial
 
 from mamba import runnable
 from mamba.example import PendingExample
@@ -33,12 +32,13 @@ class ExampleGroup(runnable.Runnable):
 
         self._start(reporter)
         try:
-            self._bind_helpers_to(execution_context)
             self.execute_hook('before_all', execution_context)
 
             for example in self:
+                example_execution_context = copy.copy(execution_context)
+                self._bind_helpers_to(example_execution_context)
                 example.execute(reporter,
-                                copy.copy(execution_context),
+                                example_execution_context,
                                 tags=tags)
 
             self.execute_hook('after_all', execution_context)
@@ -61,7 +61,7 @@ class ExampleGroup(runnable.Runnable):
         for name, method in self.helpers.items():
             setattr(execution_context,
                     name,
-                    partial(method, execution_context))
+                    method.__get__(execution_context))
 
     def execute_hook(self, hook, execution_context):
         if hook.endswith('_all') and not self.hooks.get(hook):
