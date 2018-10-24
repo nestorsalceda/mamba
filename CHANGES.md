@@ -1,5 +1,12 @@
 # ChangeLog
 
+## Version 0.10
+
+* Use metadata instead of encode in spec names
+* Shared context: Remove duplication on spec files using shared contexts
+* Improve execution context binding in helper methods
+* Remove requirements from MANIFEST.in since is using pipenv
+
 ## Version 0.9.3
 
 * Improve documentation
