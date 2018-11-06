@@ -52,35 +52,43 @@ with description('Hooks') as self:
         expect(self.execution_context.calls).to(equal(['example_1', 'example_2', 'after_all']))
 
     with context('when having nested contexts'):
-        with it('executes only once the before_all hooks'):
+        with it('executes each before_all hook only once'):
             self.parent.hooks['before_all'] = [lambda ctx: ctx.calls.append('before_all_parent')]
 
             child = an_example_group()
             child.append(Example(lambda ctx: ctx.calls.append('example')))
+            child.hooks['before_all'] = [lambda ctx: ctx.calls.append('before_all_child_1')]
             self.parent.append(child)
 
             child = an_example_group()
             child.append(Example(lambda ctx: ctx.calls.append('example_2')))
+            child.hooks['before_all'] = [lambda ctx: ctx.calls.append('before_all_child_2')]
             self.parent.append(child)
 
             self.parent.execute(self.reporter, self.execution_context)
 
-            expect(self.execution_context.calls).to(equal(['before_all_parent', 'example', 'example_2']))
+            expect(self.execution_context.calls).to(equal(
+                ['before_all_parent', 'before_all_child_1', 'example', 'before_all_child_2', 'example_2']
+            ))
 
-        with it('executes only once the after_all hooks'):
+        with it('executes each after_all hook only once (in opposite nesting order)'):
             self.parent.hooks['after_all'] = [lambda ctx: ctx.calls.append('after_all_parent')]
 
             child = an_example_group()
             child.append(Example(lambda ctx: ctx.calls.append('example')))
+            child.hooks['after_all'] = [lambda ctx: ctx.calls.append('after_all_child_1')]
             self.parent.append(child)
 
             child = an_example_group()
             child.append(Example(lambda ctx: ctx.calls.append('example_2')))
+            child.hooks['after_all'] = [lambda ctx: ctx.calls.append('after_all_child_2')]
             self.parent.append(child)
 
             self.parent.execute(self.reporter, self.execution_context)
 
-            expect(self.execution_context.calls).to(equal(['example', 'example_2', 'after_all_parent']))
+            expect(self.execution_context.calls).to(equal(
+                ['example', 'after_all_child_1', 'example_2', 'after_all_child_2', 'after_all_parent']
+            ))
 
         with it('executes first the before_all and later the before_each for every parent, in declaration order'):
             self.parent.hooks['before_all'] = [lambda ctx: ctx.calls.append('before_all_parent')]
