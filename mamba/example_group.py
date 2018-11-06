@@ -67,7 +67,7 @@ class ExampleGroup(runnable.Runnable):
         if hook.endswith('_all') and not self.hooks.get(hook):
             return
 
-        if self.parent is not None:
+        if not hook.endswith('_all') and self.parent is not None:
             self.parent.execute_hook(hook, execution_context)
 
         for registered in self.hooks.get(hook, []):
