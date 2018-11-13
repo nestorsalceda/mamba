@@ -4,8 +4,13 @@ import sys
 import traceback
 import inspect
 
-from clint.textui import indent, puts, colored
+from clint.textui import indent, puts as textui_puts, colored
 
+
+def puts(*args, **kwargs):
+    textui_puts(*args, **kwargs)
+    sys.stdout.flush()
+    
 
 class Formatter(object):
 
