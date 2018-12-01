@@ -3,6 +3,8 @@
 import sys
 import traceback
 import inspect
+from datetime import datetime
+from xml.etree import ElementTree
 
 from clint.textui import indent, puts, colored
 
@@ -187,3 +189,58 @@ class ProgressFormatter(DocumentationFormatter):
         puts()
         puts()
         super(ProgressFormatter, self).summary(duration, example_count, failed_count, pending_count)
+
+
+class JUnitFormatter(DocumentationFormatter):
+    def __init__(self, settings):
+        self.settings = settings
+        self.suite = ElementTree.Element('testsuite', attrib={
+            'errors': '0',
+            'timestamp': datetime.now().isoformat(),
+            'host': 'localhost'
+        })
+
+    def example_passed(self, example):
+        self._dump_example(example)
+
+    def example_failed(self, example):
+        ex = example.error.exception
+        failure_info = ElementTree.Element('failure', attrib={
+            'message': str(ex),
+            'type': type(ex).__name__
+        })
+        failure_info.text = self.format_failure(example)
+        self._dump_example(example, failure_info)
+
+    def example_pending(self, example):
+        self._dump_example(example, ElementTree.Element('skipped'))
+
+    def example_group_started(self, example_group):
+        pass
+
+    def example_group_finished(self, example_group):
+        pass
+
+    def example_group_pending(self, example_group):
+        pass
+
+    def failures(self, failed_examples):
+        pass
+
+    def summary(self, duration, example_count, failed_count, pending_count):
+        self.suite.attrib['tests'] = str(example_count)
+        self.suite.attrib['skipped'] = str(pending_count)
+        self.suite.attrib['failures'] = str(failed_count)
+        self.suite.attrib['time'] = str(duration)
+        ElementTree.ElementTree(self.suite).write(sys.stdout, encoding='unicode')
+
+    def _dump_example(self, example, child=None):
+        testcase = ElementTree.Element('testcase', attrib={
+            'classname': example.classname,
+            'name': self.format_full_example_name(example),
+            'file': example.file,
+            'time': str(example.elapsed_time.total_seconds())
+        })
+        if child is not None:
+            testcase.append(child)
+        self.suite.append(testcase)
