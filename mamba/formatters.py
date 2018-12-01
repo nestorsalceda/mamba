@@ -7,10 +7,13 @@ import inspect
 from clint.textui import indent, puts as textui_puts, colored
 
 
+# If no newline is included in the output (like in the ProgressFormatter)
+# then the console output does not update immediately.
+# Therefore always flush after printing
 def puts(*args, **kwargs):
     textui_puts(*args, **kwargs)
     sys.stdout.flush()
-    
+
 
 class Formatter(object):
 
