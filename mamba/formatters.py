@@ -114,13 +114,12 @@ class DocumentationFormatter(Formatter):
         puts()
         with indent(2):
             for index, failed in enumerate(failed_examples):
-                puts('%d) %s' % (index + 1, self._format_full_example_name(failed)))
+                puts('%d) %s' % (index + 1, self.format_full_example_name(failed)))
                 with indent(3):
-                    puts(self._color('red', 'Failure/Error: %s' % self._format_failing_expectation(failed)))
-                    puts(self._color('red', self._format_traceback(failed)))
+                    puts(self._color('red', self.format_failure(failed)))
                     puts()
 
-    def _format_full_example_name(self, example):
+    def format_full_example_name(self, example):
         result = [example.name]
 
         current = example
@@ -130,6 +129,9 @@ class DocumentationFormatter(Formatter):
 
         result.reverse()
         return ' '.join(result)
+
+    def format_failure(self, failed):
+        return "Failure/Error: %s\n%s" % (self._format_failing_expectation(failed), self._format_traceback(failed))
 
     def _format_failing_expectation(self, example_):
         tb = self._traceback(example_)
