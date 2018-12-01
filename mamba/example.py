@@ -8,9 +8,9 @@ from mamba import runnable
 class Example(runnable.Runnable):
 
     # TODO: Remove parent parameter, it's only used for testing purposes
-    def __init__(self, test, parent=None, tags=None):
+    def __init__(self, test, parent=None, tags=None, module=None):
         super(Example, self).__init__(parent=parent, tags=tags)
-
+        self.module = module
         self.test = test
         self.was_run = False
 
@@ -56,6 +56,14 @@ class Example(runnable.Runnable):
     @property
     def name(self):
         return self.test._example_name
+
+    @property
+    def file(self):
+        return self.module.__file__
+
+    @property
+    def classname(self):
+        return self.module.__name__.replace('/', '.')
 
 
 class PendingExample(Example):

@@ -9,6 +9,7 @@ from mamba.infrastructure import is_python3
 
 class Loader(object):
     def load_examples_from(self, module):
+        self.module = module
         loaded = []
         example_groups = self._example_groups_for(module)
 
@@ -56,9 +57,9 @@ class Loader(object):
         for example in self._examples_in(klass):
             tags = example._tags
             if self._is_pending_example(example) or self._is_pending_example_group(example_group):
-                example_group.append(PendingExample(example, tags=tags))
+                example_group.append(PendingExample(example, tags=tags, module=self.module))
             else:
-                example_group.append(Example(example, tags=tags))
+                example_group.append(Example(example, tags=tags, module=self.module))
 
     def _examples_in(self, example_group):
         return [method for name, method in self._methods_for(example_group) if self._is_example(method)]
