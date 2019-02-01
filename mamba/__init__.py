@@ -57,6 +57,10 @@ def included_context(message):
     pass
 
 
+def exported_context(message):
+    pass
+
+
 def before():
     pass
 
