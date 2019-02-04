@@ -12,8 +12,9 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     PENDING_EXAMPLE_GROUPS = ('_description', '_context', '_describe')
     FOCUSED_EXAMPLE_GROUPS = ('fdescription', 'fcontext', 'fdescribe')
     SHARED_EXAMPLE_GROUPS = ('shared_context', )
+    EXPORTED_EXAMPLE_GROUPS = ('exported_context', )
     INCLUDED_EXAMPLE_GROUPS = ('included_context', )
-    EXAMPLE_GROUPS = ('description', 'context', 'describe') + PENDING_EXAMPLE_GROUPS + FOCUSED_EXAMPLE_GROUPS + SHARED_EXAMPLE_GROUPS
+    EXAMPLE_GROUPS = ('description', 'context', 'describe') + PENDING_EXAMPLE_GROUPS + FOCUSED_EXAMPLE_GROUPS + SHARED_EXAMPLE_GROUPS + EXPORTED_EXAMPLE_GROUPS
     FOCUSED_EXAMPLE = ('fit', )
     PENDING_EXAMPLE = ('_it', )
     EXAMPLES = ('it',) + PENDING_EXAMPLE + FOCUSED_EXAMPLE
@@ -21,10 +22,11 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     HOOKS = ('before', 'after')
 
     sequence = 1
+    exported_contexts = {}
 
     def visit_Module(self, node):
         self.has_focused_examples = False
-        self.shared_contexts = {}
+        self.shared_contexts = self.__class__.exported_contexts
 
         super(TransformToSpecsNodeTransformer, self).generic_visit(node)
 
@@ -79,6 +81,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
         if name in self.SHARED_EXAMPLE_GROUPS:
             self.shared_contexts[example_name] = node.body
+        if name in self.EXPORTED_EXAMPLE_GROUPS:
+            self.__class__.exported_contexts[example_name] = node.body
 
         return ast.copy_location(
             ast.ClassDef(
@@ -91,7 +95,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                     self._set_attribute('_example_name', example_name),
                     self._set_attribute('_tags', self._tags_from(context_expr, name)),
                     self._set_attribute('_pending', name in self.PENDING_EXAMPLE_GROUPS),
-                    self._set_attribute('_shared', name in self.SHARED_EXAMPLE_GROUPS)
+                    self._set_attribute('_shared', name in self.SHARED_EXAMPLE_GROUPS),
+                    self._set_attribute('_exported', name in self.EXPORTED_EXAMPLE_GROUPS)
                 ]
             ),
             node
@@ -169,7 +174,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                     self._set_attribute('_example_name', example_name),
                     self._set_attribute('_tags', self._tags_from(context_expr, 'context')),
                     self._set_attribute('_pending', False),
-                    self._set_attribute('_shared', False)
+                    self._set_attribute('_shared', False),
+                    self._set_attribute('_exported', False)
                 ]
             ),
             node

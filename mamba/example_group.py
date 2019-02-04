@@ -119,3 +119,7 @@ class PendingExampleGroup(ExampleGroup):
 class SharedExampleGroup(ExampleGroup):
     def execute(self, reporter, execution_context, tags=None):
         pass
+
+
+class ExportedExampleGroup(SharedExampleGroup):
+    pass
