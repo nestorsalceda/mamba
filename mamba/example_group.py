@@ -67,7 +67,7 @@ class ExampleGroup(runnable.Runnable):
         if hook.endswith('_all') and not self.hooks.get(hook):
             return
 
-        if self.parent is not None:
+        if self.parent is not None and hook.startswith("before") and not hook.endswith("_all"):
             self.parent.execute_hook(hook, execution_context)
 
         for registered in self.hooks.get(hook, []):
@@ -78,6 +78,10 @@ class ExampleGroup(runnable.Runnable):
                     registered(execution_context)
             except Exception:
                 self.fail()
+
+        if self.parent is not None and hook.startswith("after") and not hook.endswith("_all"):
+            self.parent.execute_hook(hook, execution_context)
+
 
     def _finish(self, reporter):
         self.elapsed_time = datetime.utcnow() - self._begin
