@@ -62,38 +62,88 @@ with description('Errors in hooks') as self:
 
             expect(self.example.was_run).to(be_false)
 
-        with context('executes teardown only for contexts, which ran their setups'):
-            def call_and_raise(self, ctx):
-                ctx.calls.append('before_each_parent')
+        with context('executes after_each only for contexts, which ran their before_each'):
+            def call_and_raise(self, ctx, msg):
+                # helper method, because we can't do multiline lambda
+                ctx.calls.append(msg)
                 raise Exception
 
-            with it('executes teardown only for contexts, which ran their setups'):
-                
-                self.example_group.hooks['before_each'] = [lambda ctx: self.call_and_raise(ctx)]
-                self.example_group.hooks['after_each'] = [lambda ctx: ctx.calls.append('after_each_parent')]
+            with before.each:
+                # Setup the following scenario:
+                #
+                # with description("describe") as self:
+                #     with before.each:
+                #         print("describe_before_each")
+                #     with after.each:
+                #         print("describe_after_each")
+                #     with it("describe_example"):
+                #         print("describe_example")
+                #     with context("context1"):
+                #         with before.each:
+                #             print("context1_before_each")
+                #         with after.each:
+                #             print("context1_after_each")
+                #         with context("context2"):
+                #             with before.each:
+                #                 print("context2_before_each")
+                #             with after.each:
+                #                 print("context2_after_each")
+                #             with it("context2_example"):
+                #                 print("context2_example")
 
-                self.parent_example = a_failing_example()
-                self.example_group.append(self.parent_example)
+                self.describe = an_example_group()
+                self.describe.hooks['before_each'] = [lambda ctx: ctx.calls.append('describe_before_each')]
+                self.describe.hooks['after_each'] = [lambda ctx: ctx.calls.append('describe_after_each')]
 
-                child = an_example_group()
-                child.hooks['before_each'] = [lambda ctx: ctx.calls.append('before_each_child')]
-                child.hooks['after_each'] = [lambda ctx: ctx.calls.append('after_each_child')]
+                self.context1 = an_example_group()
+                self.context1.hooks['before_each'] = [lambda ctx: ctx.calls.append('context1_before_each')]
+                self.context1.hooks['after_each'] = [lambda ctx: ctx.calls.append('context1_after_each')]
 
-                self.example = a_failing_example()
-                child.append(self.example)
-                self.example_group.append(child)
+                context2 = an_example_group()
+                context2.hooks['before_each'] = [lambda ctx: ctx.calls.append('context2_before_each')]
+                context2.hooks['after_each'] = [lambda ctx: ctx.calls.append('context2_after_each')]
 
-                self.execution_context = runnable.ExecutionContext()
-                self.execution_context.calls = []
+                example_in_describe = an_example()
+                self.describe.append(example_in_describe)
+                example_in_context2 = an_example()
+                context2.append(example_in_context2)
 
-                self.example_group.execute(self.reporter, self.execution_context)
+                self.describe.append(self.context1)
+                self.context1.append(context2)
 
-                expect(self.execution_context.calls).to(equal([
-                    'before_each_parent',
-                    'after_each_parent',
-                    'before_each_parent',
-                    'after_each_parent'
+
+            with it('exception in describe block before_each'):
+                self.describe.hooks['before_each'] = [lambda ctx: self.call_and_raise(ctx, 'describe_before_each')]
+
+                exec_context = runnable.ExecutionContext()
+                exec_context.calls = []
+
+                self.describe.execute(self.reporter, exec_context)
+
+                expect(exec_context.calls).to(equal([
+                    'describe_before_each',
+                    'describe_after_each',
+                    'describe_before_each',
+                    'describe_after_each'
                 ]))
+
+            with it('exception in context1 block before_each'):
+                self.context1.hooks['before_each'] = [lambda ctx: self.call_and_raise(ctx, 'context1_before_each')]
+
+                exec_context = runnable.ExecutionContext()
+                exec_context.calls = []
+
+                self.describe.execute(self.reporter, exec_context)
+
+                expect(exec_context.calls).to(equal([
+                    'describe_before_each',
+                    'describe_after_each',
+                    'describe_before_each',
+                    'context1_before_each',
+                    'context1_after_each',
+                    'describe_after_each',
+                ]))
+
 
     with context('when an error was raised in an after.each hook'):
         with before.each:
@@ -152,33 +202,3 @@ with description('Errors in hooks') as self:
 
     def _other_error(self, *args):
         raise IOError()
-
-# from mamba import description, context, it, before, after, shared_context, \
-#     included_context
-# from expects import be_empty, be_none, expect, equal, have_length, be_false
-
-# with description("D") as self:
-#     with before.each:
-#         print("D.BeforeEach")
-#         raise Exception("asdf")
-#     with after.each:
-#         print("D.AfterEach")
-
-#     with it("it.D"):
-#         print("it.D")
-
-#     with context("C1"):
-#         with before.each:
-#             print("C1.BeforeEach")
-#         with after.each:
-#             print("C1.AfterEach")
-
-
-#         with context("C2"):
-#             with before.each:
-#                 print("C2.BeforeEach")
-#             with after.each:
-#                 print("C2.AfterEach")
-
-#             with it("it.C2"):
-#                 print("it.C2")
