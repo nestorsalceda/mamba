@@ -21,7 +21,7 @@ class ExampleGroup(runnable.Runnable):
             'after_all': []
         }
         self.helpers = {}
-        self._before_all_executed = False
+        self.can_run_after_each = True
 
     def __iter__(self):
         return iter(self.examples)
@@ -68,16 +68,24 @@ class ExampleGroup(runnable.Runnable):
             return
 
         if self.parent is not None and hook.startswith("before") and not hook.endswith("_all"):
-            self.parent.execute_hook(hook, execution_context)
-
-        for registered in self.hooks.get(hook, []):
             try:
-                if hasattr(registered, 'im_func'):
-                    registered.im_func(execution_context)
-                elif callable(registered):
-                    registered(execution_context)
+                self.parent.execute_hook(hook, execution_context)
             except Exception:
-                self.fail()
+                self.can_run_after_each = False
+                raise
+
+        if self.can_run_after_each or hook != "after_each":
+            for registered in self.hooks.get(hook, []):
+                try:
+                    if hasattr(registered, 'im_func'):
+                        registered.im_func(execution_context)
+                    elif callable(registered):
+                        registered(execution_context)
+                except Exception:
+                    self.fail()
+                    if hook.endswith("all"):
+                        self.fail_children()
+                    raise
 
         if self.parent is not None and hook.startswith("after") and not hook.endswith("_all"):
             self.parent.execute_hook(hook, execution_context)
@@ -101,6 +109,7 @@ class ExampleGroup(runnable.Runnable):
     def fail(self):
         super(ExampleGroup, self).fail()
 
+    def fail_children(self):
         for example in self.examples:
             example.fail()
 

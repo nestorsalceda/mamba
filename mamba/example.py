@@ -22,12 +22,18 @@ class Example(runnable.Runnable):
         self._start(reporter)
 
         if self.error is None:
-            self.parent.execute_hook('before_each', execution_context)
+            try:
+                self.parent.execute_hook('before_each', execution_context)
+            except Exception:
+                self.fail()
 
         if self.error is None:
             self._execute_test(execution_context)
 
-        self.parent.execute_hook('after_each', execution_context)
+        try:
+            self.parent.execute_hook('after_each', execution_context)
+        except Exception:
+            self.fail()
 
         self._finish(reporter)
 
