@@ -10,7 +10,7 @@ def add_attribute_decorator(attr, value):
 
 
 def lazy_property(attr):
-    cached_attr = '_%s'.format(attr)
+    cached_attr = '_' + attr
 
     def wrapper(func):
         @wraps(func)
