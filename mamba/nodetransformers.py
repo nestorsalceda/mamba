@@ -1,10 +1,27 @@
 import ast
+from functools import wraps
 
 
 def add_attribute_decorator(attr, value):
     def wrapper(function_or_class):
         setattr(function_or_class, attr, value)
         return function_or_class
+    return wrapper
+
+
+def lazy_property(attr):
+    cached_attr = f'_{attr}'
+
+    def wrapper(func):
+        @wraps(func)
+        def wrapper2(self):
+            if not hasattr(self, cached_attr):
+                value = func(self)
+                if not hasattr(self, cached_attr):
+                    setattr(self, cached_attr, value)
+            return getattr(self, cached_attr)
+        return wrapper2
+
     return wrapper
 
 
@@ -19,6 +36,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     EXAMPLES = ('it',) + PENDING_EXAMPLE + FOCUSED_EXAMPLE
     FOCUSED = FOCUSED_EXAMPLE_GROUPS + FOCUSED_EXAMPLE
     HOOKS = ('before', 'after')
+    LAZY = ('lazy',)
 
     sequence = 1
 
@@ -30,7 +48,10 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
         node.body.insert(0, ast.ImportFrom(
             module='mamba.nodetransformers',
-            names=[ast.alias(name='add_attribute_decorator')],
+            names=[
+                ast.alias(name='add_attribute_decorator'),
+                ast.alias(name='lazy_property')
+            ],
             level=0
         ))
         node.body.append(ast.Assign(
@@ -56,6 +77,8 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
             return self._transform_to_example(node, name)
         if name in self.HOOKS:
             return self._transform_to_hook(node, name)
+        if name in self.LAZY:
+            return self._transform_to_lazy(node, name)
 
         return node
 
@@ -150,6 +173,24 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
                 args=self._generate_argument('self'),
                 body=node.body,
                 decorator_list=[]
+            ),
+            node
+        )
+
+    def _transform_to_lazy(self, node, name):
+        property_name = self._context_expr_for(node).attr
+        return ast.copy_location(
+            ast.FunctionDef(
+                name=property_name,
+                args=self._generate_argument('self'),
+                body=node.body,
+                decorator_list=[
+                    ast.Call(
+                        func=ast.Name(id='lazy_property', ctx=ast.Load()),
+                        args=[ast.Str(property_name)],
+                        keywords=[]
+                    ),
+                ]
             ),
             node
         )

@@ -63,3 +63,7 @@ def before():
 
 def after():
     pass
+
+
+def lazy():
+    pass
