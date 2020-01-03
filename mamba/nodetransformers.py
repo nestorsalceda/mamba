@@ -64,11 +64,15 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
         if isinstance(context_expr, ast.Call):
             if hasattr(context_expr.func, 'value'):
-                return context_expr.func.value.id
-            return context_expr.func.id
+                if hasattr(context_expr.func.value, 'id'):
+                    return context_expr.func.value.id
+
+            if hasattr(context_expr.func, 'id'):
+                return context_expr.func.id
 
         if isinstance(context_expr, ast.Attribute):
-            return context_expr.value.id
+            if hasattr(context_expr.value, 'id'):
+                return context_expr.value.id
 
     def _context_expr_for(self, node):
         return node.context_expr
