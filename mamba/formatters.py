@@ -145,11 +145,7 @@ class DocumentationFormatter(Formatter):
         )
 
     def _traceback(self, example_):
-        tb = example_.error.traceback.tb_next
-        if tb.tb_next is not None:
-            tb = tb.tb_next
-
-        return tb
+        return example_.error.traceback.tb_next
 
     def _format_traceback(self, example_):
         tb = self._traceback(example_)
