@@ -11,7 +11,7 @@ assignees: ''
 
 **Describe the bug**
 
-<! -- A clear and concise description of what the bug is. -->
+<!-- A clear and concise description of what the bug is. -->
 
 **How to reproduce it**
 
@@ -27,8 +27,8 @@ assignees: ''
 
 **Environment**
 
- - Python version:  
+ - Python version:
 
 **Additional context**
 
-<! -- Add any other context about the problem here. -->
+<!-- Add any other context about the problem here. -->

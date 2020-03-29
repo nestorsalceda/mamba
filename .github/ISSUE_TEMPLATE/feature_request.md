@@ -2,12 +2,12 @@
 name: Feature request
 about: Suggest an idea for this project
 title: ''
-labels: enhancement
+labels: feature
 assignees: ''
 
 ---
 
-**Motivation **
+**Motivation**
 
 <!--
 Is your feature request related to a problem?
