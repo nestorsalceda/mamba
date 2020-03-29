@@ -16,12 +16,13 @@ class Runner(object):
 
 class BaseRunner(Runner):
 
-    def __init__(self, example_collector, loader, reporter, tags):
+    def __init__(self, example_collector, loader, reporter, tags, formatter):
         self.example_collector = example_collector
         self.loader = loader
         self.reporter = reporter
         self._has_failed_examples = False
         self.tags = tags
+        self.formatter = formatter
 
     def run(self):
         self.reporter.start()
@@ -30,6 +31,9 @@ class BaseRunner(Runner):
 
         if self._any_module_has_focused_examples(modules):
             self.tags = ['focus']
+
+        if self.formatter == 'pending':
+            self.tags = ['pending']
 
         for module in modules:
             self._run_examples_in(module)

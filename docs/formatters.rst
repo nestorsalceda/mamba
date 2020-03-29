@@ -25,6 +25,19 @@ For enabling it:
 
   $ pipenv run mamba --format=documentation
 
+Pending Formatter
+-----------------------
+
+This is an extra formatter that allows you to read in a tree way all the pending tests in your project. It uses a yellow color scheme.
+
+Is useful when you have pending tests on your project and want to check where are those tests in human language.
+
+For enabling it:
+
+::
+
+  $ pipenv run mamba --format=pending
+
 Custom Formatters
 -----------------
 

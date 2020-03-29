@@ -44,7 +44,8 @@ class ApplicationFactory(object):
         runner = runners.BaseRunner(self._example_collector(),
                                     self._loader(),
                                     self._reporter(),
-                                    self.settings.tags)
+                                    self.settings.tags,
+                                    self.settings.format)
 
         if self.settings.enable_code_coverage:
             runner = \
@@ -67,6 +68,8 @@ class ApplicationFactory(object):
             return formatters.ProgressFormatter(self.settings)
         if self.settings.format == 'documentation':
             return formatters.DocumentationFormatter(self.settings)
+        if self.settings.format == 'pending':
+            return formatters.PendingFormatter(self.settings)
 
         return self._custom_formatter()
 
