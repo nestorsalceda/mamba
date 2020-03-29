@@ -199,6 +199,7 @@ class TransformToSpecsPython3NodeTransformer(TransformToSpecsNodeTransformer):
 
     def _generate_argument(self, name):
         return ast.arguments(
+            posonlyargs=[],
             args=[ast.arg(arg=name, annotation=None)],
             vararg=None,
             kwonlyargs=[],
