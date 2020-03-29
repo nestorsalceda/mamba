@@ -1,22 +1,18 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [dev-packages]
-
 expects = ">=0.8.0"
 doublex-expects = ">=0.7.0rc2"
 mock = ">=2.0.0"
 sphinx = ">=1.6.5"
 sphinx-autobuild = ">=0.7.1"
-"e1839a8" = {path = ".", editable = true}
-
+e1839a8 = {editable = true,path = "."}
+mamba = {editable = true,path = "."}
 
 [packages]
-
 clint = ">=0.5.1"
 coverage = ">=4.4.1"
-"e1839a8" = {path = ".", editable = true}
+e1839a8 = {path = ".",editable = true}
