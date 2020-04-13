@@ -104,6 +104,23 @@ Run the spec file and enjoy that all tests are green!
   1 examples ran in 0.0022 seconds
 ```
 
+## Settings
+
+Mamba provides a way to configuration using `spec/spec_helper.py` or `specs/specs_helper.py`
+This module function is readed after parsing arguments so configure function overrides settings
+
+A sample config file :
+
+```python
+def configure(settings):
+  # settings.slow_test_threshold = 0.075
+  # settings.enable_code_coverage = False
+  # settings.code_coverage_file = '.coverage'
+  settings.format = 'documentation'
+  # settings.no_color = False
+  # settings.tags = None
+
+```
 ## Official Manual
 
 You can read more features about mamba in its [official manual](https://mamba-bdd.readthedocs.io/en/latest/)

@@ -95,3 +95,31 @@ with description('Hooks') as self:
             self.parent.execute(self.reporter, self.execution_context)
 
             expect(self.execution_context.calls).to(equal(['before_all_parent', 'before_each_parent', 'before_each_child', 'example']))
+
+        with it('should act like a stack, when parent and child groups have all possible hooks'):
+            self.parent.hooks['before_all'] = [lambda ctx: ctx.calls.append('before_all_parent')]
+            self.parent.hooks['after_all'] = [lambda ctx: ctx.calls.append('after_all_parent')]
+            self.parent.hooks['before_each'] = [lambda ctx: ctx.calls.append('before_each_parent')]
+            self.parent.hooks['after_each'] = [lambda ctx: ctx.calls.append('after_each_parent')]
+
+            child = an_example_group()
+            child.hooks['before_all'] = [lambda ctx: ctx.calls.append('before_all_child')]
+            child.hooks['after_all'] = [lambda ctx: ctx.calls.append('after_all_child')]
+            child.hooks['before_each'] = [lambda ctx: ctx.calls.append('before_each_child')]
+            child.hooks['after_each'] = [lambda ctx: ctx.calls.append('after_each_child')]
+
+            child.append(Example(lambda ctx: ctx.calls.append('example')))
+            self.parent.append(child)
+
+            self.parent.execute(self.reporter, self.execution_context)
+
+            expect(self.execution_context.calls).to(equal([
+                'before_all_parent',
+                'before_all_child',
+                'before_each_parent',
+                'before_each_child',
+                'example',
+                'after_each_child',
+                'after_each_parent',
+                'after_all_child',
+                'after_all_parent']))

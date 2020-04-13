@@ -1,3 +1,6 @@
+import contextlib
+
+
 __version__ = '0.10'
 
 
@@ -57,13 +60,25 @@ def included_context(message):
     pass
 
 
+@contextlib.contextmanager
 def before():
     pass
 
 
+@contextlib.contextmanager
+def before_all():
+    pass
+
+
+@contextlib.contextmanager
 def after():
     pass
 
 
+@contextlib.contextmanager
 def lazy():
+    pass
+
+@contextlib.contextmanager
+def after_all():
     pass
