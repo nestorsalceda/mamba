@@ -1,5 +1,15 @@
 # ChangeLog
 
+## Version 0.11.0
+
+* Fix hooks execution
+* Avoid linter warnings on before and after each hook
+* Document spec_helper.py file usage
+* Support for Python 3.8
+* Add JUnit XML formatter
+* Remove Python 2 support
+* Fix error location reporting
+
 ## Version 0.10
 
 * Use metadata instead of encode in spec names
