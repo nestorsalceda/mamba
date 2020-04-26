@@ -3,6 +3,8 @@
 import sys
 import traceback
 import inspect
+from datetime import datetime
+from xml.etree import ElementTree
 
 from clint.textui import indent, puts, colored
 
@@ -114,13 +116,12 @@ class DocumentationFormatter(Formatter):
         puts()
         with indent(2):
             for index, failed in enumerate(failed_examples):
-                puts('%d) %s' % (index + 1, self._format_full_example_name(failed)))
+                puts('%d) %s' % (index + 1, self.format_full_example_name(failed)))
                 with indent(3):
-                    puts(self._color('red', 'Failure/Error: %s' % self._format_failing_expectation(failed)))
-                    puts(self._color('red', self._format_traceback(failed)))
+                    puts(self._color('red', self.format_failure(failed)))
                     puts()
 
-    def _format_full_example_name(self, example):
+    def format_full_example_name(self, example):
         result = [example.name]
 
         current = example
@@ -130,6 +131,9 @@ class DocumentationFormatter(Formatter):
 
         result.reverse()
         return ' '.join(result)
+
+    def format_failure(self, failed):
+        return "Failure/Error: %s\n%s" % (self._format_failing_expectation(failed), self._format_traceback(failed))
 
     def _format_failing_expectation(self, example_):
         tb = self._traceback(example_)
@@ -185,3 +189,58 @@ class ProgressFormatter(DocumentationFormatter):
         puts()
         puts()
         super(ProgressFormatter, self).summary(duration, example_count, failed_count, pending_count)
+
+
+class JUnitFormatter(DocumentationFormatter):
+    def __init__(self, settings):
+        self.settings = settings
+        self.suite = ElementTree.Element('testsuite', attrib={
+            'errors': '0',
+            'timestamp': datetime.now().isoformat(),
+            'host': 'localhost'
+        })
+
+    def example_passed(self, example):
+        self._dump_example(example)
+
+    def example_failed(self, example):
+        ex = example.error.exception
+        failure_info = ElementTree.Element('failure', attrib={
+            'message': str(ex),
+            'type': type(ex).__name__
+        })
+        failure_info.text = self.format_failure(example)
+        self._dump_example(example, failure_info)
+
+    def example_pending(self, example):
+        self._dump_example(example, ElementTree.Element('skipped'))
+
+    def example_group_started(self, example_group):
+        pass
+
+    def example_group_finished(self, example_group):
+        pass
+
+    def example_group_pending(self, example_group):
+        pass
+
+    def failures(self, failed_examples):
+        pass
+
+    def summary(self, duration, example_count, failed_count, pending_count):
+        self.suite.attrib['tests'] = str(example_count)
+        self.suite.attrib['skipped'] = str(pending_count)
+        self.suite.attrib['failures'] = str(failed_count)
+        self.suite.attrib['time'] = str(duration)
+        ElementTree.ElementTree(self.suite).write(sys.stdout, encoding='unicode')
+
+    def _dump_example(self, example, child=None):
+        testcase = ElementTree.Element('testcase', attrib={
+            'classname': example.classname,
+            'name': self.format_full_example_name(example),
+            'file': example.file,
+            'time': str(example.elapsed_time.total_seconds())
+        })
+        if child is not None:
+            testcase.append(child)
+        self.suite.append(testcase)
