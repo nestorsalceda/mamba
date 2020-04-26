@@ -7,6 +7,7 @@ setup(name='mamba',
       version=__version__,
       description="The definitive testing tool for Python. Born under the banner of Behavior Driven Development.",
       long_description=open('README.md').read(),
+      long_description_content_type='text/markdown',
       classifiers=[
           'Development Status :: 4 - Beta',
           'Environment :: Console',

@@ -11,6 +11,7 @@ sphinx = ">=1.6.5"
 sphinx-autobuild = ">=0.7.1"
 e1839a8 = {editable = true,path = "."}
 mamba = {editable = true,path = "."}
+twine = "*"
 
 [packages]
 clint = ">=0.5.1"
