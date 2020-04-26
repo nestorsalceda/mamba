@@ -16,3 +16,4 @@ mamba = {editable = true,path = "."}
 clint = ">=0.5.1"
 coverage = ">=4.4.1"
 e1839a8 = {path = ".",editable = true}
+mamba = {editable = true,path = "."}
