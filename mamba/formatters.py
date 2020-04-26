@@ -145,11 +145,11 @@ class DocumentationFormatter(Formatter):
             filename=filename,
             source_line=open(filename).read().splitlines()[tb.tb_lineno-1].strip(),
             exc_type=type(example_.error.exception).__name__,
-            exc_msg=str(example_.error.exception)
+            exc_msg=str(example_.error.exception).strip()
         )
 
     def _traceback(self, example_):
-        tb = example_.error.traceback.tb_next
+        tb = example_.error.traceback
         if tb.tb_next is not None:
             tb = tb.tb_next
 
