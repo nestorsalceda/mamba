@@ -94,7 +94,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
             return context_expr.value.id
 
     def _context_expr_for(self, node):
-        return node.context_expr
+        return node.items[0].context_expr
 
     def _transform_to_example_group(self, node, name):
         context_expr = self._context_expr_for(node)
@@ -163,7 +163,15 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         return result
 
     def _generate_argument(self, name):
-        return ast.arguments(args=[ast.Name(id=name, ctx=ast.Param())], vararg=None, kwarg=None, defaults=[])
+        return ast.arguments(
+            posonlyargs=[],
+            args=[ast.arg(arg=name, annotation=None)],
+            vararg=None,
+            kwonlyargs=[],
+            kw_defaults=[],
+            kwarg=None,
+            defaults=[]
+        )
 
     def _transform_to_hook(self, node, name):
         when = self._context_expr_for(node).attr
@@ -230,20 +238,3 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
             return ast.List(elts=list(map(self._convert_value, value)), ctx=ast.Load())
         else:
             return ast.Str(str(value))
-
-
-
-class TransformToSpecsPython3NodeTransformer(TransformToSpecsNodeTransformer):
-
-    def _context_expr_for(self, node):
-        return node.items[0].context_expr
-
-    def _generate_argument(self, name):
-        return ast.arguments(
-            args=[ast.arg(arg=name, annotation=None)],
-            vararg=None,
-            kwonlyargs=[],
-            kw_defaults=[],
-            kwarg=None,
-            defaults=[]
-        )

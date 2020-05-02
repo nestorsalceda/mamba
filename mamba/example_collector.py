@@ -7,17 +7,12 @@ import ast
 import contextlib
 
 from mamba import nodetransformers
-from mamba.infrastructure import is_python3
-
 
 class ExampleCollector(object):
     def __init__(self, paths):
         self.paths = paths
 
-        if is_python3():
-            self._node_transformer = nodetransformers.TransformToSpecsPython3NodeTransformer()
-        else:
-            self._node_transformer = nodetransformers.TransformToSpecsNodeTransformer()
+        self._node_transformer = nodetransformers.TransformToSpecsNodeTransformer()
 
     def modules(self):
         modules = []

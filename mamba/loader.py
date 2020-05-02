@@ -4,11 +4,11 @@ import inspect
 
 from mamba.example_group import ExampleGroup, PendingExampleGroup, SharedExampleGroup
 from mamba.example import Example, PendingExample
-from mamba.infrastructure import is_python3
 
 
 class Loader(object):
     def load_examples_from(self, module):
+        self.module = module
         loaded = []
         example_groups = self._example_groups_for(module)
 
@@ -56,15 +56,15 @@ class Loader(object):
         for example in self._examples_in(klass):
             tags = example._tags
             if self._is_pending_example(example) or self._is_pending_example_group(example_group):
-                example_group.append(PendingExample(example, tags=tags))
+                example_group.append(PendingExample(example, tags=tags, module=self.module))
             else:
-                example_group.append(Example(example, tags=tags))
+                example_group.append(Example(example, tags=tags, module=self.module))
 
     def _examples_in(self, example_group):
         return [method for name, method in self._methods_for(example_group) if self._is_example(method)]
 
     def _methods_for(self, klass):
-        return inspect.getmembers(klass, inspect.isfunction if is_python3() else inspect.ismethod)
+        return inspect.getmembers(klass, inspect.isfunction)
 
     def _is_example(self, method):
         return getattr(method, '_example', False)
@@ -93,7 +93,4 @@ class Loader(object):
         helper_methods = [method for name, method in self._methods_for(klass) if not self._is_example(method)]
 
         for method in helper_methods:
-            if is_python3():
-                example_group.helpers[method.__name__] = method
-            else:
-                example_group.helpers[method.__name__] = method.im_func
+            example_group.helpers[method.__name__] = method
