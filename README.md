@@ -106,7 +106,7 @@ Run the spec file and enjoy that all tests are green!
 
 ## Settings
 
-Mamba provides a way to configuration using `spec/spec_helper.py` or `specs/specs_helper.py`
+Mamba provides a way to configuration using `spec/spec_helper.py` or `specs/spec_helper.py`
 This module function is read after parsing arguments so configure function overrides settings
 
 A sample config file :
