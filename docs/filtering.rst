@@ -74,7 +74,7 @@ Or run only unit tests:
 
   $ pipenv run mamba -t unit
 
-Or tun only integration tests
+Or run only integration tests
 
 ::
 
