@@ -1,4 +1,5 @@
 import ast
+import sys
 
 
 def add_attribute_decorator(attr, value):
@@ -6,6 +7,19 @@ def add_attribute_decorator(attr, value):
         setattr(function_or_class, attr, value)
         return function_or_class
     return wrapper
+
+
+def _ast_const(name):
+    # fixes compat issue with python 3.8.4+
+    # c.f https://github.com/pytest-dev/pytest/issues/7322
+    if sys.version_info >= (3, 4):
+        name = ast.literal_eval(name)
+        if sys.version_info >= (3, 8):
+            return ast.Constant(name)
+        else:
+            return ast.NameConstant(name)
+    else:
+        return ast.Name(id=name, ctx=ast.Load())
 
 
 class TransformToSpecsNodeTransformer(ast.NodeTransformer):
@@ -35,7 +49,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         ))
         node.body.append(ast.Assign(
             targets=[ast.Name(id='__mamba_has_focused_examples', ctx=ast.Store())],
-            value=ast.Name(id=str(self.has_focused_examples), ctx=ast.Load())),
+            value=_ast_const(str(self.has_focused_examples))),
         )
 
         return node
