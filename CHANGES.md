@@ -1,5 +1,10 @@
 # ChangeLog
 
+## Version 0.11.1
+
+* Fix compatiblity issue with 3.8.4
+* Fix some typos
+
 ## Version 0.11.0
 
 * Fix hooks execution
