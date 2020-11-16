@@ -231,7 +231,7 @@ class JUnitFormatter(DocumentationFormatter):
         self.suite.attrib['tests'] = str(example_count)
         self.suite.attrib['skipped'] = str(pending_count)
         self.suite.attrib['failures'] = str(failed_count)
-        self.suite.attrib['time'] = str(duration)
+        self.suite.attrib['time'] = '%f'  % (duration.total_seconds(), )
         ElementTree.ElementTree(self.suite).write(sys.stdout, encoding='unicode')
 
     def _dump_example(self, example, child=None):
@@ -239,7 +239,7 @@ class JUnitFormatter(DocumentationFormatter):
             'classname': example.classname,
             'name': self.format_full_example_name(example),
             'file': example.file,
-            'time': str(example.elapsed_time.total_seconds())
+            'time': '%f' % (example.elapsed_time.total_seconds(), )
         })
         if child is not None:
             testcase.append(child)
