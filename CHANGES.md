@@ -1,5 +1,9 @@
 # ChangeLog
 
+## Version 0.11.2
+
+* Fix time field format for JUnit formatter
+
 ## Version 0.11.1
 
 * Fix compatiblity issue with 3.8.4
