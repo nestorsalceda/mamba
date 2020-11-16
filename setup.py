@@ -33,7 +33,7 @@ setup(name='mamba',
       include_package_data=True,
       zip_safe=False,
       install_requires=['clint', 'coverage'],
-      test_require=['expect', 'doublex', 'doublex-expects', 'mock'],
+      test_require=['expect', 'doublex', 'doublex-expects'],
       entry_points={
           'console_scripts': [
               'mamba = mamba.cli:main'
