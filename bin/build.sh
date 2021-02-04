@@ -80,7 +80,7 @@ function check-python-version {
         echo "Please update PYTHON in $ENV_FILE to refer to a Python $PYTHON_VERSION executable."
         exit 1
     fi
-
+    echo "Found expected python version ($PYTHON_VERSION) at: $(which $PYTHON)"
     return 0
 }
 
