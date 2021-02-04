@@ -7,3 +7,5 @@ dist
 .coverage
 .idea
 docs/_build/
+build-init.log
+usr/
