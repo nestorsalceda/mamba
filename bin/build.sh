@@ -41,18 +41,18 @@ USAGE: $0 <command> <options>*
 END
 )
 
-BUILD_CONFIG="./config/.build_cfg.sh"
+BUILD_CONFIG="./config/build_cfg.sh"
 CIRCLE_CI="NO"
 COMMAND="help"
 CONFIRM="NO"
-ENV_FILE="./config/.env"
+ENV_FILE="./config/env"
 FORMAT="progress"
 LINT_INCLUDE="src"
 LINT_EXCLUDE="--exclude=.ropeproject"
 MESSY="NO"
 NUKE="NO"
 PYTHON=$(which python)
-PYTHON_VERSION=$(tail -1 ./config/.python_version)
+PYTHON_VERSION=$(tail -1 ./config/python_version)
 TEST_FILE=".pylib.testing"
 TEST_FUNCTIONAL="YES"
 TEST_INTEGRATION="YES"
@@ -162,12 +162,14 @@ function write-build-config {
 }
 
 function write-env-file {
-    [[ -e "$ENV_FILE" ]] && rm "$ENV_FILE"
+    if [[ ! -e "$ENV_FILE" ]]; then
 
-    echo "# The location of a python executable (same version specified by PYTHON_VERSION)"     >> $ENV_FILE
-    echo "PYTHON=$(which python)"                                                               >> $ENV_FILE
-    echo "# The authentication token used for uploading to GemFury"                             >> $ENV_FILE
-    echo "GEMFURY_TOKEN="                                                                       >> $ENV_FILE
+        echo "# The location of a python executable (same version specified by PYTHON_VERSION)"     >> $ENV_FILE
+        echo "# Defaults to current version of python in your PATH"                                 >> $ENV_FILE
+        echo "PYTHON=$(which python)"                                                               >> $ENV_FILE
+        echo "# The authentication token used for uploading to GemFury"                             >> $ENV_FILE
+        echo "GEMFURY_TOKEN="                                                                       >> $ENV_FILE
+    fi
 }
 
 # Local Commands #######################################################################################################
