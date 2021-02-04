@@ -1,0 +1,25 @@
+# Python CircleCI 2.0 configuration file
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+
+version: 2
+jobs:
+  build-lint-test:
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install Dependencies
+          command: ./bin/build.sh init --circle-ci
+
+      - run:
+          name: Run Linter
+          command: ./bin/build.sh lint
+
+      - run:
+          name: Run Tests
+          command: mkdir -p ./tmp && ./bin/build.sh test --format documentation --circle-ci
+
+      - store_artifacts:
+          path: ./tmp
+          destination: test-reports
