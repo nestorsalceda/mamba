@@ -5,21 +5,26 @@ version: 2
 jobs:
   build-lint-test:
 
-    steps:
-      - checkout
+  docker:
+      - image: circleci/python:3.9.0
 
-      - run:
-          name: Install Dependencies
-          command: ./bin/build.sh init --circle-ci
+  working_directory: ~/boom-pylib
 
-      - run:
-          name: Run Linter
-          command: ./bin/build.sh lint
+  steps:
+    - checkout
 
-      - run:
-          name: Run Tests
-          command: mkdir -p ./tmp && ./bin/build.sh test --format documentation --circle-ci
+    - run:
+        name: Install Dependencies
+        command: ./bin/build.sh init --circle-ci
 
-      - store_artifacts:
-          path: ./tmp
-          destination: test-reports
+    - run:
+        name: Run Linter
+        command: ./bin/build.sh lint
+
+    - run:
+        name: Run Tests
+        command: mkdir -p ./tmp && ./bin/build.sh test --format documentation --circle-ci
+
+    - store_artifacts:
+        path: ./tmp
+        destination: test-reports
