@@ -165,7 +165,7 @@ function write-env-file {
     [[ -e "$ENV_FILE" ]] && rm "$ENV_FILE"
 
     echo "# The location of a python executable (same version specified by PYTHON_VERSION)"     >> $ENV_FILE
-    echo "PYTHON="                                                                              >> $ENV_FILE
+    echo "PYTHON=$(which python)"                                                               >> $ENV_FILE
     echo "# The authentication token used for uploading to GemFury"                             >> $ENV_FILE
     echo "GEMFURY_TOKEN="                                                                       >> $ENV_FILE
 }
