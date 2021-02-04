@@ -3,28 +3,32 @@
 
 version: 2
 jobs:
-  build-lint-test:
-
-  docker:
+  build:
+    docker:
       - image: circleci/python:3.9.0
 
-  working_directory: ~/boom-pylib
+    working_directory: ~/boom-pylib
 
-  steps:
-    - checkout
+    steps:
+      - checkout
 
-    - run:
-        name: Install Dependencies
-        command: ./bin/build.sh init --circle-ci
+      - run:
+          name: Install Dependencies
+          command: ./bin/build.sh init --circle-ci
 
-    - run:
-        name: Run Linter
-        command: ./bin/build.sh lint
+      - run:
+          name: Run Linter
+          command: ./bin/build.sh lint
 
-    - run:
-        name: Run Tests
-        command: mkdir -p ./tmp && ./bin/build.sh test --format documentation --circle-ci
+      - run:
+          name: Run Tests
+          command: mkdir -p ./tmp && ./bin/build.sh test --format documentation --circle-ci
 
-    - store_artifacts:
-        path: ./tmp
-        destination: test-reports
+      - store_artifacts:
+          path: ./tmp
+          destination: test-reports
+
+      - run:
+          name: Publish to GemFury
+          command: ./build.sh publish
+
