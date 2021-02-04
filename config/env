@@ -1,4 +1,4 @@
 # The location of a python executable (same version specified by PYTHON_VERSION)
-PYTHON=
+PYTHON=/Users/Robert.Schaefer/Codes/boom-pylib/usr/bin/python
 # The authentication token used for uploading to GemFury
 GEMFURY_TOKEN=
