@@ -17,10 +17,6 @@ jobs:
           command: ./bin/build.sh init --circle-ci
 
       - run:
-          name: Run Linter
-          command: ./bin/build.sh lint
-
-      - run:
           name: Run Tests
           command: mkdir -p ./tmp && ./bin/build.sh test --format documentation --circle-ci
 
