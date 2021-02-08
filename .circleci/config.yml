@@ -7,18 +7,21 @@ jobs:
     docker:
       - image: circleci/python:3.9.0
 
-    working_directory: ~/boom-pylib
+    working_directory: ~/boom
 
     steps:
       - checkout
 
       - run:
           name: Install Dependencies
-          command: ./bin/build.sh init --circle-ci
+          command: ./bin/build.sh init
 
       - run:
           name: Run Tests
-          command: mkdir -p ./tmp && ./bin/build.sh test --format documentation --circle-ci
+          command: |
+            pip install pipenv
+            pipenv install --dev
+            pipenv run mamba
 
       - store_artifacts:
           path: ./tmp
@@ -26,5 +29,5 @@ jobs:
 
       - run:
           name: Publish to GemFury
-          command: ./build.sh publish
+          command: ./bin/build.sh publish
 

@@ -2,9 +2,9 @@
 
 USAGE=$(cat <<-END
 USAGE: $0 <command> <options>*
-    init: install all development dependencies.  First installing from
-        preinstall-requirements.txt, then from requirements.txt
-        --nuke: completely remove the ./usr directory before initializing
+    init: install all development dependencies. Creates a python virtual environment
+        and then installs all dependencies using setuptools.
+        --nuke: completely remove the virtual env dir and env config file before initializing
     edit: launch vim with settings to use the project’s version of python
     lint: run various programs to catch programming & style errors
     test: run automated tests. By default, all tests are run once, and then the
@@ -16,17 +16,13 @@ USAGE: $0 <command> <options>*
         Functional tests are those which require no 3rd-party software be
         installed or servers set up, but which otherwise do anything else.
         Integration tests have no limits on what they may require.
-        --all (optional) turn on all test types
-        --circle-ci: (optional) only run tests which can pass in CircleCI.
-            Implies --no-integration.
         --format: (optional) either "progress" or "documentation"
         --messy: (optional) leave scratch directories behind in ./tmp
-        --watch: (optional) watch all the source files and repeat the tests
-            when things change. Implies --no-functional and --no-integration.
-        --(no-)functional: (optional) turn on/off functional tests
-        --(no-)unit: (optional) turn on/off unit tests
-        --(no-)integration: (optional) turn on/off integration tests
-        --none: (optional) turn off all test types
+        --watch: (optional) watch all the source files and repeat the unit tests
+            when things change.
+        --functional: (optional) run functional tests in isolation
+        --integration: (optional) run integration tests in isolation
+        --unit: (optional) run unit tests in isolation
     clean: remove temporary or one-off data from the ./tmp directory
     python: start a Python REPL console which is sure to use the correct
         version of Python pre-initialized with all the correct versions of
@@ -41,34 +37,15 @@ USAGE: $0 <command> <options>*
 END
 )
 
-BUILD_CONFIG="./config/build_cfg.sh"
-CIRCLE_CI="NO"
-COMMAND="help"
-CONFIRM="NO"
-ENV_FILE="./config/env"
-FORMAT="progress"
-LINT_INCLUDE="src"
-LINT_EXCLUDE="--exclude=.ropeproject"
-MESSY="NO"
-NUKE="NO"
-PYTHON=$(which python)
-PYTHON_VERSION=$(tail -1 ./config/python_version)
-TEST_FILE=".pylib.testing"
-TEST_FUNCTIONAL="YES"
-TEST_INTEGRATION="YES"
-TEST_RUN=1
-TEST_UNIT="YES"
-VIRTUAL_ENV="./usr"
-WATCH="NO"
-
-[[ "$USER" == "" ]] && USER=$(whoami)
-VIRTUAL_BIN="$VIRTUAL_ENV/bin"
-
 # Helper Functions #####################################################################################################
 
-function build-native-component {
-    # do nothing. Packages may override this function if they have a native component to build.
-    return 0
+function build-log-cleanup {
+    rm -rf ./tmp
+}
+
+function build-log-init {
+    rm -rf $BUILD_LOG 2>/dev/null
+    mkdir -p ./tmp && touch $BUILD_LOG
 }
 
 function build-python-env {
@@ -80,14 +57,14 @@ function check-python-version {
         echo "Please update PYTHON in $ENV_FILE to refer to a Python $PYTHON_VERSION executable."
         exit 1
     fi
-    echo "Found expected python version ($PYTHON_VERSION) at: $(which $PYTHON)"
+
     return 0
 }
 
 function clean-python-packages {
-    echo "Cleaning up Python directories..." | tee -a build-init.log
-    $VIRTUAL_BIN/python setup.py clean >> build-init.log 2>&1 ||
-        die "ERROR! Python clean up failed. Check build-init.log"
+    echo "Cleaning up Python directories..." | tee -a $BUILD_LOG
+    $VIRTUAL_BIN/python setup.py clean >> $BUILD_LOG 2>&1 ||
+        die "ERROR! Python clean up failed. Check $BUILD_LOG"
 }
 
 function die {
@@ -116,14 +93,17 @@ function execute-integration-tests {
 
 function execute-test-run {
     echo "Starting test run $TEST_RUN at $(date):"
+
+    if [[ "$TEST_ALL" == "YES" ]]; then
+        TEST_FUNCTIONAL="YES"
+        TEST_INTEGRATION="YES"
+        TEST_UNIT="YES"
+    fi
+
     echo "unit: $TEST_UNIT, functional: $TEST_FUNCTIONAL, integration: $TEST_INTEGRATION"
 
     build-python-env
-    build-native-component \
-        && execute-unit-tests \
-        && execute-functional-tests \
-        && execute-integration-tests \
-        || return 1
+    execute-unit-tests && execute-functional-tests && execute-integration-tests || return 1
     return 0
 }
 
@@ -137,7 +117,7 @@ function execute-unit-tests {
 }
 
 function init-custom {
-    # do nothing. repos with custom initialization can override this function in ./config/.build_cfd.sh
+    # do nothing; repos with custom initialization can override this function in ./config/build_cfg.sh
     return 0
 }
 
@@ -153,30 +133,79 @@ function watch-source-files {
     fswatch -o -r src -e '.*' -i '\.cpp$' -i '\.h$' -i '\.py$' -m poll_monitor
 }
 
-function write-build-config {
-    [[ -e "$BUILD_CONFIG" ]] && rm "$BUILD_CONFIG"
+function write-env-file {
+    echo "# The location of the build_cfg file"                                                 >> $ENV_FILE
+    echo "export BUILD_CONFIG=./config/build_cfg.sh"                                            >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The location of the build log file"                                                 >> $ENV_FILE
+    echo "export BUILD_LOG=./tmp/build.log"                                                     >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The default command when running the build.sh file"                                 >> $ENV_FILE
+    echo "export COMMAND=help"                                                                  >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The default value for confirming admin actions"                                     >> $ENV_FILE
+    echo "export CONFIRM=NO"                                                                    >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The defalt format for test output"                                                  >> $ENV_FILE
+    echo "export FORMAT=progress"                                                               >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The location of a python executable (same version specified by PYTHON_VERSION)"     >> $ENV_FILE
+    echo "export PYTHON=$(which python)"                                                        >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The python version for this project"                                                >> $ENV_FILE
+    echo "export PYTHON_VERSION=$(tail -1 ./config/python_version)"                             >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The authentication token used for uploading to GemFury"                             >> $ENV_FILE
+    echo "export GEMFURY_TOKEN=$GEMFURY_TOKEN"                                                  >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The directory where the linter should run recursively"                              >> $ENV_FILE
+    echo "export LINT_INCLUDE=src"                                                              >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# Any directories which the linter should ignore"                                     >> $ENV_FILE
+    echo "export LINT_EXCLUDE=--exclude=.ropeproject"                                           >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The default messy option"                                                           >> $ENV_FILE
+    echo "export MESSY=NO"                                                                      >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The default nuke option"                                                            >> $ENV_FILE
+    echo "export NUKE=NO"                                                                       >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The default test all option"                                                        >> $ENV_FILE
+    echo "export TEST_ALL=YES"                                                                  >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The default test file location"                                                     >> $ENV_FILE
+    echo "export TEST_FILE=.pylib.testing"                                                      >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The default test functional option"                                                 >> $ENV_FILE
+    echo "export TEST_FUNCTIONAL=NO"                                                            >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The default test integration option"                                                >> $ENV_FILE
+    echo "export TEST_INTEGRATION=NO"                                                           >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The default test run option"                                                        >> $ENV_FILE
+    echo "export TEST_RUN=1"                                                                    >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The default test unit option"                                                       >> $ENV_FILE
+    echo "export TEST_UNIT=NO"                                                                  >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The location of virtual env bin dir"                                                >> $ENV_FILE
+    echo "export VIRTUAL_BIN=./usr/bin"                                                         >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The location of the virtual env"                                                    >> $ENV_FILE
+    echo "export VIRTUAL_ENV=./usr"                                                             >> $ENV_FILE
+    echo ""                                                                                     >> $ENV_FILE
+    echo "# The default watch option"                                                           >> $ENV_FILE
+    echo "export WATCH=NO"                                                                      >> $ENV_FILE
 
-    echo "# This file allows you to configure how the build.sh script operates. It will be" >> $BUILD_CONFIG
-    echo "# sourced immediately before running a build command. Functions and variables in" >> $BUILD_CONFIG
-    echo "# this file will override those set by build.sh."                                 >> $BUILD_CONFIG
+    write-env-file-custom
 }
 
-function write-env-file {
-    if [[ ! -e "$ENV_FILE" ]]; then
-
-        echo "# The location of a python executable (same version specified by PYTHON_VERSION)"     >> $ENV_FILE
-        echo "# Defaults to current version of python in your PATH"                                 >> $ENV_FILE
-        echo "PYTHON=$(which python)"                                                               >> $ENV_FILE
-        echo "# The authentication token used for uploading to GemFury"                             >> $ENV_FILE
-        echo "GEMFURY_TOKEN="                                                                       >> $ENV_FILE
-    fi
+function write-env-file-custom {
+    # do nothing; repos with custom env file variables can override this function in ./config/build_cfg.sh
+    return 0
 }
 
 # Local Commands #######################################################################################################
-
-function command-build {
-    build-native-component
-}
 
 function command-clean {
     if [[ "$CONFIRM" == "YES" ]]; then
@@ -202,22 +231,22 @@ function command-help {
 }
 
 function command-init {
-    rm -rf build-init.log 2>/dev/null
+    build-log-init
 
     if [[ "$AUTO_REFRESH" == "YES" ]]; then
-        echo "Refreshing the build.sh script..." | tee -a build-init.log
+        echo "Refreshing the build.sh script..." | tee -a $BUILD_LOG
         command-refresh-build || exit 1
     fi
     check-python-version || exit 1
 
-    echo "Building virtual Python environment in $VIRTUAL_ENV..." | tee -a build-init.log
-    [[ "$NUKE" == "YES" && -d $VIRTUAL_ENV ]] && rm -rf $VIRTUAL_ENV
-    $PYTHON -m venv --copies $VIRTUAL_ENV || die "Environment build failed. Check build-init.log"
+    echo "Building virtual Python environment in $VIRTUAL_ENV..." | tee -a $BUILD_LOG
+    [[ "$NUKE" == "YES" ]] && rm -rf $VIRTUAL_ENV && rm -rf $ENV_FILE
+    $PYTHON -m venv --copies $VIRTUAL_ENV || die "Environment build failed. Check $BUILD_LOG"
 
-    echo "Upgrading pip to the latest version..." | tee -a build-init.log
-    ./usr/bin/pip install --upgrade pip >> build-init.log 2>&1 || die "Upgrade failed. Check build-init.log"
+    echo "Upgrading pip to the latest version..." | tee -a $BUILD_LOG
+    ./usr/bin/pip install --upgrade pip >> $BUILD_LOG 2>&1 || die "Upgrade failed. Check $BUILD_LOG"
 
-    echo "Installing Python dependencies..." | tee -a build-init.log
+    echo "Installing Python dependencies..." | tee -a $BUILD_LOG
     unset PYTHONPATH
     export PYTHONPATH
 
@@ -230,8 +259,10 @@ function command-init {
 
     $VIRTUAL_BIN/pip freeze | grep -v '^-e' > .pip.lock
 
-    echo "Initialization successful!" | tee -a build-init.log
+    echo "Initialization successful!" | tee -a $BUILD_LOG
     echo ""
+
+    build-log-cleanup
 }
 
 function command-lint {
@@ -356,28 +387,36 @@ function command-test {
         RESULT=$?
     fi
 
-    [[ "$MESSY" == "NO" ]] && rm -rf ./tmp 2>/dev/null
+    # Delete any tmp dirs only if --messy flag not set and all tests pass
+    if [[ "$MESSY" == "NO" ]] && [[ "$RESULT" -eq "0" ]]; then
+        rm -rf ./tmp 2>/dev/null
+    fi
 
     return $RESULT
 }
 
 function command-upgrade-pip {
-    $VIRTUAL_BIN/pip install -r requirements.txt --upgrade
+    build-log-init
+
+    $VIRTUAL_BIN/pip install -e . --upgrade
     $VIRTUAL_BIN/pip freeze | grep -v '^-e' > .pip.lock
 
     clean-python-packages
+    build-log-cleanup
 }
 
 # Process Arguments ####################################################################################################
 
-[[ -e $ENV_FILE ]] && source $ENV_FILE
-[[ -e $BUILD_CONFIG ]] || write-build-config
+export ENV_FILE=./config/env
+export USER=$(whoami)
+
+[[ ! -f $ENV_FILE ]] && write-env-file
+
+source $ENV_FILE
 source $BUILD_CONFIG
-write-env-file
 
 while [[ "$1" != "" ]]; do
     case "$1" in
-        build) COMMAND="build";;
         clean) COMMAND="clean";;
         edit) COMMAND="edit";;
         help|--help|-h|-?) COMMAND="help";;
@@ -389,20 +428,14 @@ while [[ "$1" != "" ]]; do
         test) COMMAND="test";;
         upgrade) COMMAND="upgrade-pip";;
 
-        --all) TEST_UNIT="YES"; TEST_FUNCTIONAL="YES"; TEST_INTEGRATION="YES";;
-        --circle-ci) CIRCLE_CI="YES"; TEST_INTEGRATION="NO";;
         --confirm) CONFIRM="YES";;
         --format) shift; FORMAT="$1";;
-        --functional) TEST_FUNCTIONAL="YES";;
-        --integration) TEST_INTEGRATION="YES";;
+        --functional) TEST_ALL="NO"; TEST_FUNCTIONAL="YES";;
+        --integration) TEST_ALL="NO"; TEST_INTEGRATION="YES";;
         --messy) MESSY="YES";;
-        --no-functional) TEST_FUNCTIONAL="NO";;
-        --no-integration) TEST_INTEGRATION="NO";;
-        --no-unit) TEST_UNIT="NO";;
-        --none) TEST_UNIT="NO"; TEST_FUNCTIONAL="NO"; TEST_INTEGRATION="NO";;
         --nuke) NUKE="YES";;
-        --unit) TEST_UNIT="YES";;
-        --watch) TEST_FUNCTIONAL="NO"; TEST_INTEGRATION="NO"; WATCH="YES";;
+        --unit) TEST_ALL="NO"; TEST_UNIT="YES";;
+        --watch) TEST_ALL="NO"; TEST_UNIT="YES"; WATCH="YES";;
 
         *) on-unknown-argument $1;;
     esac

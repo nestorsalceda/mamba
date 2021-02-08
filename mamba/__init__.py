@@ -80,6 +80,14 @@ def _context(message, tag=None):
     """Create a new logical sub-grouping of disabled specs."""
     return Noop()
 
+def shared_context(message):
+    """Create a new shared context."""
+    return Noop()
+
+def included_context(message):
+    """Create a new included context."""
+    return Noop()
+
 
 def fcontext(message, tag=None):
     """Create a new logical sub-grouping of focused specs."""
