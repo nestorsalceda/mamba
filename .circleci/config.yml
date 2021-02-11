@@ -3,9 +3,10 @@
 
 version: 2
 jobs:
-  build:
+  
+  build-py36:
     docker:
-      - image: circleci/python:3.9.0
+      - image: circleci/python:3.6.10
 
     working_directory: ~/boom
 
@@ -16,10 +17,11 @@ jobs:
           name: Install Dependencies
           command: ./bin/build.sh init
 
-      - run:
+      - run: # This runs the tests included in the mamba fork
           name: Run Tests
           command: |
-            pip install pipenv
+            source usr/bin/activate
+            pip install pipenv expects doublex doublex_expects shared_context
             pipenv install --dev
             pipenv run mamba
 
@@ -27,7 +29,106 @@ jobs:
           path: ./tmp
           destination: test-reports
 
+
+  build-py37:
+    docker:
+      - image: circleci/python:3.7.9
+
+    working_directory: ~/boom
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install Dependencies
+          command: ./bin/build.sh init
+
+      - run: # This runs the tests included in the mamba fork
+          name: Run Tests
+          command: |
+            source usr/bin/activate
+            pip install pipenv expects doublex doublex_expects shared_context
+            pipenv install --dev
+            pipenv run mamba
+
+      - store_artifacts:
+          path: ./tmp
+          destination: test-reports
+
+
+  build-py38:
+    docker:
+      - image: circleci/python:3.8.6
+
+    working_directory: ~/boom
+
+    steps:
+      - checkout
+
+      - run: # This runs the tests included in the mamba fork
+          name: Install Dependencies
+          command: ./bin/build.sh init
+
+      - run:  
+          name: Run Tests
+          command: |
+            source usr/bin/activate
+            pip install pipenv expects doublex doublex_expects shared_context
+            pipenv install --dev
+            pipenv run mamba
+
+      - store_artifacts:
+          path: ./tmp
+          destination: test-reports
+
+  build-py39:
+    docker:
+      - image: circleci/python:3.9.0
+
+    working_directory: ~/boom
+
+    steps:
+      - checkout
+
+      - run: # This runs the tests included in the mamba fork
+          name: Install Dependencies
+          command: ./bin/build.sh init
+
+      - run:
+          name: Run Tests
+          command: |
+            source usr/bin/activate
+            pip install pipenv expects doublex doublex_expects shared_context
+            pipenv install --dev
+            pipenv run mamba
+
+      - store_artifacts:
+          path: ./tmp
+          destination: test-reports
+
+  gemfury-deploy:
+    docker:
+      - image: circleci/python:3.9.0
+
+    working_directory: ~/boom-pylib
+
+    steps:
+      - checkout
       - run:
           name: Publish to GemFury
           command: ./bin/build.sh publish
 
+workflows:
+    version: 2
+    build-test-deploy:
+        jobs:
+            - build-py36
+            - build-py37
+            - build-py38
+            - build-py39
+            - gemfury-deploy:
+                  requires:
+                    - build-py36
+                    - build-py37
+                    - build-py38
+                    - build-py39

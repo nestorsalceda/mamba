@@ -2,8 +2,8 @@
 
 USAGE=$(cat <<-END
 USAGE: $0 <command> <options>*
-    init: install all development dependencies. Creates a python virtual environment
-        and then installs all dependencies using setuptools.
+    init: install all development dependencies.  First installing from
+        preinstall-requirements.txt, then from requirements.txt
         --nuke: completely remove the virtual env dir and env config file before initializing
     edit: launch vim with settings to use the project’s version of python
     lint: run various programs to catch programming & style errors
@@ -53,9 +53,15 @@ function build-python-env {
 }
 
 function check-python-version {
-    if ! $PYTHON --version 2>&1 | grep -q $PYTHON_VERSION; then
-        echo "Please update PYTHON in $ENV_FILE to refer to a Python $PYTHON_VERSION executable."
+    # parse out the current python version, will convert 1.2.3 -> 001002003 or 12.13.14 -> 012013014 
+    PYTHON_VERSION=$($PYTHON --version | sed "s/Python //" | awk -F. '{printf("%d%03d%03d%03d\n", $1,$2,$3,$4);}')
+    MIN_VERSION=$(echo $MIN_PYTHON_VERSION | awk -F. '{printf("%d%03d%03d%03d\n", $1,$2,$3,$4);}')
+
+    if [ $PYTHON_VERSION -lt $MIN_VERSION ]; then
+        echo "Please update PYTHON in $ENV_FILE ($(PYTHON --version)) to a version greater or equal to $MIN_PYTHON_VERSION."
         exit 1
+    else
+        echo "Found $($PYTHON --version) which satisfies requirement >= $MIN_PYTHON_VERSION"
     fi
 
     return 0
@@ -152,8 +158,8 @@ function write-env-file {
     echo "# The location of a python executable (same version specified by PYTHON_VERSION)"     >> $ENV_FILE
     echo "export PYTHON=$(which python)"                                                        >> $ENV_FILE
     echo ""                                                                                     >> $ENV_FILE
-    echo "# The python version for this project"                                                >> $ENV_FILE
-    echo "export PYTHON_VERSION=$(tail -1 ./config/python_version)"                             >> $ENV_FILE
+    echo "# The minimum python version for this project"                                        >> $ENV_FILE
+    echo "export MIN_PYTHON_VERSION=$(tail -1 ./config/python_version)"                         >> $ENV_FILE
     echo ""                                                                                     >> $ENV_FILE
     echo "# The authentication token used for uploading to GemFury"                             >> $ENV_FILE
     echo "export GEMFURY_TOKEN=$GEMFURY_TOKEN"                                                  >> $ENV_FILE
@@ -249,7 +255,6 @@ function command-init {
     echo "Installing Python dependencies..." | tee -a $BUILD_LOG
     unset PYTHONPATH
     export PYTHONPATH
-
     $VIRTUAL_BIN/pip install -e . >> build-init.log 2>&1 \
         || die "Installation failed. Check build-init.log"
 
@@ -398,7 +403,7 @@ function command-test {
 function command-upgrade-pip {
     build-log-init
 
-    $VIRTUAL_BIN/pip install -e . --upgrade
+    $VIRTUAL_BIN/pip install -r requirements.txt --upgrade
     $VIRTUAL_BIN/pip freeze | grep -v '^-e' > .pip.lock
 
     clean-python-packages
