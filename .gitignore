@@ -9,3 +9,4 @@ dist
 docs/_build/
 build-init.log
 usr/
+config/env
