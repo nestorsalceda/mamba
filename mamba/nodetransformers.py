@@ -12,12 +12,15 @@ def add_attribute_decorator(attr, value):
 
 def lazy_property(attr):
     cached_attr = '_' + attr
+
     def wrapper(func):
         @wraps(func)
         def wrapper2(self):
             if not hasattr(self, cached_attr):
                 value = func(self)
-                if not hasattr(self, cached_attr):
+                if not hasattr(self, cached_attr) and hasattr(self, 'value'):
+                    value = getattr(self, 'value')
+                    delattr(self, 'value')
                     setattr(self, cached_attr, value)
             return getattr(self, cached_attr)
         return wrapper2

@@ -7,11 +7,11 @@ with description('Lazy'):
         self.lazy_calls_count = 0
 
     with lazy.my_awesome_dict as self:
-        self._my_awesome_dict = dict(number=self.my_awesome_number())
+        self.value = dict(number=self.my_awesome_number())
 
     with lazy.my_awesome_number as self:
         self.lazy_calls_count = self.lazy_calls_count + 1
-        self._my_awesome_number = 1
+        self.value = 1
 
     with it('should call once') as self:
         expect(self.lazy_calls_count).to(equal(0))
@@ -23,7 +23,7 @@ with description('Lazy'):
     with context('sub context'):
         with lazy.my_awesome_number as self:
             self.lazy_calls_count = self.lazy_calls_count + 1
-            self._my_awesome_number = 2
+            self.value = 2
 
         with it('should call once') as self:
             expect(self.lazy_calls_count).to(equal(0))
