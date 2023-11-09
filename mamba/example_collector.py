@@ -2,7 +2,10 @@
 
 import os
 import sys
-import imp
+try:
+    import imp
+except ImportError:
+    import types
 import ast
 import contextlib
 
@@ -55,7 +58,7 @@ class ExampleCollector(object):
         tree = self._parse_and_transform_ast(path)
         package = '.'.join(name.split('/')[:-1])
 
-        module = imp.new_module(name)
+        module = self._create_module(name)
         module.__file__ = path
 
         try:
@@ -78,6 +81,13 @@ class ExampleCollector(object):
             tree = self._node_transformer.visit(tree)
             ast.fix_missing_locations(tree)
             return tree
+
+    def _create_module(self, name):
+        if sys.version_info < (3, 12):
+            return imp.new_module(name)
+
+        return types.ModuleType(name)
+
 
     def _prepare_path_for_local_packages(self):
         if os.getcwd().endswith('spec') or os.getcwd().endswith('specs'):
