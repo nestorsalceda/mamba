@@ -1,5 +1,9 @@
 # ChangeLog
 
+## Version 0.11.3
+
+* Add support up to Python 3.12
+
 ## Version 0.11.2
 
 * Fix time field format for JUnit formatter
