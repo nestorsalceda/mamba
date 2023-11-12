@@ -76,5 +76,9 @@ def after():
 
 
 @contextlib.contextmanager
+def lazy():
+    pass
+
+@contextlib.contextmanager
 def after_all():
     pass
