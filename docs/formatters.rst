@@ -38,4 +38,4 @@ Mamba supports third party formatters. Imagine there is a new IDE or some specif
 And mamba tries to instantiate the *wondertech.MyCustomFormatter* class.  But there are 2 conditions that should be met:
 
 * A settings object is passed to object constuctor
-* Inherit from mamba.formatter.Formatter for overriding methods
+* Inherit from mamba.formatters.Formatter for overriding methods
