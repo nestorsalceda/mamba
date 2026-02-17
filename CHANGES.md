@@ -1,5 +1,11 @@
 # ChangeLog
 
+## Version 0.11.4
+
+* Improve AST node generation compatibility for Python 3.14+
+* Load `spec/spec_helper.py` and `specs/spec_helper.py` by path (doesn't require `spec` to be a Python package)
+* Add Python 3.13 and 3.14 trove classifiers
+
 ## Version 0.11.3
 
 * Add support up to Python 3.12

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os.path
+import importlib.util
 from importlib import import_module
 
 from mamba import settings, formatters, reporter, runners, example_collector, loader
@@ -25,12 +26,19 @@ class ApplicationFactory(object):
         module = None
 
         if os.path.exists('./spec/spec_helper.py'):
-            module = import_module('spec.spec_helper')
+            module = self._import_module_from('./spec/spec_helper.py', 'spec.spec_helper')
         if os.path.exists('./specs/spec_helper.py'):
-            module = import_module('specs.spec_helper')
+            module = self._import_module_from('./specs/spec_helper.py', 'specs.spec_helper')
         if module is not None:
             configure = getattr(module, 'configure', lambda settings: settings)
             configure(settings_)
+
+    def _import_module_from(self, path, module_name):
+        spec = importlib.util.spec_from_file_location(module_name, path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        return module
 
     def _configure_from_arguments(self, settings_):
         settings_.slow_test_threshold = self.arguments.slow

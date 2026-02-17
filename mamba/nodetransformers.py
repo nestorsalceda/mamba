@@ -2,6 +2,9 @@ import ast
 import sys
 
 
+AST_STR = getattr(ast, 'Str', None)
+
+
 def add_attribute_decorator(attr, value):
     def wrapper(function_or_class):
         setattr(function_or_class, attr, value)
@@ -10,16 +13,7 @@ def add_attribute_decorator(attr, value):
 
 
 def _ast_const(name):
-    # fixes compat issue with python 3.8.4+
-    # c.f https://github.com/pytest-dev/pytest/issues/7322
-    if sys.version_info >= (3, 4):
-        name = ast.literal_eval(name)
-        if sys.version_info >= (3, 8):
-            return ast.Constant(name)
-        else:
-            return ast.NameConstant(name)
-    else:
-        return ast.Name(id=name, ctx=ast.Load())
+    return ast.Constant(name)
 
 
 class TransformToSpecsNodeTransformer(ast.NodeTransformer):
@@ -49,7 +43,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         ))
         node.body.append(ast.Assign(
             targets=[ast.Name(id='__mamba_has_focused_examples', ctx=ast.Store())],
-            value=_ast_const(str(self.has_focused_examples))),
+            value=_ast_const(self.has_focused_examples)),
         )
 
         return node
@@ -95,7 +89,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
             self.shared_contexts[example_name] = node.body
 
         return ast.copy_location(
-            ast.ClassDef(
+            self._classdef_node(
                 name=self._prefix_with_sequence(example_name),
                 bases=[],
                 keywords=[],
@@ -112,7 +106,9 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         )
 
     def _human_readable_context_expr(self, context_expr):
-        if isinstance(context_expr.args[0], ast.Str):
+        if isinstance(context_expr.args[0], ast.Constant):
+            return context_expr.args[0].value
+        if AST_STR is not None and isinstance(context_expr.args[0], AST_STR):
             return context_expr.args[0].s
         elif isinstance(context_expr.args[0], ast.Attribute):
             return context_expr.args[0].attr
@@ -124,17 +120,17 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         if method_name in self.FOCUSED:
             tags.append('focus')
         if len(context_expr.args) > 1:
-            tags.extend([arg.s for arg in context_expr.args[1:]])
+            tags.extend([self._literal_value(arg) for arg in context_expr.args[1:]])
 
         return tags
 
     def _transform_to_example(self, node, name):
         context_expr = self._context_expr_for(node)
 
-        example_name = '{0} {1}'.format(name, context_expr.args[0].s)
+        example_name = '{0} {1}'.format(name, self._literal_value(context_expr.args[0]))
 
         return ast.copy_location(
-            ast.FunctionDef(
+            self._functiondef_node(
                 name=self._prefix_with_sequence(example_name),
                 args=self._generate_argument('self'),
                 body=node.body,
@@ -167,7 +163,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     def _transform_to_hook(self, node, name):
         when = self._context_expr_for(node).attr
         return ast.copy_location(
-            ast.FunctionDef(
+            self._functiondef_node(
                 name=name + '_' + when,
                 args=self._generate_argument('self'),
                 body=node.body,
@@ -181,7 +177,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
         example_name = self._human_readable_context_expr(context_expr)
 
         return ast.copy_location(
-            ast.ClassDef(
+            self._classdef_node(
                 name=self._prefix_with_sequence(example_name),
                 bases=[],
                 keywords=[],
@@ -200,14 +196,28 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
     def _set_attribute(self, attr, value):
         return ast.Call(
             func=ast.Name(id='add_attribute_decorator', ctx=ast.Load()),
-            args=[ast.Str(attr), self._convert_value(value)],
+            args=[ast.Constant(attr), self._convert_value(value)],
             keywords=[]
         )
 
     def _convert_value(self, value):
-        if isinstance(value, bool):
-            return ast.Str(str(value) if value else '')
-        elif isinstance(value, list):
+        if isinstance(value, list):
             return ast.List(elts=list(map(self._convert_value, value)), ctx=ast.Load())
-        else:
-            return ast.Str(str(value))
+        return ast.Constant(value)
+
+    def _literal_value(self, node):
+        if isinstance(node, ast.Constant):
+            return node.value
+        if AST_STR is not None and isinstance(node, AST_STR):
+            return node.s
+        return ast.literal_eval(node)
+
+    def _classdef_node(self, **kwargs):
+        if sys.version_info >= (3, 12):
+            kwargs['type_params'] = []
+        return ast.ClassDef(**kwargs)
+
+    def _functiondef_node(self, **kwargs):
+        if sys.version_info >= (3, 12):
+            kwargs['type_params'] = []
+        return ast.FunctionDef(**kwargs)
