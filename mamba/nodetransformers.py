@@ -78,7 +78,7 @@ class TransformToSpecsNodeTransformer(ast.NodeTransformer):
 
         if isinstance(context_expr, ast.Call):
             if hasattr(context_expr.func, 'value'):
-                return context_expr.func.value.id
+                return getattr(context_expr.func.value, 'id', None)
             return context_expr.func.id
 
         if isinstance(context_expr, ast.Attribute):
